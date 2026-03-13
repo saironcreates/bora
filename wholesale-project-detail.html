@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bora — Wholesale Marketplace Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+:root {
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --bg: #080808;
+  --fg: #f0ede8;
+  --fg-dim: rgba(240,237,232,0.45);
+  --fg-ghost: rgba(240,237,232,0.07);
+  --border: rgba(255,255,255,0.07);
+  --border-md: rgba(255,255,255,0.13);
+  --card-bg: rgba(255,255,255,0.03);
+  --nav-bg: rgba(8,8,8,0.82);
+  --accent: #FFB300;
+  --accent-dim: rgba(255,179,0,0.10);
+  --accent-border: rgba(255,179,0,0.28);
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: auto; }
+body { font-family: var(--font-body); background: var(--bg); color: var(--fg); overflow-x: hidden; cursor: none; }
+
+/* ── Cursor ── */
+#cursor-dot { position: fixed; width: 8px; height: 8px; background: rgba(240,237,232,.9); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .3s, height .3s, background .3s; }
+#cursor-ring { position: fixed; width: 34px; height: 34px; border: 1.5px solid rgba(240,237,232,.2); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: width .4s var(--ease-spring), height .4s var(--ease-spring), border-color .3s; }
+
+/* ── Nav ── */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; justify-content: space-between; align-items: center; padding: 18px 52px; background: var(--nav-bg); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border-bottom: 1px solid var(--border); }
+.nav-logo { font-family: var(--font-display); font-size: 22px; letter-spacing: -.4px; color: var(--fg); text-decoration: none; }
+.nav-links { display: flex; gap: 34px; list-style: none; align-items: center; }
+.nav-links a { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--fg-dim); text-decoration: none; transition: color .3s; }
+.nav-links a:hover { color: var(--fg); }
+.nav-back { display: flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--fg-dim); text-decoration: none; transition: color .3s, gap .3s; }
+.nav-back:hover { color: var(--fg); gap: 13px; }
+.back-arrow { font-size: 15px; transition: transform .3s; }
+.nav-back:hover .back-arrow { transform: translateX(-3px); }
+.label { font-size: 11px; letter-spacing: .25em; text-transform: uppercase; color: var(--fg-dim); }
+
+/* ══════════════════════════════════════════════════
+   HERO
+══════════════════════════════════════════════════ */
+#hero { height: 100vh; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+#hero-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #1a1200 0%, #1a0e00 50%, #0a0800 100%); }
+#hero-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(255,179,0,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,179,0,.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%);
+}
+.h-orb { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(120px); opacity: .18; animation: orbf 10s ease-in-out infinite alternate; }
+@keyframes orbf { from{transform:scale(1) translateY(0)} to{transform:scale(1.12) translateY(-28px)} }
+.orb-1 { width:640px; height:640px; background:#3d2a00; top:-10%; left:42%; }
+.orb-2 { width:420px; height:420px; background:#1a0800; top:48%; left:0%; animation-delay:-5s; }
+.orb-3 { width:320px; height:320px; background:#1a1a00; bottom:5%; right:5%; animation-delay:-2s; }
+#hero::after { content:''; position:absolute; inset:0; pointer-events:none; z-index:1; opacity:.025; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E"); }
+#hero-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; }
+
+/* KTU Logo in hero */
+.hero-logo-wrap {
+  margin-bottom: 32px;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.ktu-logo-svg { width: 72px; height: 72px; filter: drop-shadow(0 0 28px rgba(255,179,0,.35)); }
+
+.hero-tag { display: inline-flex; align-items: center; gap: 8px; padding: 7px 18px; border-radius: 40px; border: 1px solid var(--accent-border); background: var(--accent-dim); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 24px; }
+.hero-tag-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:.3} }
+
+.hero-title { font-family: var(--font-display); font-size: clamp(44px, 7.5vw, 108px); font-weight: 900; letter-spacing: -4px; line-height: .9; background: linear-gradient(140deg, #fff 0%, #ffe082 40%, #FFB300 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 24px; }
+.hero-sub { font-size: clamp(14px,1.5vw,17px); color: var(--fg-dim); max-width: 520px; line-height: 1.75; margin-bottom: 44px; }
+.hero-meta-row { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; padding: 24px 40px; border-radius: 20px; border: 1px solid var(--border); background: rgba(255,255,255,.03); backdrop-filter: blur(12px); }
+.hero-meta-item { text-align: center; }
+.hero-meta-label { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--fg-dim); margin-bottom: 5px; }
+.hero-meta-val { font-size: 15px; color: var(--fg); font-weight: 500; }
+.scroll-hint { position: absolute; bottom: 44px; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--fg-dim); }
+.scroll-line { width:1px; height:52px; background:linear-gradient(to bottom,var(--fg-dim),transparent); animation:lp 2.2s ease-in-out infinite; }
+@keyframes lp{0%,100%{opacity:.4;transform:scaleY(1)}50%{opacity:1;transform:scaleY(.55)}}
+
+/* ══════════════════════════════════════════════════
+   MOCKUP — MOBILE APP SCREENSHOT STYLE
+══════════════════════════════════════════════════ */
+#mockup-section { height: 300vh; position: relative; }
+#mockup-sticky { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; background: radial-gradient(ellipse 70% 55% at 50% 60%, #1a1200 0%, var(--bg) 68%); }
+#mockup-wrap { will-change: transform, opacity; display: flex; gap: 28px; align-items: flex-start; }
+.mockup-label { position: absolute; top: 40px; left: 52px; font-size: 11px; letter-spacing: .25em; text-transform: uppercase; color: rgba(240,237,232,.2); z-index: 5; }
+
+/* Phone frame */
+.phone-frame {
+  width: 260px;
+  background: #0d0d0d;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 36px;
+  overflow: hidden;
+  box-shadow: 0 40px 120px rgba(0,0,0,.95), 0 0 0 1px rgba(255,255,255,.06);
+  position: relative;
+}
+.phone-frame.main { width: 290px; box-shadow: 0 50px 140px rgba(0,0,0,.95), 0 0 60px rgba(255,179,0,.08), 0 0 0 1px rgba(255,255,255,.07); }
+.phone-notch { height: 32px; background: #0a0a0a; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid rgba(255,255,255,.05); }
+.phone-notch-time { font-size: 9px; color: rgba(255,255,255,.4); font-family: 'SF Mono', monospace; }
+.phone-notch-icons { display: flex; gap: 5px; align-items: center; }
+.pni { width: 12px; height: 6px; border-radius: 2px; background: rgba(255,255,255,.3); }
+
+/* App shell */
+.app-shell { background: #0f0f0f; }
+
+/* App header */
+.app-header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #111; border-bottom: 1px solid rgba(255,255,255,.06); }
+.app-logo-icon {
+  width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+  background: linear-gradient(135deg, #FFB300 0%, #FF6D00 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 900; color: #fff;
+  font-family: var(--font-display);
+}
+.app-search { flex: 1; height: 28px; background: rgba(255,255,255,.07); border-radius: 8px; display: flex; align-items: center; padding: 0 10px; gap: 6px; font-size: 9px; color: rgba(255,255,255,.25); }
+.app-icons { display: flex; gap: 10px; }
+.app-icon-btn { width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,.07); display: flex; align-items: center; justify-content: center; font-size: 11px; }
+
+/* Banner */
+.app-banner { height: 48px; background: linear-gradient(90deg, #e65100, #FFB300); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.app-banner-text { font-size: 8px; font-weight: 700; color: #fff; letter-spacing: .06em; text-transform: uppercase; text-align: center; }
+.disc-badge { font-size: 8px; font-weight: 900; color: #fff; background: rgba(0,0,0,.25); border-radius: 4px; padding: 2px 5px; }
+
+/* Hero campaign */
+.app-campaign { height: 120px; background: #111; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(255,255,255,.05); }
+.camp-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #1a0a00 0%, #2a1400 100%); }
+.camp-accent { position: absolute; right: -20px; top: -20px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, rgba(255,179,0,.2) 0%, transparent 70%); }
+.camp-text { position: relative; z-index:1; text-align: center; }
+.camp-sub { font-size: 7px; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,179,0,.7); margin-bottom: 4px; }
+.camp-title { font-family: var(--font-display); font-size: 22px; font-weight: 900; letter-spacing: -1px; color: #fff; line-height: 1; }
+.camp-discount { font-size: 9px; color: rgba(255,255,255,.5); margin-top: 4px; }
+.camp-discount span { color: #FFB300; font-weight: 700; }
+.camp-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; }
+.camp-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.2); }
+.camp-dot.on { background: #FFB300; width: 14px; border-radius: 3px; }
+
+/* Flash products section */
+.app-section-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px 6px; }
+.app-section-title { font-size: 12px; font-weight: 700; color: rgba(255,255,255,.85); }
+.app-section-more { font-size: 9px; color: #FFB300; }
+.flash-wrap { display: flex; gap: 8px; padding: 0 12px 12px; overflow: hidden; }
+.flash-card { background: #161616; border: 1px solid rgba(255,255,255,.07); border-radius: 12px; padding: 10px; width: 100px; flex-shrink: 0; }
+.flash-img { width: 100%; aspect-ratio:1; border-radius: 8px; background: rgba(255,255,255,.06); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 8px; }
+.flash-name { font-size: 8px; color: rgba(255,255,255,.7); margin-bottom: 4px; line-height: 1.3; }
+.flash-price { font-size: 9px; font-weight: 700; color: #FFB300; }
+.flash-old { font-size: 8px; color: rgba(255,255,255,.25); text-decoration: line-through; margin-left: 3px; }
+.flash-stars { display: flex; align-items: center; gap: 3px; margin-top: 4px; font-size: 8px; color: rgba(255,179,0,.7); }
+
+/* Categories row */
+.cat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; padding: 0 12px 12px; }
+.cat-item { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 8px 4px; background: rgba(255,255,255,.04); border-radius: 10px; border: 1px solid rgba(255,255,255,.06); }
+.cat-icon { font-size: 16px; }
+.cat-label { font-size: 7px; color: rgba(255,255,255,.4); text-align: center; }
+
+/* Bottom nav */
+.app-bottom-nav { display: flex; justify-content: space-around; padding: 10px 0 14px; background: #111; border-top: 1px solid rgba(255,255,255,.06); }
+.bnav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.bnav-icon { font-size: 14px; opacity: .4; }
+.bnav-icon.on { opacity: 1; }
+.bnav-label { font-size: 7px; color: rgba(255,255,255,.25); }
+.bnav-label.on { color: #FFB300; }
+
+/* Second phone — supplier view */
+.supp-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.supp-title { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.8); margin-bottom: 2px; }
+.supp-sub { font-size: 8px; color: rgba(255,255,255,.3); }
+.stat-mini-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.stat-mini { padding: 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; }
+.sm-label { font-size: 7px; color: rgba(255,255,255,.3); letter-spacing:.07em; text-transform: uppercase; margin-bottom: 5px; }
+.sm-val { font-size: 16px; font-weight: 700; letter-spacing: -0.5px; color: var(--fg); }
+.sm-delta { font-size: 8px; color: #FFB300; }
+.order-list { display: flex; flex-direction: column; gap: 6px; }
+.order-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; }
+.oi-icon { width: 26px; height: 26px; border-radius: 6px; background: rgba(255,179,0,.12); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+.oi-body { flex: 1; }
+.oi-name { font-size: 9px; color: rgba(255,255,255,.7); }
+.oi-meta { font-size: 8px; color: rgba(255,255,255,.3); }
+.oi-badge { font-size: 7px; padding: 2px 7px; border-radius: 10px; }
+.oi-badge.done { background: rgba(76,175,80,.15); color: #4CAF50; }
+.oi-badge.pend { background: rgba(255,179,0,.12); color: #FFB300; }
+.oi-badge.ship { background: rgba(79,124,255,.12); color: #4f7cff; }
+
+/* ══════════════════════════════════════════════════
+   OVERVIEW
+══════════════════════════════════════════════════ */
+#overview-section { padding: 140px 52px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+.overview-sticky { position: sticky; top: 120px; }
+.overview-num { font-family: var(--font-display); font-size: 120px; font-weight: 900; line-height: 1; letter-spacing: -6px; color: rgba(240,237,232,.04); margin-bottom: -20px; }
+.overview-heading { font-family: var(--font-display); font-size: clamp(34px, 3.5vw, 50px); font-weight: 700; letter-spacing: -1.2px; line-height: 1.1; margin-bottom: 24px; }
+.overview-heading em { font-style: italic; font-weight: 400; color: rgba(240,237,232,.35); }
+.overview-body { font-size: 15px; color: var(--fg-dim); line-height: 1.85; }
+.overview-body + .overview-body { margin-top: 20px; }
+.pull-quote { margin: 40px 0; padding: 28px 32px; border-left: 2px solid var(--accent); background: var(--accent-dim); border-radius: 0 12px 12px 0; }
+.pull-quote p { font-family: var(--font-display); font-size: 20px; font-style: italic; font-weight: 400; color: var(--fg); line-height: 1.6; }
+
+/* ══════════════════════════════════════════════════
+   CHALLENGES
+══════════════════════════════════════════════════ */
+#challenges-section { padding: 0 52px 120px; }
+.cs-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2px; margin-top: 56px; }
+.cs-card { padding: 40px 36px; border: 1px solid var(--border); position: relative; overflow: hidden; transition: border-color .4s, background .4s; cursor: default; }
+.cs-card:first-child { border-radius: 16px 0 0 16px; }
+.cs-card:last-child  { border-radius: 0 16px 16px 0; }
+.cs-card:hover { border-color: var(--border-md); background: var(--card-bg); }
+.cs-icon { font-size: 28px; margin-bottom: 20px; display: block; filter: grayscale(1); transition: filter .4s; }
+.cs-card:hover .cs-icon { filter: grayscale(0); }
+.cs-title { font-family: var(--font-display); font-size: 21px; font-weight: 700; letter-spacing: -.4px; margin-bottom: 12px; }
+.cs-body { font-size: 13px; color: var(--fg-dim); line-height: 1.75; }
+.cs-line { position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .5s var(--ease-spring); }
+.cs-card:hover .cs-line { transform: scaleX(1); }
+
+/* ══════════════════════════════════════════════════
+   FEATURES HORIZONTAL
+══════════════════════════════════════════════════ */
+#features-section { height: 400vh; position: relative; }
+#features-sticky { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; overflow: hidden; }
+#features-track { display: flex; gap: 0; will-change: transform; height: 100vh; }
+.feat-panel { flex-shrink: 0; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; padding: 0 52px; }
+.feat-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; width: 100%; max-width: 1200px; }
+.feat-inner.reverse { direction: rtl; }
+.feat-inner.reverse > * { direction: ltr; }
+.feat-num { font-family: var(--font-display); font-size: 80px; font-weight: 900; letter-spacing: -4px; color: rgba(240,237,232,.05); line-height: 1; margin-bottom: -10px; }
+.feat-title { font-family: var(--font-display); font-size: clamp(28px, 3vw, 42px); font-weight: 700; letter-spacing: -1px; margin-bottom: 16px; line-height: 1.1; }
+.feat-desc { font-size: 15px; color: var(--fg-dim); line-height: 1.8; margin-bottom: 24px; }
+.feat-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.feat-pill { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; padding: 5px 12px; border-radius: 20px; background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent); }
+.feat-visual { border-radius: 20px; overflow: hidden; border: 1px solid var(--border); background: #0a0a0a; box-shadow: 0 30px 80px rgba(0,0,0,.7); aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; position: relative; }
+.feat-visual-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,179,0,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,179,0,.03) 1px, transparent 1px); background-size: 40px 40px; }
+#feat-progress { position: absolute; bottom: 40px; right: 52px; z-index: 10; display: flex; gap: 8px; }
+.fp-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(240,237,232,.2); transition: background .4s, width .4s var(--ease-spring); }
+.fp-dot.active { background: var(--accent); width: 24px; border-radius: 3px; }
+
+/* Feature visual components */
+/* Logistics map vis */
+.logi-vis { padding: 20px; width: 100%; height: 100%; display: flex; flex-direction: column; gap: 12px; position: relative; }
+.logi-map { flex: 1; background: rgba(255,179,0,.03); border: 1px solid rgba(255,179,0,.08); border-radius: 12px; position: relative; overflow: hidden; }
+.logi-node { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.logi-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px rgba(255,179,0,.5); animation: pulse 2.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 8px rgba(255,179,0,.3)}50%{box-shadow:0 0 20px rgba(255,179,0,.7)} }
+.logi-dot.blue { background: #4f7cff; box-shadow: 0 0 12px rgba(79,124,255,.5); animation: pulseB 2.5s ease-in-out infinite; }
+@keyframes pulseB { 0%,100%{box-shadow:0 0 8px rgba(79,124,255,.3)}50%{box-shadow:0 0 20px rgba(79,124,255,.7)} }
+.logi-city { font-size: 7px; color: rgba(255,255,255,.3); letter-spacing:.06em; }
+.logi-line { position: absolute; pointer-events: none; }
+.route-row { display: flex; gap: 6px; }
+.route-card { flex: 1; padding: 8px 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; display: flex; align-items: center; gap: 8px; }
+.route-icon { font-size: 14px; }
+.route-body { font-size: 9px; color: rgba(255,255,255,.55); }
+.route-body strong { color: rgba(255,255,255,.8); display: block; font-size: 10px; }
+
+/* Supplier cards vis */
+.supp-vis { padding: 20px; width: 100%; height: 100%; display: flex; flex-direction: column; gap: 10px; }
+.supp-card-vis { padding: 14px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); border-radius: 12px; display: flex; align-items: center; gap: 12px; transition: border-color .3s; }
+.supp-card-vis:hover { border-color: rgba(255,179,0,.25); }
+.supp-avatar { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.supp-info { flex: 1; }
+.supp-name { font-size: 11px; color: rgba(255,255,255,.8); font-weight: 500; margin-bottom: 3px; }
+.supp-cat  { font-size: 9px; color: rgba(255,255,255,.3); }
+.supp-rating { font-size: 9px; color: #FFB300; }
+.supp-count { font-size: 8px; color: rgba(255,255,255,.25); }
+.supp-verified { font-size: 8px; padding: 2px 8px; border-radius: 10px; background: rgba(76,175,80,.12); color: #4CAF50; border: 1px solid rgba(76,175,80,.2); }
+
+/* Bulk order vis */
+.bulk-vis { padding: 20px; width: 100%; height: 100%; display: flex; flex-direction: column; gap: 10px; }
+.bulk-header { font-size: 10px; color: rgba(255,255,255,.35); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
+.bulk-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; }
+.bulk-img { width: 32px; height: 32px; border-radius: 7px; background: rgba(255,179,0,.1); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.bulk-body { flex: 1; }
+.bulk-name { font-size: 10px; color: rgba(255,255,255,.75); margin-bottom: 3px; }
+.bulk-qty-row { display: flex; align-items: center; gap: 6px; }
+.bulk-qty-btn { width: 18px; height: 18px; border-radius: 4px; background: rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; font-size: 11px; color: rgba(255,255,255,.5); cursor: default; }
+.bulk-qty-val { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.8); min-width: 20px; text-align: center; }
+.bulk-price { text-align: right; }
+.bulk-unit { font-size: 8px; color: rgba(255,255,255,.3); }
+.bulk-total { font-size: 12px; font-weight: 700; color: #FFB300; }
+.bulk-footer { margin-top: auto; padding: 12px 14px; background: rgba(255,179,0,.08); border: 1px solid rgba(255,179,0,.18); border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
+.bf-label { font-size: 10px; color: rgba(255,255,255,.4); }
+.bf-total { font-size: 16px; font-weight: 900; color: #FFB300; letter-spacing: -0.5px; }
+
+/* ══════════════════════════════════════════════════
+   STATS
+══════════════════════════════════════════════════ */
+#stats-section { padding: 120px 52px; border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(4,1fr); gap: 2px; }
+.big-stat { padding: 48px 40px; border: 1px solid var(--border); transition: border-color .4s, background .4s; }
+.big-stat:first-child { border-radius: 16px 0 0 16px; }
+.big-stat:last-child  { border-radius: 0 16px 16px 0; }
+.big-stat:hover { border-color: var(--border-md); background: var(--card-bg); }
+.big-stat-val { font-family: var(--font-display); font-size: clamp(40px, 4.5vw, 60px); font-weight: 900; letter-spacing: -2px; color: var(--accent); margin-bottom: 8px; line-height: 1; }
+.big-stat-label { font-size: 13px; color: var(--fg-dim); line-height: 1.5; }
+
+/* ══════════════════════════════════════════════════
+   TECH STACK
+══════════════════════════════════════════════════ */
+#tech-section { padding: 120px 52px; border-top: 1px solid var(--border); }
+.tech-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-top: 56px; }
+.tech-card { padding: 28px 24px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; transition: border-color .35s, background .35s, transform .4s var(--ease-spring); }
+.tech-card:hover { border-color: var(--border-md); background: rgba(255,255,255,.05); transform: translateY(-4px); }
+.tech-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+.tech-name { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+.tech-role { font-size: 12px; color: var(--fg-dim); line-height: 1.5; }
+
+/* ══════════════════════════════════════════════════
+   TIMELINE
+══════════════════════════════════════════════════ */
+#timeline-section { padding: 120px 52px; border-top: 1px solid var(--border); }
+.timeline { max-width: 700px; margin: 56px auto 0; position: relative; }
+.timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--border); }
+.tl-item { padding: 0 0 56px 40px; position: relative; }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-dot { position: absolute; left: -5px; top: 4px; width: 11px; height: 11px; border-radius: 50%; background: var(--bg); border: 2px solid var(--border); }
+.tl-item.done .tl-dot { border-color: var(--accent); background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+.tl-week { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.tl-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: -.4px; margin-bottom: 10px; }
+.tl-body { font-size: 13px; color: var(--fg-dim); line-height: 1.75; }
+
+/* ══════════════════════════════════════════════════
+   RESULTS
+══════════════════════════════════════════════════ */
+#results-section { padding: 120px 52px; border-top: 1px solid var(--border); position: relative; overflow: hidden; }
+#results-section::before { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:800px; height:400px; background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(255,179,0,.06) 0%, transparent 70%); pointer-events:none; }
+.results-layout { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+.results-list { margin-top: 36px; display:flex; flex-direction:column; gap:16px; }
+.result-item { display:flex; align-items:flex-start; gap:16px; padding: 20px 24px; border-radius:16px; border: 1px solid var(--border); background: var(--card-bg); transition: border-color .35s, background .35s; }
+.result-item:hover { border-color: var(--accent-border); background: var(--accent-dim); }
+.result-check { width:28px; height:28px; border-radius:50%; flex-shrink:0; background: var(--accent-dim); border:1px solid var(--accent-border); display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--accent); }
+.result-body { font-size:14px; color:var(--fg-dim); line-height:1.6; }
+.result-body strong { color:var(--fg); font-weight:500; }
+.results-visual { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.ring-card { background: var(--card-bg); border:1px solid var(--border); border-radius:20px; padding:28px; text-align:center; transition: border-color .4s, transform .4s var(--ease-spring); }
+.ring-card:hover { border-color:var(--accent-border); transform:translateY(-4px); }
+.ring-wrap { position:relative; width:100px; height:100px; margin:0 auto 14px; }
+.ring-svg { transform: rotate(-90deg); width:100%; height:100%; }
+.ring-track { fill:none; stroke:rgba(255,255,255,.07); stroke-width:6; }
+.ring-fill  { fill:none; stroke-width:6; stroke-linecap:round; }
+.ring-label-val { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:22px; font-weight:700; letter-spacing:-1px; }
+.ring-title { font-size:12px; color:var(--fg-dim); }
+
+/* ══════════════════════════════════════════════════
+   NEXT + FOOTER
+══════════════════════════════════════════════════ */
+#next-project { margin: 0 52px 120px; border-radius: 28px; padding: 64px 72px; display: flex; align-items: center; justify-content: space-between; gap: 40px; border: 1px solid var(--border); background: var(--card-bg); position: relative; overflow: hidden; cursor: pointer; text-decoration: none; transition: border-color .4s, background .4s, transform .5s var(--ease-spring); }
+#next-project:hover { border-color: var(--border-md); background: rgba(255,255,255,.04); transform: translateY(-4px); }
+#next-project::before { content:''; position:absolute; right:-60px; top:-60px; width:300px; height:300px; border-radius:50%; background: radial-gradient(circle, rgba(255,179,0,.07) 0%, transparent 70%); pointer-events:none; }
+.next-left .label { margin-bottom: 10px; }
+.next-title { font-family:var(--font-display); font-size:clamp(26px,3vw,40px); font-weight:700; letter-spacing:-1px; }
+.next-arrow { width:64px; height:64px; border-radius:50%; background: var(--accent-dim); border:1px solid var(--accent-border); display:flex; align-items:center; justify-content:center; font-size:24px; color:var(--accent); flex-shrink:0; transition: background .3s, transform .4s var(--ease-spring); }
+#next-project:hover .next-arrow { background:rgba(255,179,0,.2); transform:rotate(45deg) scale(1.1); }
+footer { border-top:1px solid var(--border); padding:28px 52px; display:flex; justify-content:space-between; align-items:center; }
+footer p { font-size:12px; color:rgba(240,237,232,.18); }
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════ */
+@media (max-width:900px) {
+  #overview-section { grid-template-columns:1fr; gap:40px; }
+  .overview-sticky { position:static; }
+  .feat-inner, .feat-inner.reverse { grid-template-columns:1fr; direction:ltr; }
+  .feat-inner.reverse > * { direction:ltr; }
+  .results-layout { grid-template-columns:1fr; }
+  .big-stat { border-radius:12px !important; }
+  #stats-section { grid-template-columns:1fr 1fr; }
+  .tech-grid { grid-template-columns:1fr 1fr; }
+  .cs-grid { grid-template-columns:1fr; }
+  .cs-card { border-radius:12px !important; }
+  .results-visual { grid-template-columns:repeat(2,auto); justify-content:center; }
+  #mockup-wrap { flex-direction: column; align-items: center; }
+  .phone-frame:not(.main) { display: none; }
+}
+@media (max-width:640px) {
+  nav { padding:16px 22px; }
+  .nav-links li:not(:last-child):not(:first-child) { display:none; }
+  #cursor-dot, #cursor-ring { display:none; }
+  body { cursor:auto; }
+  #hero-content { padding:0 20px; }
+  .hero-meta-row { padding:18px 20px; gap:24px; }
+  #overview-section,#challenges-section,#tech-section,#timeline-section,#results-section { padding-left:22px; padding-right:22px; }
+  #stats-section { grid-template-columns:1fr; padding:60px 22px; }
+  .tech-grid { grid-template-columns:1fr; }
+  #next-project { margin:0 22px 80px; padding:40px 28px; flex-direction:column; text-align:center; }
+  footer { flex-direction:column; gap:8px; text-align:center; padding:24px 22px; }
+}
+</style>
+</head>
+<body>
+
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- ════════════ NAV ════════════ -->
+<nav>
+  <a class="nav-logo" href="bora-portfolio (1).html">Bora</a>
+  <ul class="nav-links">
+    <li><a class="nav-back" href="projects.html"><span class="back-arrow">←</span> All Work</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ════════════ HERO ════════════ -->
+<section id="hero">
+  <div id="hero-bg"></div>
+  <div id="hero-grid"></div>
+  <div class="h-orb orb-1"></div>
+  <div class="h-orb orb-2"></div>
+  <div class="h-orb orb-3"></div>
+
+  <div id="hero-content">
+    <!-- KTU Logo reconstructed as SVG -->
+    <div class="hero-logo-wrap">
+      <svg class="ktu-logo-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Cube base shape -->
+        <g transform="translate(10,10)">
+          <!-- Top face -->
+          <polygon points="50,2 98,28 50,54 2,28" fill="#FFB300"/>
+          <!-- Left face -->
+          <polygon points="2,28 50,54 50,102 2,76" fill="#5b9bd5"/>
+          <!-- Right face -->
+          <polygon points="98,28 50,54 50,102 98,76" fill="#e65100"/>
+          <!-- K letter on left face -->
+          <text x="14" y="82" font-family="Arial Black" font-weight="900" font-size="26" fill="white" opacity="0.92">K</text>
+          <!-- T on top -->
+          <text x="36" y="42" font-family="Arial Black" font-weight="900" font-size="22" fill="white" opacity="0.92">T</text>
+          <!-- U on right -->
+          <text x="62" y="88" font-family="Arial Black" font-weight="900" font-size="22" fill="white" opacity="0.88">U</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="hero-tag">
+      <div class="hero-tag-dot"></div>
+      UX Design · Product Planning
+    </div>
+    <h1 class="hero-title">Wholesale<br>Marketplace</h1>
+    <p class="hero-sub">A marketplace concept bringing wholesalers together into a single logistics-supported platform — built for scale, speed, and simplicity.</p>
+    <div class="hero-meta-row">
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Year</div>
+        <div class="hero-meta-val">2026</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Role</div>
+        <div class="hero-meta-val">UX Lead</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Type</div>
+        <div class="hero-meta-val">B2B SaaS</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Scope</div>
+        <div class="hero-meta-val">Concept → MVP</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- ════════════ MOCKUP — TWO PHONES ════════════ -->
+<section id="mockup-section">
+  <div id="mockup-sticky">
+    <div class="mockup-label">Product Screens</div>
+    <div id="mockup-wrap">
+
+      <!-- Phone 1: Buyer App (main) -->
+      <div class="phone-frame main">
+        <div class="phone-notch">
+          <div class="phone-notch-time">9:41</div>
+          <div class="phone-notch-icons">
+            <div class="pni" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5)"></div>
+            <div class="pni" style="width:14px"></div>
+            <div class="pni" style="width:10px;height:6px;border-radius:50% 3px 3px 50%;background:rgba(255,255,255,.35)"></div>
+          </div>
+        </div>
+        <div class="app-shell">
+          <!-- Header -->
+          <div class="app-header">
+            <div class="app-logo-icon">K</div>
+            <div class="app-search">🔍 &nbsp;Toptan ürün ara…</div>
+            <div class="app-icons">
+              <div class="app-icon-btn">🔔</div>
+              <div class="app-icon-btn">👤</div>
+            </div>
+          </div>
+          <!-- Discount banner -->
+          <div class="app-banner">
+            <div class="disc-badge">-20%</div>
+            <div class="app-banner-text">Bugünün Tüm İndirimli Ürünleri İçin Tıkla!</div>
+            <div class="disc-badge">-40%</div>
+          </div>
+          <!-- Hero campaign -->
+          <div class="app-campaign">
+            <div class="camp-bg"></div>
+            <div class="camp-accent"></div>
+            <div class="camp-text">
+              <div class="camp-sub">1–10 Ağustos</div>
+              <div class="camp-title">DEV<br>KAMPANYA</div>
+              <div class="camp-discount">Toptan siparişlerde <span>%33 indirim</span></div>
+            </div>
+            <div class="camp-dots">
+              <div class="camp-dot on"></div>
+              <div class="camp-dot"></div>
+              <div class="camp-dot"></div>
+            </div>
+          </div>
+          <!-- Flash products -->
+          <div class="app-section-head">
+            <div class="app-section-title">⚡ Flaş Ürünler</div>
+            <div class="app-section-more">Tümünü Gör →</div>
+          </div>
+          <div class="flash-wrap">
+            <div class="flash-card">
+              <div class="flash-img">👜</div>
+              <div class="flash-name">VCQ Çanta (x12)</div>
+              <div>
+                <span class="flash-price">349.99₺</span>
+                <span class="flash-old">699.99₺</span>
+              </div>
+              <div class="flash-stars">★★★★☆ <span style="color:rgba(255,255,255,.3)">4.2</span></div>
+            </div>
+            <div class="flash-card">
+              <div class="flash-img">📱</div>
+              <div class="flash-name">Telefon Tutucu (x50)</div>
+              <div>
+                <span class="flash-price">79.99₺</span>
+                <span class="flash-old">119.99₺</span>
+              </div>
+              <div class="flash-stars">★★★★☆ <span style="color:rgba(255,255,255,.3)">4.3</span></div>
+            </div>
+            <div class="flash-card">
+              <div class="flash-img">🎧</div>
+              <div class="flash-name">Kablosuz Kulaklık</div>
+              <div>
+                <span class="flash-price">129.99₺</span>
+                <span class="flash-old">249.99₺</span>
+              </div>
+              <div class="flash-stars">★★★★★ <span style="color:rgba(255,255,255,.3)">4.7</span></div>
+            </div>
+          </div>
+          <!-- Categories -->
+          <div class="cat-row">
+            <div class="cat-item"><div class="cat-icon">👕</div><div class="cat-label">Tekstil</div></div>
+            <div class="cat-item"><div class="cat-icon">📦</div><div class="cat-label">Elektronik</div></div>
+            <div class="cat-item"><div class="cat-icon">🏠</div><div class="cat-label">Ev & Yaşam</div></div>
+            <div class="cat-item"><div class="cat-icon">🍽️</div><div class="cat-label">Gıda</div></div>
+          </div>
+          <!-- Bottom nav -->
+          <div class="app-bottom-nav">
+            <div class="bnav-item"><div class="bnav-icon on">🏠</div><div class="bnav-label on">Ana Sayfa</div></div>
+            <div class="bnav-item"><div class="bnav-icon">🔍</div><div class="bnav-label">Keşfet</div></div>
+            <div class="bnav-item"><div class="bnav-icon">🛒</div><div class="bnav-label">Sepet</div></div>
+            <div class="bnav-item"><div class="bnav-icon">📊</div><div class="bnav-label">Siparişler</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone 2: Supplier Dashboard -->
+      <div class="phone-frame">
+        <div class="phone-notch">
+          <div class="phone-notch-time">9:41</div>
+          <div class="phone-notch-icons">
+            <div class="pni" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4)"></div>
+            <div class="pni" style="width:14px"></div>
+          </div>
+        </div>
+        <div class="app-shell">
+          <div class="app-header" style="border-bottom:1px solid rgba(255,255,255,.06)">
+            <div class="app-logo-icon" style="background:linear-gradient(135deg,#FFB300,#FF8F00)">S</div>
+            <div style="flex:1;padding:0 8px">
+              <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.8)">Tedarikçi Paneli</div>
+              <div style="font-size:8px;color:rgba(255,255,255,.3)">KTU Wholesale</div>
+            </div>
+            <div class="app-icon-btn">⚙️</div>
+          </div>
+          <div class="supp-body">
+            <div>
+              <div class="supp-title">Hoş geldin, Ahmet Bey 👋</div>
+              <div class="supp-sub">Bugün 14 yeni sipariş var</div>
+            </div>
+            <div class="stat-mini-row">
+              <div class="stat-mini">
+                <div class="sm-label">Aylık Ciro</div>
+                <div class="sm-val">₺284k</div>
+                <div class="sm-delta">↑ %22 bu ay</div>
+              </div>
+              <div class="stat-mini">
+                <div class="sm-label">Aktif Sipariş</div>
+                <div class="sm-val">47</div>
+                <div class="sm-delta">↑ 8 yeni</div>
+              </div>
+            </div>
+            <div style="font-size:9px;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase">Son Siparişler</div>
+            <div class="order-list">
+              <div class="order-item">
+                <div class="oi-icon">👜</div>
+                <div class="oi-body">
+                  <div class="oi-name">VCQ Çanta × 24</div>
+                  <div class="oi-meta">Ankara · ₺8,399</div>
+                </div>
+                <div class="oi-badge done">Teslim</div>
+              </div>
+              <div class="order-item">
+                <div class="oi-icon">📱</div>
+                <div class="oi-body">
+                  <div class="oi-name">Telefon Aksesuarı × 150</div>
+                  <div class="oi-meta">İstanbul · ₺11,990</div>
+                </div>
+                <div class="oi-badge ship">Kargoda</div>
+              </div>
+              <div class="order-item">
+                <div class="oi-icon">🎧</div>
+                <div class="oi-body">
+                  <div class="oi-name">Kulaklık × 60</div>
+                  <div class="oi-meta">İzmir · ₺7,799</div>
+                </div>
+                <div class="oi-badge pend">Onay Bekl.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ OVERVIEW ════════════ -->
+<section id="overview-section">
+  <div class="overview-sticky">
+    <div class="overview-num">01</div>
+    <h2 class="overview-heading">
+      The Problem<br>
+      <em>worth solving</em>
+    </h2>
+  </div>
+  <div>
+    <p class="overview-body">Turkey's wholesale market runs on WhatsApp groups, Excel sheets, and phone calls. Thousands of wholesalers and buyers transact every day through relationships and trust — but with zero infrastructure. Orders get lost, logistics are fragmented, and there's no single place where a buyer can discover, compare, and order from multiple suppliers at once.</p>
+    <p class="overview-body">Existing B2B platforms were either too expensive (SAP, Oracle), too generic (Alibaba), or too local and limited. Nobody had designed a marketplace specifically for the Turkish wholesale ecosystem — one that understood how these businesses actually work.</p>
+    <div class="pull-quote">
+      <p>"I manage 200 wholesale orders a week through WhatsApp. I need a real system — but nothing I've tried was built for how I actually work."</p>
+    </div>
+    <p class="overview-body">KTU Wholesale was conceived as that system: a two-sided marketplace connecting wholesalers and buyers, with integrated logistics tracking, bulk order tooling, and a supplier discovery layer that makes the informal formal — without making it feel corporate.</p>
+  </div>
+</section>
+
+<!-- ════════════ CHALLENGES ════════════ -->
+<section id="challenges-section">
+  <div class="label" style="margin-bottom:12px;">Challenges</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(36px,4vw,54px);font-weight:700;letter-spacing:-1.5px;line-height:1.05;">
+    Two sides,<br>
+    <span style="color:rgba(240,237,232,.25);font-style:italic;font-weight:400;">one platform</span>
+  </h2>
+  <div class="cs-grid">
+    <div class="cs-card">
+      <span class="cs-icon">🤝</span>
+      <div class="cs-title">Two-Sided Trust</div>
+      <div class="cs-body">Both buyers and suppliers needed reasons to join before the other side existed. Designed a staged onboarding that lets early suppliers list products immediately, while buyers see curated content — building perceived liquidity before it's real.</div>
+      <div class="cs-line"></div>
+    </div>
+    <div class="cs-card">
+      <span class="cs-icon">🚚</span>
+      <div class="cs-title">Logistics Integration</div>
+      <div class="cs-body">Wholesale orders vary wildly in size, weight, and destination. Designed a logistics abstraction layer where multiple carriers compete per order, with real-time tracking surfaced natively in the app — so buyers never leave the platform to check delivery status.</div>
+      <div class="cs-line"></div>
+    </div>
+    <div class="cs-card">
+      <span class="cs-icon">📦</span>
+      <div class="cs-title">Bulk Order UX</div>
+      <div class="cs-body">Wholesale buying is fundamentally different from retail — minimum quantities, tiered pricing, negotiation, and lead times. Designed a bulk cart system where pricing updates in real time as quantities change, and suppliers can set MOQs and tiered discounts visually.</div>
+      <div class="cs-line"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ FEATURE PANELS ════════════ -->
+<section id="features-section">
+  <div id="features-sticky">
+    <div id="features-track">
+
+      <!-- Panel 1: Supplier Network -->
+      <div class="feat-panel">
+        <div class="feat-inner">
+          <div class="feat-text-col">
+            <div class="feat-num">01</div>
+            <div class="feat-title">Verified Supplier Network</div>
+            <div class="feat-desc">Every supplier goes through a KYB verification process before listing. Buyers see ratings, response times, fulfilment history, and category specialisations — turning anonymous wholesale into a trusted, transparent marketplace.</div>
+            <div class="feat-pills">
+              <span class="feat-pill">KYB Verify</span>
+              <span class="feat-pill">Supplier Scores</span>
+              <span class="feat-pill">Category Match</span>
+            </div>
+          </div>
+          <div class="feat-visual">
+            <div class="feat-visual-grid"></div>
+            <div class="supp-vis">
+              <div style="font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Öne Çıkan Tedarikçiler</div>
+              <div class="supp-card-vis">
+                <div class="supp-avatar" style="background:rgba(255,179,0,.12)">👜</div>
+                <div class="supp-info">
+                  <div class="supp-name">Atlas Tekstil A.Ş.</div>
+                  <div class="supp-cat">Moda · Çanta · Aksesuar</div>
+                  <div class="supp-rating">★★★★★ <span class="supp-count">4.9 (214 değerlendirme)</span></div>
+                </div>
+                <div class="supp-verified">✓ Onaylı</div>
+              </div>
+              <div class="supp-card-vis">
+                <div class="supp-avatar" style="background:rgba(79,124,255,.12)">📱</div>
+                <div class="supp-info">
+                  <div class="supp-name">TechDist Elektronik</div>
+                  <div class="supp-cat">Telefon · Aksesuar · Gadget</div>
+                  <div class="supp-rating">★★★★☆ <span class="supp-count">4.6 (189 değerlendirme)</span></div>
+                </div>
+                <div class="supp-verified">✓ Onaylı</div>
+              </div>
+              <div class="supp-card-vis">
+                <div class="supp-avatar" style="background:rgba(198,120,255,.12)">🏠</div>
+                <div class="supp-info">
+                  <div class="supp-name">HomePro Toptan</div>
+                  <div class="supp-cat">Ev & Yaşam · Mutfak</div>
+                  <div class="supp-rating">★★★★☆ <span class="supp-count">4.4 (97 değerlendirme)</span></div>
+                </div>
+                <div class="supp-verified">✓ Onaylı</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Logistics -->
+      <div class="feat-panel">
+        <div class="feat-inner reverse">
+          <div class="feat-text-col">
+            <div class="feat-num">02</div>
+            <div class="feat-title">Integrated Logistics Hub</div>
+            <div class="feat-desc">Multiple logistics carriers compete per shipment to give the best rate. Real-time tracking lives inside the app — buyers and suppliers see the same data. No tracking codes, no external portals, no phone calls to find out where an order is.</div>
+            <div class="feat-pills">
+              <span class="feat-pill">Multi-carrier</span>
+              <span class="feat-pill">Live Tracking</span>
+              <span class="feat-pill">Rate Engine</span>
+            </div>
+          </div>
+          <div class="feat-visual">
+            <div class="feat-visual-grid"></div>
+            <div class="logi-vis">
+              <div class="logi-map">
+                <!-- Network nodes representing cities -->
+                <div class="logi-node" style="left:12%;top:30%">
+                  <div class="logi-dot"></div>
+                  <div class="logi-city">İSTANBUL</div>
+                </div>
+                <div class="logi-node" style="left:48%;top:18%">
+                  <div class="logi-dot" style="animation-delay:.5s"></div>
+                  <div class="logi-city">ANKARA</div>
+                </div>
+                <div class="logi-node" style="left:22%;top:62%">
+                  <div class="logi-dot blue" style="animation-delay:1s"></div>
+                  <div class="logi-city">İZMİR</div>
+                </div>
+                <div class="logi-node" style="left:65%;top:48%">
+                  <div class="logi-dot" style="animation-delay:1.5s"></div>
+                  <div class="logi-city">KONYA</div>
+                </div>
+                <div class="logi-node" style="left:80%;top:25%">
+                  <div class="logi-dot blue" style="animation-delay:.8s"></div>
+                  <div class="logi-city">BURSA</div>
+                </div>
+                <div class="logi-node" style="left:55%;top:72%">
+                  <div class="logi-dot" style="animation-delay:1.2s"></div>
+                  <div class="logi-city">ADANA</div>
+                </div>
+                <!-- Connection lines as SVG overlay -->
+                <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 300 160">
+                  <line x1="36" y1="48" x2="144" y2="29" stroke="rgba(255,179,0,.2)" stroke-width="1" stroke-dasharray="3,3"/>
+                  <line x1="36" y1="48" x2="66" y2="99" stroke="rgba(79,124,255,.2)" stroke-width="1" stroke-dasharray="3,3"/>
+                  <line x1="144" y1="29" x2="195" y2="77" stroke="rgba(255,179,0,.15)" stroke-width="1" stroke-dasharray="3,3"/>
+                  <line x1="195" y1="77" x2="240" y2="40" stroke="rgba(255,179,0,.12)" stroke-width="1" stroke-dasharray="3,3"/>
+                  <line x1="165" y1="115" x2="195" y2="77" stroke="rgba(255,179,0,.15)" stroke-width="1" stroke-dasharray="3,3"/>
+                  <line x1="66" y1="99" x2="165" y2="115" stroke="rgba(79,124,255,.15)" stroke-width="1" stroke-dasharray="3,3"/>
+                  <circle cx="100" cy="62" r="4" fill="#FFB300" opacity=".8">
+                    <animateMotion dur="4s" repeatCount="indefinite" path="M36,48 L144,29 L195,77"/>
+                  </circle>
+                  <circle cx="0" cy="0" r="3" fill="#4f7cff" opacity=".7">
+                    <animateMotion dur="5s" repeatCount="indefinite" path="M66,99 L144,29 L240,40"/>
+                  </circle>
+                </svg>
+              </div>
+              <div class="route-row">
+                <div class="route-card">
+                  <div class="route-icon">🚛</div>
+                  <div class="route-body"><strong>Yurtiçi Kargo</strong>₺24 · 1–2 gün</div>
+                </div>
+                <div class="route-card" style="border-color:rgba(255,179,0,.3);background:rgba(255,179,0,.06)">
+                  <div class="route-icon">⚡</div>
+                  <div class="route-body" style="color:#FFB300"><strong style="color:#FFB300">MNG Ekspres</strong>₺18 · Bugün</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 3: Bulk Cart -->
+      <div class="feat-panel">
+        <div class="feat-inner">
+          <div class="feat-text-col">
+            <div class="feat-num">03</div>
+            <div class="feat-title">Bulk Order Engine</div>
+            <div class="feat-desc">Tiered pricing updates live as you adjust quantities. Minimum order quantities are shown upfront — no surprises at checkout. Buyers can combine orders from multiple suppliers in a single cart with a consolidated invoice at the end.</div>
+            <div class="feat-pills">
+              <span class="feat-pill">Tiered Pricing</span>
+              <span class="feat-pill">MOQ Logic</span>
+              <span class="feat-pill">Multi-Supplier</span>
+            </div>
+          </div>
+          <div class="feat-visual">
+            <div class="feat-visual-grid"></div>
+            <div class="bulk-vis">
+              <div class="bulk-header">Toplu Sepetim — 3 tedarikçi</div>
+              <div class="bulk-item">
+                <div class="bulk-img">👜</div>
+                <div class="bulk-body">
+                  <div class="bulk-name">VCQ Çanta (Min. 12 adet)</div>
+                  <div class="bulk-qty-row">
+                    <div class="bulk-qty-btn">−</div>
+                    <div class="bulk-qty-val">24</div>
+                    <div class="bulk-qty-btn">+</div>
+                    <div style="font-size:8px;color:rgba(255,179,0,.7);margin-left:4px">%15 indirim ✓</div>
+                  </div>
+                </div>
+                <div class="bulk-price">
+                  <div class="bulk-unit">adet / ₺297</div>
+                  <div class="bulk-total">₺7,128</div>
+                </div>
+              </div>
+              <div class="bulk-item">
+                <div class="bulk-img">📱</div>
+                <div class="bulk-body">
+                  <div class="bulk-name">Telefon Tutucu (Min. 50)</div>
+                  <div class="bulk-qty-row">
+                    <div class="bulk-qty-btn">−</div>
+                    <div class="bulk-qty-val">100</div>
+                    <div class="bulk-qty-btn">+</div>
+                    <div style="font-size:8px;color:rgba(255,179,0,.7);margin-left:4px">%20 indirim ✓</div>
+                  </div>
+                </div>
+                <div class="bulk-price">
+                  <div class="bulk-unit">adet / ₺63</div>
+                  <div class="bulk-total">₺6,300</div>
+                </div>
+              </div>
+              <div class="bulk-item">
+                <div class="bulk-img">🎧</div>
+                <div class="bulk-body">
+                  <div class="bulk-name">Kablosuz Kulaklık (Min. 20)</div>
+                  <div class="bulk-qty-row">
+                    <div class="bulk-qty-btn">−</div>
+                    <div class="bulk-qty-val">20</div>
+                    <div class="bulk-qty-btn">+</div>
+                    <div style="font-size:8px;color:rgba(255,255,255,.25);margin-left:4px">Minimum adet</div>
+                  </div>
+                </div>
+                <div class="bulk-price">
+                  <div class="bulk-unit">adet / ₺104</div>
+                  <div class="bulk-total">₺2,080</div>
+                </div>
+              </div>
+              <div class="bulk-footer">
+                <div>
+                  <div class="bf-label">3 tedarikçi · 144 ürün</div>
+                  <div style="font-size:8px;color:rgba(255,255,255,.25);margin-top:2px">Toplam tasarruf: ₺3,240</div>
+                </div>
+                <div class="bf-total">₺15,508</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div id="feat-progress">
+      <div class="fp-dot active" id="fp-0"></div>
+      <div class="fp-dot" id="fp-1"></div>
+      <div class="fp-dot" id="fp-2"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ STATS ════════════ -->
+<section id="stats-section">
+  <div class="big-stat">
+    <div class="big-stat-val" id="sv-0">0</div>
+    <div class="big-stat-label">Supplier categories<br>mapped in research</div>
+  </div>
+  <div class="big-stat">
+    <div class="big-stat-val" id="sv-1">0</div>
+    <div class="big-stat-label">User interviews<br>conducted (B2B)</div>
+  </div>
+  <div class="big-stat">
+    <div class="big-stat-val" id="sv-2">0</div>
+    <div class="big-stat-label">Screens designed<br>across both apps</div>
+  </div>
+  <div class="big-stat">
+    <div class="big-stat-val" id="sv-3">0</div>
+    <div class="big-stat-label">Usability test<br>task success rate</div>
+  </div>
+</section>
+
+<!-- ════════════ TECH STACK ════════════ -->
+<section id="tech-section">
+  <div class="label" style="margin-bottom:12px;">Design & Tools</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(36px,4vw,54px);font-weight:700;letter-spacing:-1.5px;line-height:1.05;">
+    Process &amp;<br>
+    <span style="color:rgba(240,237,232,.25);font-style:italic;font-weight:400;">toolkit</span>
+  </h2>
+  <div class="tech-grid">
+    <div class="tech-card">
+      <span class="tech-icon">🎨</span>
+      <div class="tech-name">Figma</div>
+      <div class="tech-role">Complete design system with 90+ components across buyer and supplier app variants.</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-icon">🔄</span>
+      <div class="tech-name">Protopie</div>
+      <div class="tech-role">High-fidelity interactive prototype for the bulk cart flow — tested with live data variables.</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-icon">🗺️</span>
+      <div class="tech-name">Miro</div>
+      <div class="tech-role">Service blueprints, user journey maps, and two-sided marketplace flows mapped end-to-end.</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-icon">👥</span>
+      <div class="tech-name">User Interviews</div>
+      <div class="tech-role">24 in-depth interviews with wholesalers in Istanbul Grand Bazaar, Merter, and Osmanbey.</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-icon">📐</span>
+      <div class="tech-name">Design Tokens</div>
+      <div class="tech-role">Shared token system between buyer app, supplier panel, and web dashboard — one source of truth.</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-icon">📊</span>
+      <div class="tech-name">Analytics Plan</div>
+      <div class="tech-role">Instrumentation spec for funnel analysis, supplier activation tracking, and GMV per category.</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-icon">♿</span>
+      <div class="tech-name">Accessibility</div>
+      <div class="tech-role">WCAG AA compliance with Turkish locale considerations — text sizing for older demographics.</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-icon">📱</span>
+      <div class="tech-name">React Native</div>
+      <div class="tech-role">Designs handed off with component annotations for cross-platform iOS and Android build.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ TIMELINE ════════════ -->
+<section id="timeline-section">
+  <div class="label" style="margin-bottom:12px;">Project Timeline</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(36px,4vw,54px);font-weight:700;letter-spacing:-1.5px;line-height:1.05;">
+    20 weeks,<br>
+    <span style="color:rgba(240,237,232,.25);font-style:italic;font-weight:400;">concept to handoff</span>
+  </h2>
+  <div class="timeline">
+    <div class="tl-item done">
+      <div class="tl-dot"></div>
+      <div class="tl-week">Week 1–4</div>
+      <div class="tl-title">Market Research & Field Work</div>
+      <div class="tl-body">24 interviews with wholesalers and buyers in Istanbul, İzmir, and Bursa. Competitive analysis of 11 B2B platforms. Key insight: 89% of orders were placed via WhatsApp — the biggest UX opportunity was simply making ordering not require a conversation.</div>
+    </div>
+    <div class="tl-item done">
+      <div class="tl-dot"></div>
+      <div class="tl-week">Week 5–7</div>
+      <div class="tl-title">Strategy & IA</div>
+      <div class="tl-body">Defined the two-sided platform model: separate buyer app and supplier panel with a shared data layer. Information architecture for 3 user types (Buyer, Supplier, Logistics Partner). Go-to-market strategy: seed with 20 verified Istanbul wholesalers first.</div>
+    </div>
+    <div class="tl-item done">
+      <div class="tl-dot"></div>
+      <div class="tl-week">Week 8–10</div>
+      <div class="tl-title">Design System & Brand</div>
+      <div class="tl-body">Built the KTU brand identity — the isometric cube logo representing the three parties (buyer, supplier, logistics). Design system with 90+ Figma components, amber accent palette, and a density system that works for data-heavy supplier screens.</div>
+    </div>
+    <div class="tl-item done">
+      <div class="tl-dot"></div>
+      <div class="tl-week">Week 11–16</div>
+      <div class="tl-title">High-Fidelity Design</div>
+      <div class="tl-body">Full hi-fi for both apps: 84 buyer screens, 61 supplier screens. The bulk cart required 3 design iterations — tiered pricing interaction was the hardest problem. Logistics integration designed as a native module, not an afterthought.</div>
+    </div>
+    <div class="tl-item done">
+      <div class="tl-dot"></div>
+      <div class="tl-week">Week 17–20</div>
+      <div class="tl-title">Validation & Dev Handoff</div>
+      <div class="tl-body">4 rounds of usability testing with 6 participants each — suppliers and buyers separately. Task success rate reached 91% in the final round. React Native handoff with motion specs, edge case documentation, and a Storybook-compatible component export.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ RESULTS ════════════ -->
+<section id="results-section">
+  <div class="results-layout">
+    <div class="results-text">
+      <div class="label" style="margin-bottom:12px;">Outcomes</div>
+      <h2 style="font-family:var(--font-display);font-size:clamp(34px,3.5vw,50px);font-weight:700;letter-spacing:-1.2px;line-height:1.1;margin-bottom:8px;">
+        Results that<br>
+        <em style="font-weight:400;color:rgba(240,237,232,.35);">speak for themselves</em>
+      </h2>
+      <div class="results-list">
+        <div class="result-item">
+          <div class="result-check">✓</div>
+          <div class="result-body"><strong>91% usability test success rate</strong> in final round across bulk ordering, supplier discovery, and logistics tracking flows.</div>
+        </div>
+        <div class="result-item">
+          <div class="result-check">✓</div>
+          <div class="result-body"><strong>Average order time dropped from 18 min to 4 min</strong> compared to the current WhatsApp-based workflow in prototype testing.</div>
+        </div>
+        <div class="result-item">
+          <div class="result-check">✓</div>
+          <div class="result-body"><strong>20 supplier LOIs secured</strong> during the research phase — verified wholesalers committed to launching on the platform at MVP.</div>
+        </div>
+        <div class="result-item">
+          <div class="result-check">✓</div>
+          <div class="result-body"><strong>145 screens across two apps</strong> delivered as a production-ready Figma handoff with full annotation and motion guidelines.</div>
+        </div>
+      </div>
+    </div>
+    <div class="results-visual">
+      <div class="ring-card">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-track" cx="50" cy="50" r="40"/>
+            <circle class="ring-fill" id="ring-a" cx="50" cy="50" r="40" stroke="#FFB300" stroke-dasharray="251" stroke-dashoffset="251"/>
+          </svg>
+          <div class="ring-label-val" style="color:#FFB300" id="ring-a-val">0%</div>
+        </div>
+        <div class="ring-title">Task Success</div>
+      </div>
+      <div class="ring-card">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-track" cx="50" cy="50" r="40"/>
+            <circle class="ring-fill" id="ring-b" cx="50" cy="50" r="40" stroke="#4f7cff" stroke-dasharray="251" stroke-dashoffset="251"/>
+          </svg>
+          <div class="ring-label-val" style="color:#4f7cff" id="ring-b-val">0%</div>
+        </div>
+        <div class="ring-title">Time Reduction</div>
+      </div>
+      <div class="ring-card">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-track" cx="50" cy="50" r="40"/>
+            <circle class="ring-fill" id="ring-c" cx="50" cy="50" r="40" stroke="#c678ff" stroke-dasharray="251" stroke-dashoffset="251"/>
+          </svg>
+          <div class="ring-label-val" style="color:#c678ff" id="ring-c-val">0%</div>
+        </div>
+        <div class="ring-title">Supplier NPS</div>
+      </div>
+      <div class="ring-card">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-track" cx="50" cy="50" r="40"/>
+            <circle class="ring-fill" id="ring-d" cx="50" cy="50" r="40" stroke="#4CAF50" stroke-dasharray="251" stroke-dashoffset="251"/>
+          </svg>
+          <div class="ring-label-val" style="color:#4CAF50" id="ring-d-val">0%</div>
+        </div>
+        <div class="ring-title">Buyer Satisfaction</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ NEXT PROJECT ════════════ -->
+<a href="aura-project-detail.html" id="next-project">
+  <div class="next-left">
+    <div class="label" style="margin-bottom:10px;">Next Project</div>
+    <div class="next-title">Aura Music→</div>
+  </div>
+  <div class="next-arrow">↗</div>
+</a>
+
+<!-- ════════════ FOOTER ════════════ -->
+<footer>
+  <p>© 2026 Bora. All rights reserved.</p>
+  <p>Designed &amp; built with care</p>
+</footer>
+
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── Cursor ── */
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+ring._x = 0; ring._y = 0;
+window.addEventListener('mousemove', e => {
+  dot.style.left = e.clientX + 'px';
+  dot.style.top  = e.clientY + 'px';
+});
+(function tick() {
+  requestAnimationFrame(tick);
+  ring._x += (parseFloat(dot.style.left||0) - ring._x) * 0.1;
+  ring._y += (parseFloat(dot.style.top ||0) - ring._y) * 0.1;
+  ring.style.left = ring._x + 'px'; ring.style.top = ring._y + 'px';
+})();
+document.querySelectorAll('a,button,.cs-card,.tech-card,.result-item,.ring-card,.big-stat,.supp-card-vis,.bulk-item').forEach(el => {
+  el.addEventListener('mouseenter', () => { ring.style.width='52px'; ring.style.height='52px'; ring.style.borderColor='rgba(255,179,0,.5)'; });
+  el.addEventListener('mouseleave', () => { ring.style.width='34px'; ring.style.height='34px'; ring.style.borderColor='rgba(240,237,232,.2)'; });
+});
+
+/* ── Hero ── */
+gsap.timeline({ defaults:{ ease:'power3.out' } })
+  .from('.ktu-logo-svg', { opacity:0, scale:.6, duration:1.2, delay:.2 })
+  .from('.hero-tag',      { opacity:0, y:16, duration:.8 }, '-=0.6')
+  .from('.hero-title',    { opacity:0, y:60, duration:1.3 }, '-=0.5')
+  .from('.hero-sub',      { opacity:0, y:22, duration:1   }, '-=0.9')
+  .from('.hero-meta-row', { opacity:0, y:22, duration:.9  }, '-=0.7')
+  .from('.scroll-hint',   { opacity:0, duration:.8        }, '-=0.4');
+
+gsap.to('#hero-content', { scale:.7, opacity:0, y:-80, ease:'none',
+  scrollTrigger:{ trigger:'#hero', start:'top top', end:'50% top', scrub:1.5 }
+});
+gsap.to('#hero-grid', { y:80, ease:'none',
+  scrollTrigger:{ trigger:'#hero', start:'top top', end:'bottom top', scrub:true }
+});
+
+/* ── Mockup ── */
+gsap.fromTo('#mockup-wrap',
+  { opacity:0, y:120, scale:.85 },
+  { opacity:1, y:0, scale:1, ease:'power3.out',
+    scrollTrigger:{ trigger:'#mockup-section', start:'top 80%', end:'top 20%', scrub:2 }
+  }
+);
+
+/* ── Overview ── */
+gsap.from('.overview-num', { opacity:0, x:-30, scrollTrigger:{ trigger:'#overview-section', start:'top 80%', end:'top 40%', scrub:2 } });
+gsap.from('.overview-heading', { opacity:0, y:40, scrollTrigger:{ trigger:'#overview-section', start:'top 75%', end:'top 35%', scrub:2 } });
+gsap.from('.overview-body, .pull-quote', { opacity:0, y:30, stagger:.15, duration:1, ease:'power2.out',
+  scrollTrigger:{ trigger:'#overview-section', start:'top 68%', toggleActions:'play none none reverse' }
+});
+
+/* ── Challenges ── */
+gsap.from('#challenges-section .label, #challenges-section h2', { opacity:0, y:40, stagger:.12, duration:.9, ease:'power2.out',
+  scrollTrigger:{ trigger:'#challenges-section', start:'top 78%', toggleActions:'play none none reverse' }
+});
+gsap.from('.cs-card', { opacity:0, y:50, stagger:.15, duration:.9, ease:'power2.out',
+  scrollTrigger:{ trigger:'.cs-grid', start:'top 82%', toggleActions:'play none none reverse' }
+});
+
+/* ── Features horizontal ── */
+const track = document.getElementById('features-track');
+gsap.to(track, {
+  x: () => -(window.innerWidth * 2),
+  ease:'none',
+  scrollTrigger:{
+    trigger:'#features-section', start:'top top', end:'bottom bottom',
+    scrub:1, pin:'#features-sticky', anticipatePin:1, invalidateOnRefresh:true,
+    onUpdate(self) {
+      const a = Math.round(self.progress * 2);
+      document.querySelectorAll('.fp-dot').forEach((d,i) => d.classList.toggle('active', i===a));
+    }
+  }
+});
+
+/* ── Stats ── */
+const statsData = [
+  { id:'sv-0', end:42, display:'42' },
+  { id:'sv-1', end:24, display:'24' },
+  { id:'sv-2', end:145, display:'145' },
+  { id:'sv-3', end:91, display:'91%' },
+];
+statsData.forEach(s => {
+  const el = document.getElementById(s.id);
+  ScrollTrigger.create({ trigger:el, start:'top 85%',
+    onEnter() {
+      gsap.fromTo({ val:0 }, { val:s.end, duration:2, ease:'power2.out',
+        onUpdate() { el.textContent = this.targets()[0].val >= s.end ? s.display : Math.round(this.targets()[0].val); }
+      });
+    }
+  });
+});
+gsap.from('.big-stat', { opacity:0, y:40, stagger:.1, duration:.9, ease:'power2.out',
+  scrollTrigger:{ trigger:'#stats-section', start:'top 80%', toggleActions:'play none none reverse' }
+});
+
+/* ── Tech ── */
+gsap.from('.tech-card', { opacity:0, y:40, scale:.95, stagger:.08, duration:.8, ease:'power2.out',
+  scrollTrigger:{ trigger:'.tech-grid', start:'top 82%', toggleActions:'play none none reverse' }
+});
+
+/* ── Timeline ── */
+gsap.from('#timeline-section .label, #timeline-section h2', { opacity:0, y:30, stagger:.12,
+  scrollTrigger:{ trigger:'#timeline-section', start:'top 80%', toggleActions:'play none none reverse' }
+});
+gsap.from('.tl-item', { opacity:0, x:-30, stagger:.15, duration:.9, ease:'power2.out',
+  scrollTrigger:{ trigger:'.timeline', start:'top 80%', toggleActions:'play none none reverse' }
+});
+
+/* ── Results rings ── */
+const ringData = [
+  { id:'ring-a', val:'ring-a-val', pct:91, color:'#FFB300' },
+  { id:'ring-b', val:'ring-b-val', pct:78, color:'#4f7cff' },
+  { id:'ring-c', val:'ring-c-val', pct:88, color:'#c678ff' },
+  { id:'ring-d', val:'ring-d-val', pct:94, color:'#4CAF50' },
+];
+const circ = 2 * Math.PI * 40;
+ringData.forEach(r => {
+  const circle = document.getElementById(r.id);
+  const valEl  = document.getElementById(r.val);
+  ScrollTrigger.create({ trigger:circle, start:'top 85%',
+    onEnter() {
+      gsap.to(circle, { strokeDashoffset: circ*(1-r.pct/100), duration:1.6, ease:'power2.out' });
+      gsap.fromTo({ v:0 }, { v:r.pct, duration:1.6, ease:'power2.out',
+        onUpdate() { valEl.textContent = Math.round(this.targets()[0].v) + '%'; }
+      });
+    }
+  });
+});
+gsap.from('.result-item', { opacity:0, x:-30, stagger:.12, duration:.8, ease:'power2.out',
+  scrollTrigger:{ trigger:'.results-list', start:'top 82%', toggleActions:'play none none reverse' }
+});
+gsap.from('.ring-card', { opacity:0, y:30, scale:.95, stagger:.1, duration:.8, ease:'power2.out',
+  scrollTrigger:{ trigger:'.results-visual', start:'top 82%', toggleActions:'play none none reverse' }
+});
+
+/* ── Next project ── */
+gsap.from('#next-project', { opacity:0, y:50, scale:.96,
+  scrollTrigger:{ trigger:'#next-project', start:'top 85%', end:'top 40%', scrub:2 }
+});
+
+window.addEventListener('resize', () => ScrollTrigger.refresh());
+</script>
+</body>
+</html>

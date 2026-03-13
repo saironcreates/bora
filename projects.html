@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bora — Projects</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+/* ══════════════════════════════════════════════════
+   SHARED DESIGN SYSTEM (mirrors index)
+══════════════════════════════════════════════════ */
+:root {
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --bg: #080808;
+  --fg: #f0ede8;
+  --fg-dim: rgba(240,237,232,0.45);
+  --fg-ghost: rgba(240,237,232,0.07);
+  --border: rgba(255,255,255,0.07);
+  --border-md: rgba(255,255,255,0.13);
+  --card-bg: rgba(255,255,255,0.03);
+  --card-hover: rgba(255,255,255,0.06);
+  --tag-bg: rgba(255,255,255,0.05);
+  --tag-border: rgba(255,255,255,0.09);
+  --nav-bg: rgba(8,8,8,0.80);
+  --accent-blue:   #4f7cff;
+  --accent-purple: #c678ff;
+  --accent-green:  #3dffb0;
+  --accent-orange: #ff6b35;
+  --accent-cyan:   #00d4ff;
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: auto; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--fg);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── Cursor ── */
+#cursor-dot {
+  position: fixed; width: 8px; height: 8px;
+  background: rgba(240,237,232,.9); border-radius: 50%;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: width .3s, height .3s;
+}
+#cursor-ring {
+  position: fixed; width: 34px; height: 34px;
+  border: 1.5px solid rgba(240,237,232,.22); border-radius: 50%;
+  pointer-events: none; z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: width .4s var(--ease-spring), height .4s var(--ease-spring), border-color .3s;
+}
+
+/* ── Nav ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 52px;
+  background: var(--nav-bg);
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-family: var(--font-display); font-size: 22px; letter-spacing: -.4px; color: var(--fg); text-decoration: none; }
+.nav-links { display: flex; gap: 34px; list-style: none; align-items: center; }
+.nav-links a { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--fg-dim); text-decoration: none; transition: color .3s; }
+.nav-links a:hover, .nav-links a.active { color: var(--fg); }
+.nav-back {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--fg-dim); text-decoration: none;
+  transition: color .3s, gap .3s;
+}
+.nav-back:hover { color: var(--fg); gap: 12px; }
+.nav-back-arrow { font-size: 16px; transition: transform .3s; }
+.nav-back:hover .nav-back-arrow { transform: translateX(-3px); }
+
+/* ── Shared labels ── */
+.label { font-size: 11px; letter-spacing: .25em; text-transform: uppercase; color: var(--fg-dim); }
+.section-title { font-family: var(--font-display); font-size: clamp(40px,5.5vw,72px); font-weight: 700; letter-spacing: -1.5px; line-height: 1.05; }
+
+/* ══════════════════════════════════════════════════
+   PAGE HERO — PROJECTS
+══════════════════════════════════════════════════ */
+#page-hero {
+  height: 100vh;
+  position: relative;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  overflow: hidden;
+  text-align: center;
+}
+#page-hero-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 85% 65% at 50% 55%, #121228 0%, #0a0a14 45%, var(--bg) 100%);
+}
+.hero-orb {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  filter: blur(100px); opacity: .2;
+  animation: orbFloat 9s ease-in-out infinite alternate;
+}
+@keyframes orbFloat { from { transform: translateY(0) scale(1); } to { transform: translateY(-44px) scale(1.08); } }
+.orb-a { width: 500px; height: 500px; background: #1e1e50; top: 5%; left: 55%; animation-delay: 0s; }
+.orb-b { width: 350px; height: 350px; background: #30105a; top: 50%; left: 5%;  animation-delay: -4s; }
+.orb-c { width: 280px; height: 280px; background: #0a2e4a; top: 60%; left: 70%; animation-delay: -7s; }
+
+/* noise grain */
+#page-hero::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1; opacity: .022;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+#hero-content { position: relative; z-index: 2; }
+.page-eyebrow { font-size: 11px; letter-spacing: .28em; text-transform: uppercase; color: var(--fg-dim); margin-bottom: 24px; }
+.page-title {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 10vw, 130px);
+  font-weight: 900; line-height: .9; letter-spacing: -4px;
+  background: linear-gradient(140deg, #fff 0%, #c0bdb8 55%, #9e9b97 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.page-subtitle { margin-top: 28px; font-size: 16px; color: var(--fg-dim); max-width: 480px; margin-inline: auto; line-height: 1.7; }
+.hero-scroll-hint {
+  position: absolute; bottom: 44px; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--fg-dim);
+}
+.scroll-line { width: 1px; height: 52px; background: linear-gradient(to bottom, var(--fg-dim), transparent); animation: linePulse 2.2s ease-in-out infinite; }
+@keyframes linePulse { 0%,100%{opacity:.4;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(.55)} }
+
+/* ══════════════════════════════════════════════════
+   FILTER BAR
+══════════════════════════════════════════════════ */
+#filter-section {
+  padding: 60px 52px 0;
+  position: sticky; top: 65px; z-index: 100;
+  background: linear-gradient(to bottom, var(--bg) 80%, transparent);
+  padding-bottom: 24px;
+}
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+.filter-btn {
+  font-family: var(--font-body); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 9px 22px; border-radius: 40px;
+  border: 1px solid var(--border-md);
+  background: var(--card-bg); color: var(--fg-dim);
+  cursor: pointer; transition: all .35s var(--ease-spring);
+}
+.filter-btn:hover { color: var(--fg); border-color: rgba(255,255,255,.25); background: var(--card-hover); }
+.filter-btn.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+/* ══════════════════════════════════════════════════
+   FEATURED PROJECT (big card)
+══════════════════════════════════════════════════ */
+#featured-section { padding: 80px 52px 0; }
+.featured-card {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; border-radius: 28px; overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  transition: border-color .4s, transform .5s var(--ease-spring);
+  cursor: pointer; min-height: 480px;
+}
+.featured-card:hover { border-color: var(--border-md); transform: translateY(-6px); }
+.feat-visual {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.feat-visual-inner { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.feat-big-icon {
+  font-family: var(--font-display);
+  font-size: 120px; opacity: .55; line-height: 1;
+  transition: transform .6s var(--ease-spring), opacity .4s;
+}
+.featured-card:hover .feat-big-icon { transform: scale(1.08); opacity: .75; }
+/* grid overlay */
+.feat-visual::before {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.feat-info { padding: 56px 52px; display: flex; flex-direction: column; justify-content: center; border-left: 1px solid var(--border); }
+.feat-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--accent-blue); margin-bottom: 20px;
+}
+.feat-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent-blue); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.5)} }
+.feat-title { font-family: var(--font-display); font-size: clamp(32px, 3.5vw, 48px); font-weight: 700; letter-spacing: -1px; margin-bottom: 16px; line-height: 1.1; }
+.feat-desc { font-size: 15px; color: var(--fg-dim); line-height: 1.75; margin-bottom: 32px; }
+.feat-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 40px; }
+.tag {
+  font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 5px 12px; border-radius: 20px;
+  background: var(--tag-bg); border: 1px solid var(--tag-border);
+  color: var(--fg-dim);
+}
+.cta-btn {
+  display: inline-flex; align-items: center; gap: 10px; align-self: flex-start;
+  font-family: var(--font-body); font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 14px 28px; border-radius: 40px; border: 1px solid rgba(240,237,232,.25);
+  background: none; color: var(--fg); cursor: pointer;
+  transition: background .3s, border-color .3s, gap .3s;
+}
+.cta-btn:hover { background: rgba(240,237,232,.08); border-color: rgba(240,237,232,.5); gap: 16px; }
+.cta-arrow { font-size: 18px; transition: transform .3s; }
+.cta-btn:hover .cta-arrow { transform: translateX(4px); }
+
+/* ══════════════════════════════════════════════════
+   PROJECTS GRID
+══════════════════════════════════════════════════ */
+#grid-section { padding: 80px 52px 120px; }
+.grid-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; }
+.grid-count { font-size: 13px; color: var(--fg-dim); }
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.proj-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 22px; overflow: hidden;
+  cursor: pointer;
+  transition: border-color .35s, transform .45s var(--ease-spring);
+  opacity: 1;
+}
+.proj-card:hover { border-color: var(--border-md); transform: translateY(-6px); }
+.proj-card.hidden { display: none; }
+.proj-img {
+  width: 100%; aspect-ratio: 16/10;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.proj-img::before {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0; transition: opacity .4s;
+}
+.proj-card:hover .proj-img::before { opacity: 1; }
+.proj-icon-wrap { position: relative; z-index: 1; transition: transform .5s var(--ease-spring); }
+.proj-card:hover .proj-icon-wrap { transform: scale(1.1); }
+.proj-icon { font-family: var(--font-display); font-size: 48px; opacity: .6; }
+.proj-info { padding: 24px; }
+.proj-num { font-size: 10px; color: rgba(240,237,232,.22); letter-spacing: .1em; margin-bottom: 8px; }
+.proj-title { font-family: var(--font-display); font-size: 21px; font-weight: 700; letter-spacing: -.4px; margin-bottom: 8px; }
+.proj-desc { font-size: 13px; color: var(--fg-dim); line-height: 1.65; margin-bottom: 18px; }
+.proj-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 22px; }
+.proj-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-body); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--fg); background: none; border: 1px solid rgba(240,237,232,.22);
+  padding: 10px 20px; border-radius: 40px; cursor: pointer;
+  transition: background .3s, border-color .3s;
+}
+.proj-btn:hover { background: rgba(240,237,232,.07); border-color: rgba(240,237,232,.45); }
+
+/* category color accents */
+.proj-card[data-cat="design"] .proj-title { }
+.proj-card[data-cat="motion"] .proj-num  { color: rgba(198,120,255,.5); }
+.proj-card[data-cat="dev"]    .proj-num  { color: rgba(61,255,176,.5); }
+.proj-card[data-cat="film"]   .proj-num  { color: rgba(255,107,53,.5); }
+
+/* ══════════════════════════════════════════════════
+   PROCESS SECTION
+══════════════════════════════════════════════════ */
+#process-section { padding: 120px 52px; border-top: 1px solid var(--border); }
+.process-header { margin-bottom: 72px; }
+.process-steps {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+}
+.process-step {
+  padding: 40px 36px;
+  border: 1px solid var(--border);
+  position: relative; overflow: hidden;
+  transition: border-color .4s, background .4s;
+}
+.process-step:first-child { border-radius: 16px 0 0 16px; }
+.process-step:last-child  { border-radius: 0 16px 16px 0; }
+.process-step:hover { border-color: var(--border-md); background: var(--card-bg); }
+.step-num {
+  font-family: var(--font-display); font-size: 64px; font-weight: 900; letter-spacing: -3px;
+  line-height: 1; color: rgba(240,237,232,.06); margin-bottom: 28px;
+  transition: color .4s;
+}
+.process-step:hover .step-num { color: rgba(240,237,232,.1); }
+.step-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: -.4px; margin-bottom: 12px; }
+.step-desc { font-size: 13px; color: var(--fg-dim); line-height: 1.7; }
+.step-line {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .5s var(--ease-spring);
+}
+.process-step:hover .step-line { transform: scaleX(1); }
+
+/* ══════════════════════════════════════════════════
+   CTA STRIP
+══════════════════════════════════════════════════ */
+#cta-strip {
+  margin: 0 52px 120px;
+  border-radius: 28px;
+  padding: 72px 80px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 40px;
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(79,124,255,.07) 0%, rgba(198,120,255,.05) 100%);
+  position: relative; overflow: hidden;
+}
+#cta-strip::before {
+  content: ''; position: absolute; top: -80px; right: -80px;
+  width: 320px; height: 320px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(79,124,255,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-text .label { margin-bottom: 12px; }
+.cta-text h2 { font-family: var(--font-display); font-size: clamp(28px,3vw,42px); font-weight: 700; letter-spacing: -1px; }
+.cta-action { flex-shrink: 0; }
+.cta-primary {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-family: var(--font-body); font-size: 13px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 18px 36px; border-radius: 40px; border: none;
+  background: var(--fg); color: var(--bg);
+  cursor: pointer; text-decoration: none;
+  transition: transform .4s var(--ease-spring), box-shadow .4s;
+}
+.cta-primary:hover { transform: scale(1.04); box-shadow: 0 20px 60px rgba(240,237,232,.15); }
+
+/* ══════════════════════════════════════════════════
+   MODAL / PROJECT DETAIL
+══════════════════════════════════════════════════ */
+#modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(4,4,4,.85);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity .4s;
+}
+#modal-overlay.open { opacity: 1; pointer-events: auto; }
+#modal-box {
+  width: min(860px, 90vw);
+  max-height: 88vh; overflow-y: auto;
+  background: #0f0f0f;
+  border: 1px solid var(--border-md);
+  border-radius: 28px;
+  transform: translateY(40px) scale(.96);
+  transition: transform .5s var(--ease-spring);
+  scrollbar-width: none;
+}
+#modal-overlay.open #modal-box { transform: translateY(0) scale(1); }
+#modal-box::-webkit-scrollbar { display: none; }
+.modal-visual {
+  width: 100%; height: 300px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 26px 26px 0 0; overflow: hidden; position: relative;
+}
+.modal-visual::before {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+.modal-icon { font-family: var(--font-display); font-size: 110px; opacity: .55; position: relative; z-index: 1; }
+.modal-body { padding: 44px 52px 52px; }
+.modal-close {
+  position: absolute; top: 20px; right: 20px;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(255,255,255,.08); border: 1px solid var(--border);
+  color: var(--fg); font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .3s, transform .3s;
+  z-index: 10;
+}
+.modal-close:hover { background: rgba(255,255,255,.15); transform: rotate(90deg); }
+.modal-meta { display: flex; gap: 40px; margin-bottom: 36px; flex-wrap: wrap; }
+.modal-meta-item .meta-label { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--fg-dim); margin-bottom: 5px; }
+.modal-meta-item .meta-val { font-size: 14px; color: var(--fg); }
+.modal-title { font-family: var(--font-display); font-size: clamp(30px, 4vw, 44px); font-weight: 700; letter-spacing: -1px; margin-bottom: 20px; }
+.modal-desc { font-size: 15px; color: var(--fg-dim); line-height: 1.8; margin-bottom: 32px; }
+.modal-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; }
+.modal-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--font-body); font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 14px 28px; border-radius: 40px;
+  background: var(--fg); color: var(--bg);
+  border: none; cursor: pointer;
+  transition: transform .3s var(--ease-spring), box-shadow .3s;
+}
+.modal-cta:hover { transform: scale(1.04); box-shadow: 0 12px 40px rgba(240,237,232,.12); }
+
+/* ══════════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════════ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 52px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+footer p { font-size: 12px; color: rgba(240,237,232,.18); }
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .featured-card { grid-template-columns: 1fr; }
+  .feat-info { border-left: none; border-top: 1px solid var(--border); padding: 36px 32px; }
+  .projects-grid { grid-template-columns: repeat(2, 1fr); }
+  .process-steps { grid-template-columns: repeat(2, 1fr); }
+  .process-step:first-child { border-radius: 16px 0 0 0; }
+  .process-step:nth-child(2) { border-radius: 0 16px 0 0; }
+  .process-step:nth-child(3) { border-radius: 0 0 0 16px; }
+  .process-step:last-child { border-radius: 0 0 16px 0; }
+  #cta-strip { flex-direction: column; text-align: center; padding: 52px 36px; }
+}
+@media (max-width: 640px) {
+  nav { padding: 16px 22px; }
+  .nav-links li:not(:last-child) { display: none; }
+  #cursor-dot, #cursor-ring { display: none; }
+  body { cursor: auto; }
+  .projects-grid { grid-template-columns: 1fr; }
+  .process-steps { grid-template-columns: 1fr; }
+  .process-step { border-radius: 0 !important; }
+  .process-step:first-child { border-radius: 16px 16px 0 0 !important; }
+  .process-step:last-child  { border-radius: 0 0 16px 16px !important; }
+  #featured-section, #grid-section, #process-section { padding-left: 22px; padding-right: 22px; }
+  #cta-strip { margin: 0 22px 80px; padding: 44px 28px; }
+  footer { padding: 24px 22px; flex-direction: column; gap: 8px; text-align: center; }
+  .modal-body { padding: 28px 24px 36px; }
+  #filter-section { padding: 40px 22px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- ══════════ NAV ══════════ -->
+<nav>
+  <a class="nav-logo" href="bora-portfolio (1).html">Bora</a>
+  <ul class="nav-links">
+    <li><a href="bora-portfolio (1).html">Home</a></li>
+    <li><a href="projects.html" class="active">Work</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ══════════ PAGE HERO ══════════ -->
+<section id="page-hero">
+  <div id="page-hero-bg"></div>
+  <div class="hero-orb orb-a"></div>
+  <div class="hero-orb orb-b"></div>
+  <div class="hero-orb orb-c"></div>
+
+  <div id="hero-content">
+    <div class="page-eyebrow">Portfolio — Selected Work</div>
+    <h1 class="page-title">Work</h1>
+    <p class="page-subtitle">A curated collection of design, motion, and development projects built with intention.</p>
+  </div>
+
+  <div class="hero-scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Explore</span>
+  </div>
+</section>
+
+<!-- ══════════ FILTER BAR ══════════ -->
+<div id="filter-section">
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">All Projects</button>
+    <button class="filter-btn" data-filter="design">UI Design</button>
+    <button class="filter-btn" data-filter="motion">Motion</button>
+    <button class="filter-btn" data-filter="dev">Development</button>
+    <button class="filter-btn" data-filter="film">Film</button>
+  </div>
+</div>
+
+<!-- ══════════ FEATURED ══════════ -->
+<section id="featured-section">
+  <div class="featured-card proj-card" data-cat="dev" data-id="0"
+       style="cursor:pointer;">
+    <div class="feat-visual" style="background:linear-gradient(135deg,#0d1a3a 0%,#0a2a1e 100%);">
+      <div class="feat-visual-inner">
+        <div class="feat-big-icon" style="color:#3dffb0;">◈</div>
+      </div>
+    </div>
+    <div class="feat-info">
+      <div class="feat-badge">
+        <div class="feat-badge-dot"></div>
+        Featured Project
+      </div>
+      <div class="feat-title">Orbital Dashboard</div>
+      <div class="feat-desc">
+        A real-time analytics platform built with WebGL data visualizations, live streaming feeds, and a fluid component system designed to handle dense information without visual noise.
+      </div>
+      <div class="feat-tags">
+        <span class="tag">React</span>
+        <span class="tag">Three.js</span>
+        <span class="tag">D3.js</span>
+        <span class="tag">Tailwind</span>
+        <span class="tag">WebSocket</span>
+      </div>
+      <button class="cta-btn">
+        View Case Study <span class="cta-arrow">→</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PROJECTS GRID ══════════ -->
+<section id="grid-section">
+  <div class="grid-header">
+    <div>
+      <div class="label" style="margin-bottom:8px;">All Projects</div>
+      <div class="grid-count" id="grid-count">Showing 7 projects</div>
+    </div>
+  </div>
+
+  <div class="projects-grid" id="proj-grid">
+
+    <div class="proj-card" data-cat="design" data-id="1">
+      <div class="proj-img" style="background:linear-gradient(135deg,#1a1a3e,#0d2137)">
+        <div class="proj-icon-wrap"><div class="proj-icon" style="color:#4f7cff">◎</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-num">01</div>
+        <div class="proj-title">Luminary App</div>
+        <div class="proj-desc">A mindfulness & meditation app with fluid micro-interactions and a custom illustration system built for iOS.</div>
+        <div class="proj-tags"><span class="tag">Figma</span><span class="tag">Protopie</span><span class="tag">After Effects</span></div>
+        <button class="proj-btn" onclick="window.location.href='luminary-project-detail.html'">View Project→</button>
+      </div>
+    </div>
+
+    <div class="proj-card" data-cat="film" data-id="2">
+      <div class="proj-img" style="background:linear-gradient(135deg,#2d1a1a,#3d1f0d)">
+        <div class="proj-icon-wrap"><div class="proj-icon" style="color:#ff6b35">▶</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-num">02</div>
+        <div class="proj-title">Kinetic Brand Film</div>
+        <div class="proj-desc">60-second brand film for a sustainable fashion label — concept, storyboard, shoot, through final color grade.</div>
+        <div class="proj-tags"><span class="tag">Premiere Pro</span><span class="tag">After Effects</span><span class="tag">Cinema 4D</span></div>
+        <button class="proj-btn" onclick="window.location.href='kinetic-project-detail.html'">View Project→</button>
+      </div>
+    </div>
+
+    <div class="proj-card" data-cat="design" data-id="3">
+      <div class="proj-img" style="background:linear-gradient(135deg,#1e1a2e,#2a1a2e)">
+        <div class="proj-icon-wrap"><div class="proj-icon" style="color:#c678ff;font-size:36px">Aa</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-num">03</div>
+        <div class="proj-title">Kutu Marketplace</div>
+        <div class="proj-desc">A marketplace concept bringing wholesalers together into a single logistics-supported platform — built for scale, speed, and simplicity.</div>
+        <div class="proj-tags"><span class="tag">GSAP</span><span class="tag">Next.js</span><span class="tag">Figma</span></div>
+        <button class="proj-btn" onclick="window.location.href='wholesale-project-detail.html'">View Project→</button>
+      </div>
+    </div>
+
+    <div class="proj-card" data-cat="dev" data-id="4">
+      <div class="proj-img" style="background:linear-gradient(135deg,#1a2828,#111a2e)">
+        <div class="proj-icon-wrap"><div class="proj-icon" style="color:#00d4ff">♫</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-num">04</div>
+        <div class="proj-title">Aura Music Player</div>
+        <div class="proj-desc">Conceptual music player with reactive audio visualizers, gesture controls, and a spatial audio interface.</div>
+        <div class="proj-tags"><span class="tag">React</span><span class="tag">Web Audio API</span><span class="tag">GSAP</span></div>
+        <button class="proj-btn" onclick="window.location.href='aura-project-detail.html'">View Project→</button>
+      </div>
+    </div>
+
+    <div class="proj-card" data-cat="motion" data-id="5">
+      <div class="proj-img" style="background:linear-gradient(135deg,#1e2a14,#142218)">
+        <div class="proj-icon-wrap"><div class="proj-icon" style="color:#3dffb0">✦</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-num">05</div>
+        <div class="proj-title">Bloom Motion System</div>
+        <div class="proj-desc">A comprehensive motion design system and animation library for a fintech brand — 200+ components, full specs.</div>
+        <div class="proj-tags"><span class="tag">After Effects</span><span class="tag">Lottie</span><span class="tag">Figma</span></div>
+        <button class="proj-btn" onclick="window.location.href='bloom-project-detail.html'">View Project→</button>
+      </div>
+    </div>
+
+    <div class="proj-card" data-cat="design" data-id="6">
+      <div class="proj-img" style="background:linear-gradient(135deg,#2a1e14,#3a1e0a)">
+        <div class="proj-icon-wrap"><div class="proj-icon" style="color:#ff6b35">⬡</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-num">06</div>
+        <div class="proj-title">Helix Design System</div>
+        <div class="proj-desc">An enterprise-scale design system with dark/light themes, accessibility at its core, and detailed Figma documentation.</div>
+        <div class="proj-tags"><span class="tag">Figma</span><span class="tag">React</span><span class="tag">Storybook</span></div>
+        <button class="proj-btn" onclick="window.location.href='helix-project-detail.html'">View Project→</button>
+      </div>
+    </div>
+
+    <div class="proj-card" data-cat="film" data-id="7">
+      <div class="proj-img" style="background:linear-gradient(135deg,#14142e,#1a0a2e)">
+        <div class="proj-icon-wrap"><div class="proj-icon" style="color:#c678ff">◉</div></div>
+      </div>
+      <div class="proj-info">
+        <div class="proj-num">07</div>
+        <div class="proj-title">E-Invoice Automation</div>
+        <div class="proj-desc"> Smart invoicing platform that automatically generates and manages invoices for marketplace sellers — zero manual work, zero errors.</div>
+        <div class="proj-tags"><span class="tag">JavaScript</span><span class="tag">Nuke</span><span class="tag">React</span></div>
+        <button class="proj-btn" onclick="window.location.href='einvoice-project-detail.html'">View Project→</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════ PROCESS ══════════ -->
+<section id="process-section">
+  <div class="process-header">
+    <div class="label" style="margin-bottom:12px;">How I Work</div>
+    <h2 class="section-title">
+      The Process<br>
+      <span style="color:rgba(240,237,232,.2);font-style:italic;font-weight:400;">behind the work</span>
+    </h2>
+  </div>
+  <div class="process-steps">
+    <div class="process-step">
+      <div class="step-num">01</div>
+      <div class="step-title">Discover</div>
+      <div class="step-desc">Deep dive into the brief, audience, and competitive landscape. Every great outcome starts with the right questions.</div>
+      <div class="step-line" style="background:var(--accent-blue)"></div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">02</div>
+      <div class="step-title">Define</div>
+      <div class="step-desc">Distill research into a clear creative direction. Mood boards, motion references, and a single north star statement.</div>
+      <div class="step-line" style="background:var(--accent-purple)"></div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">03</div>
+      <div class="step-title">Design</div>
+      <div class="step-desc">Rapid iteration from wireframe to high-fidelity. Every pixel earns its place. Prototype early, fail fast, refine.</div>
+      <div class="step-line" style="background:var(--accent-green)"></div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">04</div>
+      <div class="step-title">Deliver</div>
+      <div class="step-desc">Production-ready handoff with full documentation, asset packages, and motion specs for seamless implementation.</div>
+      <div class="step-line" style="background:var(--accent-orange)"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CTA STRIP ══════════ -->
+<div id="cta-strip">
+  <div class="cta-text">
+    <div class="label" style="margin-bottom:10px;">Next Step</div>
+    <h2>Have a project in mind?</h2>
+  </div>
+  <div class="cta-action">
+    <a class="cta-primary" href="contact.html">
+      Let's Talk →
+    </a>
+  </div>
+</div>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <p>© 2026 Bora. All rights reserved.</p>
+  <p>Designed &amp; built with care</p>
+</footer>
+
+<!-- ══════════ PROJECT DETAIL MODAL ══════════ -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <button class="modal-close" id="modal-close-btn">✕</button>
+    <div class="modal-visual" id="modal-visual">
+      <div class="modal-icon" id="modal-icon"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-meta" id="modal-meta"></div>
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-desc" id="modal-desc"></div>
+      <div class="modal-tags" id="modal-tags"></div>
+      <button class="modal-cta" onclick="window.location.href='project-detail (1).html'">
+  View Live Project →
+</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     GSAP ANIMATIONS
+══════════════════════════════════════════════════ -->
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── Cursor ── */
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+ring._x = 0; ring._y = 0;
+
+window.addEventListener('mousemove', e => {
+  dot.style.left = e.clientX + 'px';
+  dot.style.top  = e.clientY + 'px';
+});
+(function tick() {
+  requestAnimationFrame(tick);
+  ring._x += (parseFloat(dot.style.left||0) - ring._x) * 0.1;
+  ring._y += (parseFloat(dot.style.top ||0) - ring._y) * 0.1;
+  ring.style.left = ring._x + 'px';
+  ring.style.top  = ring._y + 'px';
+})();
+document.querySelectorAll('a,button,.proj-card,.featured-card').forEach(el => {
+  el.addEventListener('mouseenter', () => { ring.style.width='56px'; ring.style.height='56px'; ring.style.borderColor='rgba(240,237,232,.4)'; });
+  el.addEventListener('mouseleave', () => { ring.style.width='34px'; ring.style.height='34px'; ring.style.borderColor='rgba(240,237,232,.22)'; });
+});
+
+/* ── Hero entrance ── */
+gsap.timeline({ defaults: { ease: 'power3.out' } })
+  .from('.page-eyebrow', { opacity:0, y:20, duration:1, delay:.2 })
+  .from('.page-title',   { opacity:0, y:50, duration:1.3 }, '-=0.7')
+  .from('.page-subtitle',{ opacity:0, y:20, duration:1   }, '-=0.9')
+  .from('.hero-scroll-hint', { opacity:0, duration:.8    }, '-=0.5');
+
+/* Hero content shrinks on scroll */
+gsap.to('#hero-content', {
+  scale: 0.72, opacity: 0, y: -60, ease: 'none',
+  scrollTrigger: { trigger: '#page-hero', start: 'top top', end: '40% top', scrub: 1.4 }
+});
+
+/* ── Filter bar reveal ── */
+gsap.from('.filter-btn', {
+  opacity:0, y:16, stagger:.07, duration:.7, ease:'power2.out',
+  scrollTrigger: { trigger: '#filter-section', start: 'top 88%', toggleActions: 'play none none reverse' }
+});
+
+/* ── Featured card ── */
+gsap.from('.featured-card', {
+  opacity:0, y:70, scale:.95,
+  scrollTrigger: { trigger: '#featured-section', start: 'top 80%', end: 'top 30%', scrub:2 }
+});
+
+/* ── Grid cards stagger ── */
+gsap.from('.proj-card', {
+  opacity:0, y:50, stagger:.1, duration:.9, ease:'power2.out',
+  scrollTrigger: { trigger: '#proj-grid', start: 'top 82%', toggleActions: 'play none none reverse' }
+});
+
+/* ── Process steps ── */
+gsap.from('.process-step', {
+  opacity:0, y:40, stagger:.12, duration:.9, ease:'power2.out',
+  scrollTrigger: { trigger: '#process-section', start: 'top 78%', toggleActions: 'play none none reverse' }
+});
+
+/* ── CTA strip ── */
+gsap.from('#cta-strip', {
+  opacity:0, y:50, scale:.96,
+  scrollTrigger: { trigger: '#cta-strip', start: 'top 85%', end: 'top 40%', scrub:2 }
+});
+
+/* ── Parallax hero orbs ── */
+gsap.to('.orb-a', { y:-80, ease:'none', scrollTrigger: { trigger:'#page-hero', start:'top top', end:'bottom top', scrub:true } });
+gsap.to('.orb-b', { y:-50, ease:'none', scrollTrigger: { trigger:'#page-hero', start:'top top', end:'bottom top', scrub:true } });
+
+/* ════════════════════════════════════════
+   FILTER LOGIC
+════════════════════════════════════════ */
+const filterBtns = document.querySelectorAll('.filter-btn');
+const cards = document.querySelectorAll('#proj-grid .proj-card');
+const countEl = document.getElementById('grid-count');
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const cat = btn.dataset.filter;
+    let visible = 0;
+
+    cards.forEach(card => {
+      const match = cat === 'all' || card.dataset.cat === cat;
+      if (match) {
+        card.classList.remove('hidden');
+        gsap.fromTo(card, { opacity:0, y:20 }, { opacity:1, y:0, duration:.5, ease:'power2.out', delay: visible * .06 });
+        visible++;
+      } else {
+        gsap.to(card, { opacity:0, y:-10, duration:.3, ease:'power2.in', onComplete: () => card.classList.add('hidden') });
+      }
+    });
+
+    setTimeout(() => {
+      const showing = cat === 'all' ? cards.length : document.querySelectorAll(`#proj-grid .proj-card[data-cat="${cat}"]`).length;
+      countEl.textContent = `Showing ${showing} project${showing !== 1 ? 's' : ''}`;
+      ScrollTrigger.refresh();
+    }, 350);
+  });
+});
+
+/* ════════════════════════════════════════
+   PROJECT MODAL DATA
+════════════════════════════════════════ */
+const projectData = [
+  {
+    id: 0,
+    title: 'Orbital Dashboard',
+    icon: '◈', iconColor: '#3dffb0',
+    gradient: 'linear-gradient(135deg,#0d1a3a 0%,#0a2a1e 100%)',
+    year: '2024', role: 'Lead Developer', duration: '3 months',
+    desc: 'A real-time analytics platform built for enterprise clients that needed to visualise thousands of data points simultaneously. The challenge was making dense data feel approachable and beautiful. Built with React, Three.js for 3D visualisations, D3 for charts, and WebSocket for live feeds.',
+    tags: ['React','Three.js','D3.js','Tailwind','WebSocket','TypeScript']
+  },
+  {
+    id: 1,
+    title: 'Luminary App',
+    icon: '◎', iconColor: '#4f7cff',
+    gradient: 'linear-gradient(135deg,#1a1a3e,#0d2137)',
+    year: '2024', role: 'UI/UX Designer', duration: '6 weeks',
+    desc: 'A mindfulness & meditation iOS app with hand-crafted illustrations, fluid spring animations, and a personalised session system. Designed in Figma, prototyped in Protopie. The animation system uses 60fps scroll-driven transitions for a premium feel.',
+    tags: ['Figma','Protopie','After Effects','iOS Design']
+  },
+  {
+    id: 2,
+    title: 'Kinetic Brand Film',
+    icon: '▶', iconColor: '#ff6b35',
+    gradient: 'linear-gradient(135deg,#2d1a1a,#3d1f0d)',
+    year: '2023', role: 'Director / Editor', duration: '4 weeks',
+    desc: 'A 60-second brand identity film for a sustainable fashion label. I handled concept development, storyboarding, on-location shooting, colour grading in DaVinci Resolve, and motion graphics in After Effects. The film aired across Instagram, TikTok, and retail installations.',
+    tags: ['Premiere Pro','After Effects','Cinema 4D','DaVinci Resolve']
+  },
+  {
+    id: 3,
+    title: 'Typeset Editorial',
+    icon: 'Aa', iconColor: '#c678ff',
+    gradient: 'linear-gradient(135deg,#1e1a2e,#2a1a2e)',
+    year: '2024', role: 'Designer & Developer', duration: '5 weeks',
+    desc: 'An interactive editorial web experience exploring type as an art medium. Scroll-driven typography animations, kinetic text, and SVG morphing combine to create a magazine that feels alive. GSAP ScrollTrigger powers every transition.',
+    tags: ['GSAP','Next.js','Figma','SVG Animation']
+  },
+  {
+    id: 4,
+    title: 'Aura Music Player',
+    icon: '♫', iconColor: '#00d4ff',
+    gradient: 'linear-gradient(135deg,#1a2828,#111a2e)',
+    year: '2024', role: 'Developer & Designer', duration: '3 weeks',
+    desc: 'A conceptual music player that visualises audio frequency data in real time using the Web Audio API and canvas. Swipe gestures, a waveform scrubber, and spatial audio controls create an immersive listening interface beyond anything currently on the market.',
+    tags: ['React','Web Audio API','Canvas','GSAP']
+  },
+  {
+    id: 5,
+    title: 'Bloom Motion System',
+    icon: '✦', iconColor: '#3dffb0',
+    gradient: 'linear-gradient(135deg,#1e2a14,#142218)',
+    year: '2023', role: 'Motion Designer', duration: '8 weeks',
+    desc: 'A comprehensive motion design system for a fintech brand covering 200+ animated UI components, transition specifications, micro-interaction guidelines, and Lottie exports for iOS/Android. Reduced the engineering motion implementation time by 60%.',
+    tags: ['After Effects','Lottie','Figma','Motion Guidelines']
+  },
+  {
+    id: 6,
+    title: 'Helix Design System',
+    icon: '⬡', iconColor: '#ff6b35',
+    gradient: 'linear-gradient(135deg,#2a1e14,#3a1e0a)',
+    year: '2024', role: 'Design Systems Lead', duration: '4 months',
+    desc: 'An enterprise-scale design system with full dark and light modes, WCAG AA accessibility compliance, and a React + Storybook component library. 120+ components documented with interactive examples and Figma auto-layout structures.',
+    tags: ['Figma','React','Storybook','Accessibility']
+  },
+  {
+    id: 7,
+    title: 'Neon City Short Film',
+    icon: '◉', iconColor: '#c678ff',
+    gradient: 'linear-gradient(135deg,#14142e,#1a0a2e)',
+    year: '2023', role: 'Director / VFX Artist', duration: '10 weeks',
+    desc: 'A 4-minute sci-fi short film exploring identity in a hyper-connected world. Shot on Sony FX3, composited in Nuke, colour graded in DaVinci Resolve. The original electronic score was composed and produced entirely in Ableton Live. Screened at 3 international festivals.',
+    tags: ['DaVinci Resolve','Nuke','Ableton','Sony FX3']
+  }
+];
+
+/* ── Open modal ── */
+function openModal(id) {
+  const p = projectData.find(x => x.id === id);
+  if (!p) return;
+
+  document.getElementById('modal-visual').style.background = p.gradient;
+  const iconEl = document.getElementById('modal-icon');
+  iconEl.textContent = p.icon;
+  iconEl.style.color = p.iconColor;
+
+  document.getElementById('modal-title').textContent = p.title;
+  document.getElementById('modal-desc').textContent = p.desc;
+
+  document.getElementById('modal-meta').innerHTML =
+    `<div class="modal-meta-item"><div class="meta-label">Year</div><div class="meta-val">${p.year}</div></div>
+     <div class="modal-meta-item"><div class="meta-label">Role</div><div class="meta-val">${p.role}</div></div>
+     <div class="modal-meta-item"><div class="meta-label">Duration</div><div class="meta-val">${p.duration}</div></div>`;
+
+  document.getElementById('modal-tags').innerHTML = p.tags.map(t => `<span class="tag">${t}</span>`).join('');
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* bind all cards */
+document.querySelectorAll('[data-id]').forEach(el => {
+  el.addEventListener('click', () => openModal(parseInt(el.dataset.id)));
+});
+document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+window.addEventListener('resize', () => ScrollTrigger.refresh());
+</script>
+</body>
+</html>

@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bora — Kinetic Brand Film</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+:root{
+  --font-display:'Playfair Display',serif;
+  --font-body:'DM Sans',sans-serif;
+  --bg:#0a0502;
+  --fg:#f0ede8;
+  --fg-dim:rgba(240,237,232,0.45);
+  --border:rgba(255,255,255,0.07);
+  --border-md:rgba(255,255,255,0.13);
+  --card-bg:rgba(255,255,255,0.03);
+  --nav-bg:rgba(10,5,2,0.88);
+  --accent:#ff6b35;
+  --accent-dim:rgba(255,107,53,0.10);
+  --accent-border:rgba(255,107,53,0.28);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--bg);color:var(--fg);overflow-x:hidden;cursor:none}
+#cursor-dot{position:fixed;width:8px;height:8px;background:rgba(240,237,232,.9);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+#cursor-ring{position:fixed;width:34px;height:34px;border:1.5px solid rgba(240,237,232,.2);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .4s var(--ease-spring),height .4s var(--ease-spring),border-color .3s}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:18px 52px;background:var(--nav-bg);backdrop-filter:blur(28px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--font-display);font-size:22px;letter-spacing:-.4px;color:var(--fg);text-decoration:none}
+.nav-links{display:flex;gap:34px;list-style:none;align-items:center}
+.nav-links a{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-dim);text-decoration:none;transition:color .3s}
+.nav-links a:hover{color:var(--fg)}
+.nav-back{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-dim);text-decoration:none;transition:color .3s,gap .3s}
+.nav-back:hover{color:var(--fg);gap:13px}
+.back-arrow{transition:transform .3s}
+.nav-back:hover .back-arrow{transform:translateX(-3px)}
+.label{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--fg-dim)}
+
+/* ── HERO — cinematic widescreen feel ── */
+#hero{height:100vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#hero-bg{position:absolute;inset:0;background:linear-gradient(160deg,#200e05 0%,#150804 40%,#0a0502 100%)}
+/* Film grain overlay */
+#hero::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.04;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")}
+/* Scan lines */
+#hero-scanlines{position:absolute;inset:0;pointer-events:none;z-index:2;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.08) 3px,rgba(0,0,0,.08) 4px);opacity:.4}
+.h-orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(140px);opacity:.18;animation:orbf 12s ease-in-out infinite alternate}
+@keyframes orbf{from{transform:scale(1)}to{transform:scale(1.12) translate(-20px,-20px)}}
+.orb-1{width:800px;height:500px;background:#3d1a05;top:-10%;left:20%}
+.orb-2{width:400px;height:400px;background:#2a0e02;bottom:0;left:-10%;animation-delay:-6s}
+.orb-3{width:350px;height:350px;background:#3d1400;top:30%;right:0;animation-delay:-4s}
+#hero-content{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 20px}
+
+/* Play button icon */
+.hero-play{width:88px;height:88px;border-radius:50%;border:1.5px solid var(--accent-border);background:var(--accent-dim);display:flex;align-items:center;justify-content:center;margin-bottom:32px;position:relative;cursor:default;transition:transform .4s var(--ease-spring)}
+.hero-play:hover{transform:scale(1.08)}
+.hero-play::before{content:"";position:absolute;inset:-12px;border-radius:50%;border:1px solid rgba(255,107,53,.15);animation:pingRing 2.5s ease-out infinite}
+.hero-play::after{content:"";position:absolute;inset:-24px;border-radius:50%;border:1px solid rgba(255,107,53,.07);animation:pingRing 2.5s ease-out infinite .6s}
+@keyframes pingRing{0%{transform:scale(.9);opacity:.8}100%{transform:scale(1.15);opacity:0}}
+.play-triangle{width:0;height:0;border-style:solid;border-width:14px 0 14px 24px;border-color:transparent transparent transparent var(--accent);margin-left:4px;filter:drop-shadow(0 0 8px var(--accent))}
+
+.hero-tag{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;border-radius:40px;border:1px solid var(--accent-border);background:var(--accent-dim);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:24px}
+.hero-tag-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:blink 2.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.hero-title{font-family:var(--font-display);font-size:clamp(42px,7.5vw,108px);font-weight:900;letter-spacing:-4px;line-height:.9;background:linear-gradient(140deg,#fff 0%,#ffb899 45%,#ff6b35 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:22px}
+.hero-sub{font-size:clamp(14px,1.4vw,16px);color:var(--fg-dim);max-width:520px;line-height:1.75;margin-bottom:40px}
+.hero-meta-row{display:flex;gap:36px;flex-wrap:wrap;justify-content:center;padding:22px 36px;border-radius:18px;border:1px solid var(--border);background:rgba(255,255,255,.025);backdrop-filter:blur(12px)}
+.hero-meta-item{text-align:center}
+.hero-meta-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin-bottom:5px}
+.hero-meta-val{font-size:14px;color:var(--fg);font-weight:500}
+.scroll-hint{position:absolute;bottom:44px;z-index:3;display:flex;flex-direction:column;align-items:center;gap:10px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--fg-dim)}
+.scroll-line{width:1px;height:52px;background:linear-gradient(to bottom,var(--fg-dim),transparent);animation:lp 2.2s ease-in-out infinite}
+@keyframes lp{0%,100%{opacity:.4;transform:scaleY(1)}50%{opacity:1;transform:scaleY(.55)}}
+
+/* ── FILM TIMELINE MOCKUP ── */
+#mockup-section{height:280vh;position:relative}
+#mockup-sticky{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse 70% 55% at 50% 55%,#1e0c04 0%,var(--bg) 65%)}
+.mockup-label{position:absolute;top:100px;left:52px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(240,237,232,.2);z-index:5}
+#editor-frame{width:88vw;max-width:1060px;background:#0e0a08;border-radius:14px;border:1px solid rgba(255,255,255,.08);overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.95),0 0 60px rgba(255,107,53,.06);will-change:transform,opacity}
+
+/* Editor top bar */
+.editor-bar{height:36px;background:#120d0a;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid rgba(255,255,255,.05)}
+.eb-dot{width:10px;height:10px;border-radius:50%}
+.eb-title{font-size:10px;color:rgba(255,255,255,.3);margin-left:8px;letter-spacing:.06em}
+.eb-right{margin-left:auto;display:flex;gap:12px;align-items:center}
+.eb-timecode{font-family:monospace;font-size:10px;color:rgba(255,107,53,.7);letter-spacing:.08em}
+.eb-btn{font-size:9px;padding:3px 10px;border-radius:4px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);letter-spacing:.06em}
+
+/* Preview area */
+.editor-preview{height:240px;background:linear-gradient(160deg,#1a0a04,#0d0602);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,.05)}
+.preview-frame-markers{position:absolute;top:0;left:0;right:0;height:3px;background:repeating-linear-gradient(90deg,rgba(255,107,53,.4) 0px,rgba(255,107,53,.4) 2px,transparent 2px,transparent 24px)}
+.preview-content{text-align:center;position:relative;z-index:2}
+.preview-brand{font-family:var(--font-display);font-size:32px;font-weight:900;letter-spacing:-1px;color:rgba(240,237,232,.85)}
+.preview-tagline{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,107,53,.7);margin-top:6px}
+.preview-counter{position:absolute;bottom:10px;right:14px;font-family:monospace;font-size:10px;color:rgba(255,255,255,.2);animation:tickCounter 1s steps(1) infinite}
+@keyframes tickCounter{0%{content:'00:00:01:12'}25%{opacity:.5}50%{opacity:1}100%{opacity:.7}}
+.preview-overlay-bars{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
+.pob{height:40px;background:linear-gradient(180deg,rgba(10,5,2,.8),transparent)}
+.pob.b{background:linear-gradient(0deg,rgba(10,5,2,.8),transparent)}
+/* Color grading overlay */
+.preview-lut{position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,107,53,.04) 0%,rgba(20,8,2,.3) 100%);mix-blend-mode:multiply;pointer-events:none}
+
+/* Timeline tracks */
+.editor-timeline{padding:14px 16px;display:flex;flex-direction:column;gap:6px;background:#0c0907}
+.tl-row{display:flex;align-items:center;gap:8px}
+.tl-label{width:64px;font-size:8px;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase;flex-shrink:0;text-align:right}
+.tl-track{flex:1;height:22px;background:rgba(255,255,255,.04);border-radius:4px;position:relative;overflow:hidden}
+.tl-clip{position:absolute;top:2px;bottom:2px;border-radius:3px;display:flex;align-items:center;padding:0 6px}
+.tl-clip-label{font-size:7px;color:rgba(255,255,255,.5);letter-spacing:.05em;white-space:nowrap;overflow:hidden}
+/* Playhead */
+.tl-playhead{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,107,53,.8);box-shadow:0 0 8px rgba(255,107,53,.5);animation:playMove 6s linear infinite;left:0}
+@keyframes playMove{0%{left:10%}100%{left:85%}}
+.tl-timecodes{display:flex;justify-content:space-between;padding:4px 0;font-family:monospace;font-size:8px;color:rgba(255,255,255,.2)}
+
+/* Toolbar */
+.editor-toolbar{display:flex;align-items:center;gap:10px;padding:8px 16px;background:#100b08;border-top:1px solid rgba(255,255,255,.04)}
+.tb-btn{padding:5px 12px;border-radius:5px;font-size:9px;letter-spacing:.06em;color:rgba(255,255,255,.4);background:rgba(255,255,255,.05);cursor:default;transition:background .2s}
+.tb-btn.active{background:rgba(255,107,53,.15);color:rgba(255,107,53,.8);border:1px solid rgba(255,107,53,.2)}
+.tb-sep{width:1px;height:18px;background:rgba(255,255,255,.07)}
+.tb-meter{display:flex;gap:2px;align-items:flex-end;margin-left:auto}
+.tbm-bar{width:3px;border-radius:1px;background:rgba(255,107,53,.5);animation:meterBar .4s ease-in-out infinite alternate}
+@keyframes meterBar{from{height:4px;opacity:.4}to{height:16px;opacity:.9}}
+
+/* ── OVERVIEW ── */
+#overview-section{padding:140px 52px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.overview-sticky{position:sticky;top:120px}
+.overview-num{font-family:var(--font-display);font-size:120px;font-weight:900;line-height:1;letter-spacing:-6px;color:rgba(240,237,232,.04);margin-bottom:-20px}
+.overview-heading{font-family:var(--font-display);font-size:clamp(34px,3.5vw,50px);font-weight:700;letter-spacing:-1.2px;line-height:1.1;margin-bottom:22px}
+.overview-heading em{font-style:italic;font-weight:400;color:rgba(240,237,232,.3)}
+.overview-body{font-size:15px;color:var(--fg-dim);line-height:1.85}
+.overview-body+.overview-body{margin-top:18px}
+.pull-quote{margin:36px 0;padding:26px 30px;border-left:2px solid var(--accent);background:var(--accent-dim);border-radius:0 12px 12px 0}
+.pull-quote p{font-family:var(--font-display);font-size:19px;font-style:italic;font-weight:400;color:var(--fg);line-height:1.6}
+
+/* ── CHALLENGES ── */
+#challenges-section{padding:0 52px 120px}
+.cs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:56px}
+.cs-card{padding:36px;border:1px solid var(--border);position:relative;overflow:hidden;transition:border-color .4s,background .4s;cursor:default}
+.cs-card:first-child{border-radius:16px 0 0 16px}
+.cs-card:last-child{border-radius:0 16px 16px 0}
+.cs-card:hover{border-color:var(--border-md);background:var(--card-bg)}
+.cs-icon{font-size:26px;margin-bottom:18px;display:block;filter:grayscale(1);transition:filter .4s}
+.cs-card:hover .cs-icon{filter:grayscale(0)}
+.cs-title{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:11px}
+.cs-body{font-size:13px;color:var(--fg-dim);line-height:1.75}
+.cs-line{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease-spring)}
+.cs-card:hover .cs-line{transform:scaleX(1)}
+
+/* ── HORIZONTAL PANELS ── */
+#features-section{height:400vh;position:relative}
+#features-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;overflow:hidden}
+#features-track{display:flex;gap:0;will-change:transform;height:100vh}
+.feat-panel{flex-shrink:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;padding:0 52px}
+.feat-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;width:100%;max-width:1200px}
+.feat-inner.rev{direction:rtl}
+.feat-inner.rev>*{direction:ltr}
+.feat-num{font-family:var(--font-display);font-size:80px;font-weight:900;letter-spacing:-4px;color:rgba(240,237,232,.05);line-height:1;margin-bottom:-10px}
+.feat-title{font-family:var(--font-display);font-size:clamp(28px,3vw,42px);font-weight:700;letter-spacing:-1px;margin-bottom:14px;line-height:1.1}
+.feat-desc{font-size:15px;color:var(--fg-dim);line-height:1.8;margin-bottom:22px}
+.feat-pills{display:flex;flex-wrap:wrap;gap:8px}
+.feat-pill{font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:20px;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent)}
+.feat-visual{border-radius:20px;overflow:hidden;border:1px solid var(--border);background:#080502;box-shadow:0 30px 80px rgba(0,0,0,.85);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;position:relative}
+.fv-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,107,53,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,107,53,.03) 1px,transparent 1px);background-size:36px 36px}
+#feat-progress{position:absolute;bottom:40px;right:52px;z-index:10;display:flex;gap:8px}
+.fp-dot{width:6px;height:6px;border-radius:50%;background:rgba(240,237,232,.2);transition:background .4s,width .4s var(--ease-spring)}
+.fp-dot.active{background:var(--accent);width:24px;border-radius:3px}
+
+/* Visual 1 — Storyboard */
+.storyboard-vis{padding:16px;width:100%;height:100%;display:flex;flex-direction:column;gap:8px}
+.sb-title{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:2px}
+.sb-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;flex:1}
+.sb-frame{border-radius:8px;border:1px solid rgba(255,255,255,.07);position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:6px;min-height:70px}
+.sb-frame-num{position:absolute;top:5px;left:6px;font-size:7px;color:rgba(255,255,255,.3);font-family:monospace}
+.sb-frame-caption{font-size:7px;color:rgba(255,255,255,.4);line-height:1.3}
+.sb-note{display:flex;gap:6px;align-items:center;padding:6px 10px;background:rgba(255,255,255,.04);border-radius:6px}
+.sb-note-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sb-note-text{font-size:9px;color:rgba(255,255,255,.4)}
+
+/* Visual 2 — Color grade LUT selector */
+.grade-vis{padding:20px;width:100%;height:100%;display:flex;flex-direction:column;gap:12px}
+.grade-preview{flex:1;border-radius:10px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:120px}
+.gp-bg{position:absolute;inset:0}
+.gp-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);position:relative;z-index:1}
+.grade-luts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.lut-thumb{border-radius:8px;height:38px;border:1px solid rgba(255,255,255,.08);cursor:default;transition:border-color .3s;position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:4px}
+.lut-thumb.active{border-color:var(--accent);box-shadow:0 0 10px rgba(255,107,53,.3)}
+.lut-name{font-size:7px;color:rgba(255,255,255,.5);letter-spacing:.05em;position:relative;z-index:1}
+.grade-curve{padding:8px;background:rgba(255,255,255,.03);border-radius:8px}
+.grade-curve svg{width:100%;height:40px;display:block}
+
+/* Visual 3 — Motion graphics composition */
+.mograph-vis{padding:20px;width:100%;height:100%;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;position:relative}
+.mg-canvas{width:100%;flex:1;position:relative;display:flex;align-items:center;justify-content:center;min-height:140px}
+/* Animated kinetic text */
+.mg-word{font-family:var(--font-display);font-weight:900;letter-spacing:-2px;position:absolute;animation:wordFloat 3s ease-in-out infinite}
+@keyframes wordFloat{0%,100%{transform:translateY(0) rotate(var(--r));opacity:var(--o)}50%{transform:translateY(-10px) rotate(calc(var(--r) * 1.5));opacity:calc(var(--o) * 1.3)}}
+.mg-layer-info{display:flex;flex-direction:column;gap:5px;width:100%}
+.mg-layer{display:flex;align-items:center;gap:8px;padding:5px 10px;background:rgba(255,255,255,.04);border-radius:6px}
+.mg-layer-color{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.mg-layer-name{font-size:9px;color:rgba(255,255,255,.5);flex:1}
+.mg-layer-dur{font-size:9px;color:rgba(255,255,255,.25);font-family:monospace}
+
+/* ── STATS ── */
+#stats-section{padding:120px 52px;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.big-stat{padding:48px 36px;border:1px solid var(--border);transition:border-color .4s,background .4s}
+.big-stat:first-child{border-radius:16px 0 0 16px}
+.big-stat:last-child{border-radius:0 16px 16px 0}
+.big-stat:hover{border-color:var(--border-md);background:var(--card-bg)}
+.big-stat-val{font-family:var(--font-display);font-size:clamp(38px,4vw,58px);font-weight:900;letter-spacing:-2px;color:var(--accent);margin-bottom:8px;line-height:1}
+.big-stat-label{font-size:13px;color:var(--fg-dim);line-height:1.5}
+
+/* ── TECH ── */
+#tech-section{padding:120px 52px;border-top:1px solid var(--border)}
+.tech-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:52px}
+.tech-card{padding:28px 24px;background:var(--card-bg);border:1px solid var(--border);border-radius:16px;transition:border-color .35s,background .35s,transform .4s var(--ease-spring)}
+.tech-card:hover{border-color:var(--border-md);background:rgba(255,255,255,.05);transform:translateY(-4px)}
+.tech-icon{font-size:28px;margin-bottom:14px;display:block}
+.tech-name{font-size:15px;font-weight:500;margin-bottom:6px}
+.tech-role{font-size:12px;color:var(--fg-dim);line-height:1.5}
+
+/* ── RESULTS ── */
+#results-section{padding:120px 52px;border-top:1px solid var(--border);position:relative;overflow:hidden}
+#results-section::before{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:800px;height:400px;background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(255,107,53,.05) 0%,transparent 70%);pointer-events:none}
+.results-layout{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.results-visual{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.ring-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:center;transition:border-color .4s,transform .4s var(--ease-spring)}
+.ring-card:hover{border-color:var(--accent-border);transform:translateY(-4px)}
+.ring-wrap{position:relative;width:100px;height:100px;margin:0 auto 14px}
+.ring-svg{transform:rotate(-90deg);width:100%;height:100%}
+.ring-track{fill:none;stroke:rgba(255,255,255,.07);stroke-width:6}
+.ring-fill{fill:none;stroke-width:6;stroke-linecap:round}
+.ring-label-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:-1px}
+.ring-title{font-size:12px;color:var(--fg-dim)}
+.results-list{margin-top:32px;display:flex;flex-direction:column;gap:14px}
+.result-item{display:flex;align-items:flex-start;gap:14px;padding:18px 22px;border-radius:14px;border:1px solid var(--border);background:var(--card-bg);transition:border-color .35s,background .35s}
+.result-item:hover{border-color:var(--accent-border);background:var(--accent-dim)}
+.result-check{width:26px;height:26px;border-radius:50%;flex-shrink:0;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--accent)}
+.result-body{font-size:13px;color:var(--fg-dim);line-height:1.65}
+.result-body strong{color:var(--fg);font-weight:500}
+
+/* ── NEXT ── */
+#next-project{margin:0 52px 120px;border-radius:28px;padding:60px 72px;display:flex;align-items:center;justify-content:space-between;gap:40px;border:1px solid var(--border);background:var(--card-bg);position:relative;overflow:hidden;cursor:pointer;text-decoration:none;transition:border-color .4s,background .4s,transform .5s var(--ease-spring)}
+#next-project:hover{border-color:var(--border-md);background:rgba(255,255,255,.04);transform:translateY(-4px)}
+#next-project::before{content:"";position:absolute;right:-60px;top:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,53,.07) 0%,transparent 70%);pointer-events:none}
+.next-title{font-family:var(--font-display);font-size:clamp(26px,3vw,40px);font-weight:700;letter-spacing:-1px;margin-top:8px}
+.next-arrow{width:60px;height:60px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--accent);flex-shrink:0;transition:background .3s,transform .4s var(--ease-spring)}
+#next-project:hover .next-arrow{background:rgba(255,107,53,.25);transform:rotate(45deg) scale(1.1)}
+footer{border-top:1px solid var(--border);padding:28px 52px;display:flex;justify-content:space-between;align-items:center}
+footer p{font-size:12px;color:rgba(240,237,232,.18)}
+
+@media(max-width:900px){
+  #overview-section{grid-template-columns:1fr;gap:40px}
+  .overview-sticky{position:static}
+  .feat-inner,.feat-inner.rev{grid-template-columns:1fr;direction:ltr}
+  .results-layout{grid-template-columns:1fr}
+  #stats-section{grid-template-columns:1fr 1fr}
+  .cs-grid{grid-template-columns:1fr}
+  .cs-card{border-radius:12px!important}
+  .big-stat{border-radius:12px!important}
+  .tech-grid{grid-template-columns:1fr 1fr}
+  .results-visual{grid-template-columns:1fr 1fr}
+}
+@media(max-width:640px){
+  nav{padding:16px 22px}
+  body{cursor:auto}
+  #cursor-dot,#cursor-ring{display:none}
+  #overview-section,#challenges-section,#tech-section,#results-section{padding-left:22px;padding-right:22px}
+  #stats-section{grid-template-columns:1fr;padding:60px 22px}
+  .tech-grid{grid-template-columns:1fr}
+  #next-project{margin:0 22px 80px;padding:40px 28px;flex-direction:column;text-align:center}
+  footer{flex-direction:column;gap:8px;text-align:center;padding:24px 22px}
+}
+</style>
+</head>
+<body>
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<nav>
+  <a class="nav-logo" href="bora-portfolio (1).html">Bora</a>
+  <ul class="nav-links">
+    <li><a class="nav-back" href="projects.html"><span class="back-arrow">←</span> All Work</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div id="hero-bg"></div>
+  <div id="hero-scanlines"></div>
+  <div class="h-orb orb-1"></div>
+  <div class="h-orb orb-2"></div>
+  <div class="h-orb orb-3"></div>
+  <div id="hero-content">
+    <div class="hero-play">
+      <div class="play-triangle"></div>
+    </div>
+    <div class="hero-tag"><div class="hero-tag-dot"></div>Film · Motion Design · Direction</div>
+    <h1 class="hero-title">Kinetic<br>Brand Film</h1>
+    <p class="hero-sub">A 60-second brand identity film for a sustainable fashion label — from concept development and storyboarding to on-location shooting, colour grading, and motion graphics.</p>
+    <div class="hero-meta-row">
+      <div class="hero-meta-item"><div class="hero-meta-label">Year</div><div class="hero-meta-val">2023</div></div>
+      <div class="hero-meta-item"><div class="hero-meta-label">Role</div><div class="hero-meta-val">Director / Editor</div></div>
+      <div class="hero-meta-item"><div class="hero-meta-label">Duration</div><div class="hero-meta-val">4 Weeks</div></div>
+      <div class="hero-meta-item"><div class="hero-meta-label">Output</div><div class="hero-meta-val">60-sec Film</div></div>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="scroll-line"></div><span>Scroll</span></div>
+</section>
+
+<!-- EDITOR MOCKUP -->
+<section id="mockup-section">
+  <div id="mockup-sticky">
+    <div class="mockup-label">Premiere Pro Timeline</div>
+    <div id="editor-frame">
+      <!-- Top bar -->
+      <div class="editor-bar">
+        <div class="eb-dot" style="background:#ff5f57"></div>
+        <div class="eb-dot" style="background:#febc2e"></div>
+        <div class="eb-dot" style="background:#28c840"></div>
+        <div class="eb-title">Kinetic_BrandFilm_v7_FINAL.prproj</div>
+        <div class="eb-right">
+          <div class="eb-timecode">00:00:32:14</div>
+          <div class="eb-btn">Export</div>
+          <div class="eb-btn" style="background:rgba(255,107,53,.15);color:rgba(255,107,53,.8);border:1px solid rgba(255,107,53,.2)">● Render</div>
+        </div>
+      </div>
+      <!-- Preview -->
+      <div class="editor-preview">
+        <div class="preview-overlay-bars"><div class="pob"></div><div class="pob b"></div></div>
+        <div class="preview-lut"></div>
+        <div class="preview-frame-markers"></div>
+        <!-- Simulated video frame content -->
+        <div style="position:absolute;inset:0;background:linear-gradient(135deg,#1a0804 0%,#2d1008 40%,#1a0806 100%)"></div>
+        <div style="position:absolute;inset:0;opacity:.3;background:radial-gradient(ellipse 60% 40% at 50% 60%,rgba(255,107,53,.3),transparent)"></div>
+        <div class="preview-content">
+          <div class="preview-brand">VERA</div>
+          <div class="preview-tagline">Worn with Intention</div>
+        </div>
+        <div style="position:absolute;bottom:10px;left:14px;font-family:monospace;font-size:10px;color:rgba(255,255,255,.2)">1920×1080 · 24fps · 4:2:2</div>
+        <div style="position:absolute;bottom:10px;right:14px;font-family:monospace;font-size:10px;color:rgba(255,107,53,.5);animation:blink 1s steps(1) infinite">● REC</div>
+      </div>
+      <!-- Timeline -->
+      <div class="editor-timeline">
+        <div class="tl-timecodes"><span>0:00</span><span>0:10</span><span>0:20</span><span>0:30</span><span>0:40</span><span>0:50</span><span>1:00</span></div>
+        <div class="tl-row">
+          <div class="tl-label">V3</div>
+          <div class="tl-track">
+            <div class="tl-clip" style="left:2%;width:18%;background:rgba(198,120,255,.25);border:1px solid rgba(198,120,255,.3)"><div class="tl-clip-label">Title_Kinetic_v4</div></div>
+            <div class="tl-clip" style="left:45%;width:30%;background:rgba(198,120,255,.2);border:1px solid rgba(198,120,255,.25)"><div class="tl-clip-label">Logo_Reveal</div></div>
+            <div class="tl-playhead"></div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-label">V2</div>
+          <div class="tl-track">
+            <div class="tl-clip" style="left:0%;width:35%;background:rgba(79,124,255,.2);border:1px solid rgba(79,124,255,.25)"><div class="tl-clip-label">GradeOvr_Teal</div></div>
+            <div class="tl-clip" style="left:38%;width:62%;background:rgba(79,124,255,.18);border:1px solid rgba(79,124,255,.22)"><div class="tl-clip-label">GradeOvr_Warm</div></div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-label">V1</div>
+          <div class="tl-track">
+            <div class="tl-clip" style="left:0%;width:22%;background:rgba(255,107,53,.25);border:1px solid rgba(255,107,53,.3)"><div class="tl-clip-label">Scene01_Textile_4K.mp4</div></div>
+            <div class="tl-clip" style="left:23%;width:20%;background:rgba(255,107,53,.2);border:1px solid rgba(255,107,53,.25)"><div class="tl-clip-label">Scene02_Model.mp4</div></div>
+            <div class="tl-clip" style="left:44%;width:18%;background:rgba(255,107,53,.22);border:1px solid rgba(255,107,53,.28)"><div class="tl-clip-label">Scene03_Detail.mp4</div></div>
+            <div class="tl-clip" style="left:63%;width:25%;background:rgba(255,107,53,.25);border:1px solid rgba(255,107,53,.3)"><div class="tl-clip-label">Scene04_Brand.mp4</div></div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-label">A1</div>
+          <div class="tl-track">
+            <div class="tl-clip" style="left:0%;width:98%;background:rgba(61,255,176,.12);border:1px solid rgba(61,255,176,.2)"><div class="tl-clip-label">Score_Final_Mix.wav</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- Toolbar -->
+      <div class="editor-toolbar">
+        <div class="tb-btn active">▶ Play</div>
+        <div class="tb-btn">⌛ Trim</div>
+        <div class="tb-sep"></div>
+        <div class="tb-btn">🎨 Lumetri</div>
+        <div class="tb-btn active">✦ Effects</div>
+        <div class="tb-btn">📤 Export</div>
+        <div class="tb-meter">
+          <div class="tbm-bar" style="animation-delay:0s"></div>
+          <div class="tbm-bar" style="animation-delay:.05s"></div>
+          <div class="tbm-bar" style="animation-delay:.1s"></div>
+          <div class="tbm-bar" style="animation-delay:.15s"></div>
+          <div class="tbm-bar" style="animation-delay:.08s"></div>
+          <div class="tbm-bar" style="animation-delay:.12s"></div>
+          <div class="tbm-bar" style="animation-delay:.03s"></div>
+          <div class="tbm-bar" style="animation-delay:.18s"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OVERVIEW -->
+<section id="overview-section">
+  <div class="overview-sticky">
+    <div class="overview-num">01</div>
+    <h2 class="overview-heading">Fashion film<br><em>from scratch</em></h2>
+  </div>
+  <div>
+    <p class="overview-body">The brief was deceptively simple: make a 60-second film that communicates the brand value of a sustainable fashion label launching its debut collection. No budget for a production crew, no studio, no post-production house — just one director and a weekend in İzmir.</p>
+    <p class="overview-body">The creative direction drew on tactile materials — raw linen, uncut thread, worn leather — and slow, deliberate motion to counter the fast-fashion visual language the brand was explicitly rejecting. The film needed to feel handmade even as the motion graphics remained rigorously geometric.</p>
+    <div class="pull-quote"><p>"Every cut should feel intentional. This is a brand that believes nothing should be made unless it has a reason to exist — the film had to embody that."</p></div>
+    <p class="overview-body">Shot on Sony FX3 at 4K/24fps over two days, edited in Premiere Pro, colour graded in DaVinci Resolve with a custom LUT, and motion graphics composited in After Effects. The final film ran across Instagram Reels, TikTok, and as a retail installation loop.</p>
+  </div>
+</section>
+
+<!-- CHALLENGES -->
+<section id="challenges-section">
+  <div class="label" style="margin-bottom:12px">Challenges</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(36px,4vw,54px);font-weight:700;letter-spacing:-1.5px;line-height:1.05">
+    One director,<br>
+    <span style="color:rgba(240,237,232,.25);font-style:italic;font-weight:400">every role</span>
+  </h2>
+  <div class="cs-grid">
+    <div class="cs-card">
+      <span class="cs-icon">🎬</span>
+      <div class="cs-title">No Crew Constraint</div>
+      <div class="cs-body">Shot entirely solo — director, DOP, and focus puller in one. All camera moves were designed to work with a tripod or monopod, and the shot list was engineered so every scene could be set up and struck within 15 minutes to keep the two-day schedule viable.</div>
+      <div class="cs-line"></div>
+    </div>
+    <div class="cs-card">
+      <span class="cs-icon">🎨</span>
+      <div class="cs-title">Colour Language</div>
+      <div class="cs-body">The brand palette was earthy and muted, but the distribution platforms (Instagram, TikTok) compress and cool footage heavily. A custom DaVinci Resolve LUT was built to ensure the warm tones survived algorithmic compression while maintaining the slow, analogue feel.</div>
+      <div class="cs-line"></div>
+    </div>
+    <div class="cs-card">
+      <span class="cs-icon">🔁</span>
+      <div class="cs-title">Multi-Format Delivery</div>
+      <div class="cs-body">The same 60-second film needed to work as a 16:9 retail loop, a 9:16 mobile vertical, and a 1:1 Instagram post — three separate edits with identical brand feel but completely reframed compositions. Cut and colour graded three versions in parallel.</div>
+      <div class="cs-line"></div>
+    </div>
+  </div>
+</section>
+
+<!-- HORIZONTAL PANELS -->
+<section id="features-section">
+  <div id="features-sticky">
+    <div id="features-track">
+
+      <!-- Panel 1: Storyboard -->
+      <div class="feat-panel">
+        <div class="feat-inner">
+          <div>
+            <div class="feat-num">01</div>
+            <div class="feat-title">Storyboard & Shot Design</div>
+            <div class="feat-desc">Every shot was pre-visualised in a hand-drawn storyboard before production. 28 shots across 4 scenes, timed to the music's BPM so every edit point lands on a beat or half-beat. The storyboard doubled as the shot list on the day.</div>
+            <div class="feat-pills"><span class="feat-pill">Procreate</span><span class="feat-pill">28 Shots</span><span class="feat-pill">Beat-Matched</span></div>
+          </div>
+          <div class="feat-visual">
+            <div class="fv-grid"></div>
+            <div class="storyboard-vis">
+              <div class="sb-title">Shot List — Day 1</div>
+              <div class="sb-grid">
+                <div class="sb-frame" style="background:linear-gradient(160deg,#2a1408,#1a0c04)">
+                  <div class="sb-frame-num">01</div>
+                  <div class="sb-frame-caption">ECU Textile detail, pull focus</div>
+                </div>
+                <div class="sb-frame" style="background:linear-gradient(160deg,#180e04,#120a02)">
+                  <div class="sb-frame-num">02</div>
+                  <div class="sb-frame-caption">MS Model, 180° dolly</div>
+                </div>
+                <div class="sb-frame" style="background:linear-gradient(160deg,#201005,#160c03)">
+                  <div class="sb-frame-num">03</div>
+                  <div class="sb-frame-caption">WS Location, golden hour</div>
+                </div>
+                <div class="sb-frame" style="background:linear-gradient(160deg,#1e0e04,#140a02)">
+                  <div class="sb-frame-num">04</div>
+                  <div class="sb-frame-caption">CU Hands, thread detail</div>
+                </div>
+                <div class="sb-frame" style="background:linear-gradient(160deg,#2a1206,#1c0c03)">
+                  <div class="sb-frame-num">05</div>
+                  <div class="sb-frame-caption">Title card — kinetic type</div>
+                </div>
+                <div class="sb-frame" style="background:linear-gradient(160deg,#160e04,#100a02)">
+                  <div class="sb-frame-num">06</div>
+                  <div class="sb-frame-caption">Logo reveal, hold on black</div>
+                </div>
+              </div>
+              <div class="sb-note">
+                <div class="sb-note-dot" style="background:#ff6b35"></div>
+                <div class="sb-note-text">All shots at 1/50s shutter · ND6 filter</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Colour Grading -->
+      <div class="feat-panel">
+        <div class="feat-inner rev">
+          <div>
+            <div class="feat-num">02</div>
+            <div class="feat-title">Custom Colour Grade</div>
+            <div class="feat-desc">The warmth of hand-woven textiles doesn't survive Instagram's compression untouched. A custom DaVinci Resolve LUT was built and tested against compressed delivery formats — pushing the midtone warmth before compression, so it lands exactly right after.</div>
+            <div class="feat-pills"><span class="feat-pill">DaVinci Resolve</span><span class="feat-pill">Custom LUT</span><span class="feat-pill">Compression-Proof</span></div>
+          </div>
+          <div class="feat-visual">
+            <div class="fv-grid"></div>
+            <div class="grade-vis">
+              <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3)">Lumetri Preview</div>
+              <div class="grade-preview">
+                <div class="gp-bg" style="background:linear-gradient(135deg,#3d1a08 0%,#1a0a04 60%,#2a1008 100%)"></div>
+                <div class="gp-label">VERA_Scene03_GRADE.mov</div>
+              </div>
+              <div class="grade-luts">
+                <div class="lut-thumb" style="background:linear-gradient(135deg,#3d2010,#200e06)"><div class="lut-name">Warm_v3</div></div>
+                <div class="lut-thumb active" style="background:linear-gradient(135deg,#4a1e08,#2a1004)"><div class="lut-name">Final_LUT</div></div>
+                <div class="lut-thumb" style="background:linear-gradient(135deg,#1a2030,#0d141e)"><div class="lut-name">Cool_Alt</div></div>
+                <div class="lut-thumb" style="background:linear-gradient(135deg,#302010,#1e1408)"><div class="lut-name">Log_Raw</div></div>
+              </div>
+              <div class="grade-curve">
+                <svg viewBox="0 0 200 50">
+                  <polyline points="0,45 30,38 80,20 130,10 170,6 200,4" fill="none" stroke="rgba(255,107,53,.6)" stroke-width="1.5" stroke-linecap="round"/>
+                  <polyline points="0,45 200,5" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="1" stroke-dasharray="3 3"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 3: Motion Graphics -->
+      <div class="feat-panel">
+        <div class="feat-inner">
+          <div>
+            <div class="feat-num">03</div>
+            <div class="feat-title">Kinetic Typography</div>
+            <div class="feat-desc">The motion graphics layer uses a system of rotating, scaling, and fading type elements — each tied to the original music score's rhythm. Built in After Effects with expressions driving the animation, so tempo changes automatically cascade through the composition.</div>
+            <div class="feat-pills"><span class="feat-pill">After Effects</span><span class="feat-pill">Expressions</span><span class="feat-pill">Cinema 4D</span></div>
+          </div>
+          <div class="feat-visual">
+            <div class="fv-grid"></div>
+            <div class="mograph-vis">
+              <div class="mg-canvas">
+                <div class="mg-word" style="font-size:48px;color:rgba(255,107,53,.7);--r:-8deg;--o:.7;top:15%;left:10%">VERA</div>
+                <div class="mg-word" style="font-size:16px;color:rgba(240,237,232,.3);--r:3deg;--o:.3;letter-spacing:.3em;top:42%;left:20%;animation-delay:-.8s">WORN WITH</div>
+                <div class="mg-word" style="font-size:28px;color:rgba(240,237,232,.55);--r:-3deg;--o:.5;top:55%;right:10%;animation-delay:-1.4s;font-style:italic">Intention</div>
+                <div class="mg-word" style="font-size:10px;color:rgba(255,107,53,.4);--r:0deg;--o:.4;bottom:20%;left:12%;letter-spacing:.4em;animation-delay:-.5s">EST. 2023</div>
+              </div>
+              <div class="mg-layer-info">
+                <div class="mg-layer"><div class="mg-layer-color" style="background:#c678ff"></div><div class="mg-layer-name">Title_Kinetic_v4.aep</div><div class="mg-layer-dur">0:00–0:08</div></div>
+                <div class="mg-layer"><div class="mg-layer-color" style="background:#ff6b35"></div><div class="mg-layer-name">Brand_Tagline.aep</div><div class="mg-layer-dur">0:28–0:42</div></div>
+                <div class="mg-layer"><div class="mg-layer-color" style="background:#3dffb0"></div><div class="mg-layer-name">Logo_Reveal_Final.aep</div><div class="mg-layer-dur">0:52–1:00</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div id="feat-progress">
+      <div class="fp-dot active" id="fp-0"></div>
+      <div class="fp-dot" id="fp-1"></div>
+      <div class="fp-dot" id="fp-2"></div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats-section">
+  <div class="big-stat"><div class="big-stat-val" id="sv-0">0</div><div class="big-stat-label">Seconds of<br>final film</div></div>
+  <div class="big-stat"><div class="big-stat-val" id="sv-1">0</div><div class="big-stat-label">Shoot days,<br>solo crew</div></div>
+  <div class="big-stat"><div class="big-stat-val" id="sv-2">0</div><div class="big-stat-label">Formats<br>delivered</div></div>
+  <div class="big-stat"><div class="big-stat-val" id="sv-3">0</div><div class="big-stat-label">Scenes,<br>28 shots</div></div>
+</section>
+
+<!-- TECH -->
+<section id="tech-section">
+  <div class="label" style="margin-bottom:12px">Production Stack</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(36px,4vw,54px);font-weight:700;letter-spacing:-1.5px;line-height:1.05">
+    Tools of<br>
+    <span style="color:rgba(240,237,232,.25);font-style:italic;font-weight:400">the craft</span>
+  </h2>
+  <div class="tech-grid">
+    <div class="tech-card"><span class="tech-icon">📷</span><div class="tech-name">Sony FX3</div><div class="tech-role">4K/24fps with S-Cinetone log profile. All handheld and monopod — no Steadicam, intentionally.</div></div>
+    <div class="tech-card"><span class="tech-icon">🎬</span><div class="tech-name">Premiere Pro</div><div class="tech-role">Primary edit — assembly, rough cut, fine cut, and sound design sync over 3 revision rounds.</div></div>
+    <div class="tech-card"><span class="tech-icon">🎨</span><div class="tech-name">DaVinci Resolve</div><div class="tech-role">Colour grading suite. Custom LUT built from scratch, tested against multiple social compression algorithms.</div></div>
+    <div class="tech-card"><span class="tech-icon">✨</span><div class="tech-name">After Effects</div><div class="tech-role">All motion graphics and title sequences. Expression-driven animation system tied to music BPM.</div></div>
+    <div class="tech-card"><span class="tech-icon">🔮</span><div class="tech-name">Cinema 4D</div><div class="tech-role">Logo reveal sequence — 3D extrusion with cloth simulation for the final product title card.</div></div>
+    <div class="tech-card"><span class="tech-icon">🎵</span><div class="tech-name">Original Score</div><div class="tech-role">Commissioned original music from a local composer — minimal, warm, acoustic-electronic hybrid.</div></div>
+    <div class="tech-card"><span class="tech-icon">📱</span><div class="tech-name">Multi-Format</div><div class="tech-role">Three simultaneous exports: 16:9 retail, 9:16 mobile, 1:1 feed — reframed, not just cropped.</div></div>
+    <div class="tech-card"><span class="tech-icon">🖊️</span><div class="tech-name">Procreate</div><div class="tech-role">Full storyboard — 28 frames hand-drawn, each with shot notes, lens specs, and lighting diagram.</div></div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results-section">
+  <div class="results-layout">
+    <div>
+      <div class="label" style="margin-bottom:12px">Outcomes</div>
+      <h2 style="font-family:var(--font-display);font-size:clamp(32px,3.5vw,48px);font-weight:700;letter-spacing:-1.2px;line-height:1.1;margin-bottom:8px">
+        Film that<br>
+        <em style="font-weight:400;color:rgba(240,237,232,.3)">moved product</em>
+      </h2>
+      <div class="results-list">
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>2.4M organic views</strong> across Instagram and TikTok in the first 30 days — no paid promotion.</div></div>
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>340% sell-through in 48 hours</strong> after launch — the brand attributed the film as the primary driver of the debut collection sellout.</div></div>
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>3 format versions delivered</strong> on time — retail loop, mobile vertical, and square feed post, each individually reframed.</div></div>
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>Screened at two design festivals</strong> as part of a curated motion design showcase in 2024.</div></div>
+      </div>
+    </div>
+    <div class="results-visual">
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-a" cx="50" cy="50" r="40" stroke="#ff6b35" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-label-val" style="color:#ff6b35" id="ring-a-val">0%</div></div><div class="ring-title">Organic Reach</div></div>
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-b" cx="50" cy="50" r="40" stroke="#c678ff" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-label-val" style="color:#c678ff" id="ring-b-val">0%</div></div><div class="ring-title">Client Satisfaction</div></div>
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-c" cx="50" cy="50" r="40" stroke="#3dffb0" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-label-val" style="color:#3dffb0" id="ring-c-val">0%</div></div><div class="ring-title">On-Time Delivery</div></div>
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-d" cx="50" cy="50" r="40" stroke="#4f7cff" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-label-val" style="color:#4f7cff" id="ring-d-val">0%</div></div><div class="ring-title">Brand Recognition</div></div>
+    </div>
+  </div>
+</section>
+
+<a href="wholesale-project-detail.html" id="next-project">
+  <div><div class="label" style="margin-bottom:10px">Next Project</div><div class="next-title">Kutu Marketplace →</div></div>
+  <div class="next-arrow">↗</div>
+</a>
+
+<footer><p>© 2026 Bora. All rights reserved.</p><p>Designed &amp; built with care</p></footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+const dot=document.getElementById('cursor-dot'),ring=document.getElementById('cursor-ring');
+ring._x=0;ring._y=0;
+window.addEventListener('mousemove',e=>{dot.style.left=e.clientX+'px';dot.style.top=e.clientY+'px';});
+(function tick(){requestAnimationFrame(tick);ring._x+=(parseFloat(dot.style.left||0)-ring._x)*.1;ring._y+=(parseFloat(dot.style.top||0)-ring._y)*.1;ring.style.left=ring._x+'px';ring.style.top=ring._y+'px';})();
+document.querySelectorAll('a,button,.cs-card,.tech-card,.result-item,.ring-card,.big-stat,.hero-play').forEach(el=>{el.addEventListener('mouseenter',()=>{ring.style.width='52px';ring.style.height='52px';ring.style.borderColor='rgba(255,107,53,.5)';});el.addEventListener('mouseleave',()=>{ring.style.width='34px';ring.style.height='34px';ring.style.borderColor='rgba(240,237,232,.2)';});});
+
+gsap.timeline({defaults:{ease:'power3.out'}})
+  .from('.hero-play',{opacity:0,scale:.4,duration:1.4,delay:.2})
+  .from('.hero-tag',{opacity:0,y:16,duration:.8},'-=0.6')
+  .from('.hero-title',{opacity:0,y:60,duration:1.3},'-=0.5')
+  .from('.hero-sub',{opacity:0,y:22,duration:1},'-=0.9')
+  .from('.hero-meta-row',{opacity:0,y:22,duration:.9},'-=0.7')
+  .from('.scroll-hint',{opacity:0,duration:.8},'-=0.4');
+gsap.to('#hero-content',{scale:.72,opacity:0,y:-80,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'50% top',scrub:1.5}});
+
+gsap.fromTo('#editor-frame',{opacity:0,y:100,scale:.9},{opacity:1,y:0,scale:1,ease:'power3.out',scrollTrigger:{trigger:'#mockup-section',start:'top 80%',end:'top 20%',scrub:2}});
+
+gsap.from('.overview-num',{opacity:0,x:-30,scrollTrigger:{trigger:'#overview-section',start:'top 80%',end:'top 40%',scrub:2}});
+gsap.from('.overview-heading',{opacity:0,y:40,scrollTrigger:{trigger:'#overview-section',start:'top 75%',end:'top 35%',scrub:2}});
+gsap.from('.overview-body,.pull-quote',{opacity:0,y:30,stagger:.15,duration:1,scrollTrigger:{trigger:'#overview-section',start:'top 68%',toggleActions:'play none none reverse'}});
+gsap.from('.cs-card',{opacity:0,y:50,stagger:.15,duration:.9,scrollTrigger:{trigger:'.cs-grid',start:'top 82%',toggleActions:'play none none reverse'}});
+
+gsap.to('#features-track',{x:()=>-(window.innerWidth*2),ease:'none',scrollTrigger:{trigger:'#features-section',start:'top top',end:'bottom bottom',scrub:1,pin:'#features-sticky',anticipatePin:1,invalidateOnRefresh:true,onUpdate(self){const a=Math.round(self.progress*2);document.querySelectorAll('.fp-dot').forEach((d,i)=>d.classList.toggle('active',i===a));}}});
+
+const statsData=[{id:'sv-0',end:60,display:'60s'},{id:'sv-1',end:2,display:'2'},{id:'sv-2',end:3,display:'3'},{id:'sv-3',end:4,display:'4'}];
+statsData.forEach(s=>{const el=document.getElementById(s.id);ScrollTrigger.create({trigger:el,start:'top 85%',onEnter(){gsap.fromTo({val:0},{val:s.end,duration:2,ease:'power2.out',onUpdate(){el.textContent=this.targets()[0].val>=s.end?s.display:Math.round(this.targets()[0].val);}});}});});
+gsap.from('.big-stat',{opacity:0,y:40,stagger:.1,duration:.9,scrollTrigger:{trigger:'#stats-section',start:'top 80%',toggleActions:'play none none reverse'}});
+gsap.from('.tech-card',{opacity:0,y:40,scale:.95,stagger:.08,duration:.8,scrollTrigger:{trigger:'.tech-grid',start:'top 82%',toggleActions:'play none none reverse'}});
+
+const ringData=[{id:'ring-a',val:'ring-a-val',pct:88,color:'#ff6b35'},{id:'ring-b',val:'ring-b-val',pct:100,color:'#c678ff'},{id:'ring-c',val:'ring-c-val',pct:100,color:'#3dffb0'},{id:'ring-d',val:'ring-d-val',pct:92,color:'#4f7cff'}];
+const circ=2*Math.PI*40;
+ringData.forEach(r=>{const circle=document.getElementById(r.id),valEl=document.getElementById(r.val);ScrollTrigger.create({trigger:circle,start:'top 85%',onEnter(){gsap.to(circle,{strokeDashoffset:circ*(1-r.pct/100),duration:1.6,ease:'power2.out'});gsap.fromTo({v:0},{v:r.pct,duration:1.6,ease:'power2.out',onUpdate(){valEl.textContent=Math.round(this.targets()[0].v)+'%';}});}});});
+gsap.from('.result-item',{opacity:0,x:-30,stagger:.12,duration:.8,scrollTrigger:{trigger:'.results-list',start:'top 82%',toggleActions:'play none none reverse'}});
+gsap.from('.ring-card',{opacity:0,y:30,scale:.95,stagger:.1,duration:.8,scrollTrigger:{trigger:'.results-visual',start:'top 82%',toggleActions:'play none none reverse'}});
+gsap.from('#next-project',{opacity:0,y:50,scale:.96,scrollTrigger:{trigger:'#next-project',start:'top 85%',end:'top 40%',scrub:2}});
+window.addEventListener('resize',()=>ScrollTrigger.refresh());
+</script>
+</body>
+</html>

@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bora — Aura Music Player</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+:root{
+  --font-display:'Playfair Display',serif;
+  --font-body:'DM Sans',sans-serif;
+  --bg:#040a0e;--fg:#f0ede8;--fg-dim:rgba(240,237,232,0.45);
+  --border:rgba(255,255,255,0.07);--border-md:rgba(255,255,255,0.13);
+  --card-bg:rgba(255,255,255,0.03);--nav-bg:rgba(4,10,14,0.88);
+  --accent:#00d4ff;--accent-dim:rgba(0,212,255,0.09);--accent-border:rgba(0,212,255,0.28);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--bg);color:var(--fg);overflow-x:hidden;cursor:none}
+#cursor-dot{position:fixed;width:8px;height:8px;background:rgba(240,237,232,.9);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+#cursor-ring{position:fixed;width:34px;height:34px;border:1.5px solid rgba(240,237,232,.2);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .4s var(--ease-spring),height .4s var(--ease-spring),border-color .3s}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:18px 52px;background:var(--nav-bg);backdrop-filter:blur(28px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--font-display);font-size:22px;letter-spacing:-.4px;color:var(--fg);text-decoration:none}
+.nav-links{display:flex;gap:34px;list-style:none;align-items:center}
+.nav-links a{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-dim);text-decoration:none;transition:color .3s}
+.nav-links a:hover{color:var(--fg)}
+.nav-back{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-dim);text-decoration:none;transition:color .3s,gap .3s}
+.nav-back:hover{color:var(--fg);gap:13px}
+.back-arrow{transition:transform .3s}
+.nav-back:hover .back-arrow{transform:translateX(-3px)}
+.label{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--fg-dim)}
+
+/* HERO */
+#hero{height:100vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 100% 80% at 50% 40%,#081825 0%,#050e18 55%,#040a0e 100%)}
+#hero-grid{position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);
+  background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 30%,transparent 100%)}
+.h-orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(140px);opacity:.16;animation:orbf 11s ease-in-out infinite alternate}
+@keyframes orbf{from{transform:scale(1)}to{transform:scale(1.1) translate(-18px,-22px)}}
+.orb-1{width:700px;height:600px;background:#072535;top:-10%;left:30%}
+.orb-2{width:400px;height:400px;background:#041520;bottom:0;left:-5%;animation-delay:-6s}
+.orb-3{width:320px;height:320px;background:#082a3d;top:25%;right:0;animation-delay:-4s}
+#hero::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")}
+#hero-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 20px}
+.hero-icon{width:84px;height:84px;border-radius:22px;border:1.5px solid var(--accent-border);background:var(--accent-dim);display:flex;align-items:center;justify-content:center;margin-bottom:30px;font-size:38px;position:relative;box-shadow:0 0 40px rgba(0,212,255,.12)}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;border-radius:40px;border:1px solid var(--accent-border);background:var(--accent-dim);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:24px}
+.hero-tag-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:blink 2.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.hero-title{font-family:var(--font-display);font-size:clamp(48px,7.5vw,108px);font-weight:900;letter-spacing:-4px;line-height:.9;background:linear-gradient(140deg,#fff 0%,#b0f0ff 45%,#00d4ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:22px}
+.hero-sub{font-size:clamp(14px,1.4vw,16px);color:var(--fg-dim);max-width:500px;line-height:1.75;margin-bottom:40px}
+.hero-meta-row{display:flex;gap:36px;flex-wrap:wrap;justify-content:center;padding:22px 36px;border-radius:18px;border:1px solid var(--border);background:rgba(255,255,255,.025);backdrop-filter:blur(12px)}
+.hero-meta-item{text-align:center}
+.hero-meta-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin-bottom:5px}
+.hero-meta-val{font-size:14px;color:var(--fg);font-weight:500}
+.scroll-hint{position:absolute;bottom:44px;z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--fg-dim)}
+.scroll-line{width:1px;height:52px;background:linear-gradient(to bottom,var(--fg-dim),transparent);animation:lp 2.2s ease-in-out infinite}
+@keyframes lp{0%,100%{opacity:.4;transform:scaleY(1)}50%{opacity:1;transform:scaleY(.55)}}
+
+/* MOCKUP */
+#mockup-section{height:260vh;position:relative}
+#mockup-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse 65% 55% at 50% 55%,#041825 0%,var(--bg) 65%)}
+.mockup-label{position:absolute;top:100px;left:52px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(240,237,232,.2)}
+#mockup-wrap{will-change:transform,opacity;width:88vw;max-width:1000px}
+
+/* player */
+.player-shell{background:#050c12;border-radius:20px;border:1px solid rgba(0,212,255,.12);overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.95),0 0 60px rgba(0,212,255,.06)}
+.player-bar{height:48px;background:#060e16;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.05)}
+.player-bar-title{font-size:15px;font-weight:500;color:rgba(255,255,255,.6);letter-spacing:-.2px}
+.player-bar-nav{display:flex;gap:14px;font-size:12px;color:rgba(255,255,255,.25)}
+.player-bar-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#00d4ff,#0090b0);opacity:.7}
+.player-layout{display:grid;grid-template-columns:260px 1fr;min-height:400px}
+.player-sidebar{background:#050b10;border-right:1px solid rgba(255,255,255,.04);padding:20px 16px;display:flex;flex-direction:column;gap:8px}
+.sb-section-label{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-bottom:4px}
+.album-art{width:100%;aspect-ratio:1;border-radius:14px;background:radial-gradient(circle at 35% 30%,#0a4060,#041828);display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,212,255,.1);margin-bottom:10px;position:relative;overflow:hidden}
+.album-vinyl{opacity:.3}
+.album-flac{position:absolute;bottom:8px;right:8px;font-size:8px;color:rgba(0,212,255,.5);font-family:monospace}
+.track-title{font-size:14px;font-weight:600;color:rgba(255,255,255,.85)}
+.track-artist{font-size:11px;color:rgba(255,255,255,.35);margin-bottom:6px}
+.progress-bar{height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin-bottom:4px}
+.progress-fill{height:100%;width:62%;background:linear-gradient(90deg,#00d4ff,#0090b0)}
+.progress-times{display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.2);font-family:monospace;margin-bottom:8px}
+.controls{display:flex;justify-content:center;gap:16px;align-items:center}
+.ctrl-btn{font-size:16px;color:rgba(255,255,255,.3);cursor:default}
+.ctrl-play{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#00d4ff,#0070a0);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 4px 20px rgba(0,212,255,.3)}
+/* Visualiser */
+.vis-area{position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 80%,#041828 0%,#030c12 100%)}
+.vis-spatial{position:absolute;top:16px;right:16px;display:flex;gap:8px;align-items:center;z-index:2}
+.vis-spatial-label{font-size:9px;color:rgba(0,212,255,.6);letter-spacing:.1em;text-transform:uppercase}
+.vis-spatial-dot{width:8px;height:8px;border-radius:50%;background:#00d4ff;animation:blink 1.5s infinite}
+.vis-hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.06em;white-space:nowrap;z-index:2}
+.vis-bars-svg{position:absolute;inset:0;width:100%;height:100%}
+.vis-wave{position:absolute;inset:0;width:100%;height:100%;opacity:.5}
+
+/* OVERVIEW */
+#overview-section{padding:140px 52px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.overview-sticky{position:sticky;top:120px}
+.overview-num{font-family:var(--font-display);font-size:120px;font-weight:900;line-height:1;letter-spacing:-6px;color:rgba(240,237,232,.04);margin-bottom:-20px}
+.overview-heading{font-family:var(--font-display);font-size:clamp(34px,3.5vw,50px);font-weight:700;letter-spacing:-1.2px;line-height:1.1;margin-bottom:22px}
+.overview-heading em{font-style:italic;font-weight:400;color:rgba(240,237,232,.3)}
+.overview-body{font-size:15px;color:var(--fg-dim);line-height:1.85}
+.overview-body+.overview-body{margin-top:18px}
+.pull-quote{margin:36px 0;padding:26px 30px;border-left:2px solid var(--accent);background:var(--accent-dim);border-radius:0 12px 12px 0}
+.pull-quote p{font-family:var(--font-display);font-size:19px;font-style:italic;color:var(--fg);line-height:1.6}
+
+/* CHALLENGES */
+#challenges-section{padding:0 52px 120px}
+.cs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:56px}
+.cs-card{padding:36px;border:1px solid var(--border);position:relative;overflow:hidden;transition:border-color .4s,background .4s;cursor:default}
+.cs-card:first-child{border-radius:16px 0 0 16px}
+.cs-card:last-child{border-radius:0 16px 16px 0}
+.cs-card:hover{border-color:var(--border-md);background:var(--card-bg)}
+.cs-icon{font-size:26px;margin-bottom:18px;display:block;filter:grayscale(1);transition:filter .4s}
+.cs-card:hover .cs-icon{filter:grayscale(0)}
+.cs-title{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:11px}
+.cs-body{font-size:13px;color:var(--fg-dim);line-height:1.75}
+.cs-line{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease-spring)}
+.cs-card:hover .cs-line{transform:scaleX(1)}
+
+/* FEATURES HORIZ */
+#features-section{height:400vh;position:relative}
+#features-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;overflow:hidden}
+#features-track{display:flex;will-change:transform;height:100vh}
+.feat-panel{flex-shrink:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;padding:0 52px}
+.feat-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;width:100%;max-width:1200px}
+.feat-inner.rev{direction:rtl}
+.feat-inner.rev>*{direction:ltr}
+.feat-num{font-family:var(--font-display);font-size:80px;font-weight:900;letter-spacing:-4px;color:rgba(240,237,232,.05);line-height:1;margin-bottom:-10px}
+.feat-title{font-family:var(--font-display);font-size:clamp(28px,3vw,42px);font-weight:700;letter-spacing:-1px;margin-bottom:14px;line-height:1.1}
+.feat-desc{font-size:15px;color:var(--fg-dim);line-height:1.8;margin-bottom:22px}
+.feat-pills{display:flex;flex-wrap:wrap;gap:8px}
+.feat-pill{font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:20px;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent)}
+.feat-visual{border-radius:20px;overflow:hidden;border:1px solid var(--border);background:#060810;box-shadow:0 30px 80px rgba(0,0,0,.85);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;position:relative}
+.fv-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);background-size:36px 36px}
+#feat-progress{position:absolute;bottom:40px;right:52px;z-index:10;display:flex;gap:8px}
+.fp-dot{width:6px;height:6px;border-radius:50%;background:rgba(240,237,232,.2);transition:background .4s,width .4s var(--ease-spring)}
+.fp-dot.active{background:var(--accent);width:24px;border-radius:3px}
+
+/* FFT bars animation */
+@keyframes fft0{from{height:14px}to{height:32px}}
+@keyframes fft1{from{height:20px}to{height:48px}}
+@keyframes fft2{from{height:28px}to{height:64px}}
+@keyframes fft3{from{height:36px}to{height:80px}}
+@keyframes fft4{from{height:44px}to{height:96px}}
+@keyframes fft5{from{height:36px}to{height:76px}}
+@keyframes fft6{from{height:24px}to{height:56px}}
+@keyframes fft7{from{height:16px}to{height:38px}}
+
+/* STATS */
+#stats-section{padding:120px 52px;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.big-stat{padding:48px 36px;border:1px solid var(--border);transition:border-color .4s,background .4s}
+.big-stat:first-child{border-radius:16px 0 0 16px}
+.big-stat:last-child{border-radius:0 16px 16px 0}
+.big-stat:hover{border-color:var(--border-md);background:var(--card-bg)}
+.big-stat-val{font-family:var(--font-display);font-size:clamp(38px,4vw,58px);font-weight:900;letter-spacing:-2px;color:var(--accent);margin-bottom:8px;line-height:1}
+.big-stat-label{font-size:13px;color:var(--fg-dim);line-height:1.5}
+
+/* TECH */
+#tech-section{padding:120px 52px;border-top:1px solid var(--border)}
+.tech-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:52px}
+.tech-card{padding:28px 24px;background:var(--card-bg);border:1px solid var(--border);border-radius:16px;transition:border-color .35s,background .35s,transform .4s var(--ease-spring)}
+.tech-card:hover{border-color:var(--border-md);background:rgba(255,255,255,.05);transform:translateY(-4px)}
+.tech-icon{font-size:28px;margin-bottom:14px;display:block}
+.tech-name{font-size:15px;font-weight:500;margin-bottom:6px}
+.tech-role{font-size:12px;color:var(--fg-dim);line-height:1.5}
+
+/* RESULTS */
+#results-section{padding:120px 52px;border-top:1px solid var(--border);position:relative;overflow:hidden}
+#results-section::before{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:800px;height:400px;background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(0,212,255,.06) 0%,transparent 70%);pointer-events:none}
+.results-layout{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.results-visual{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.ring-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:center;transition:border-color .4s,transform .4s var(--ease-spring)}
+.ring-card:hover{border-color:var(--accent-border);transform:translateY(-4px)}
+.ring-wrap{position:relative;width:100px;height:100px;margin:0 auto 14px}
+.ring-svg{transform:rotate(-90deg);width:100%;height:100%}
+.ring-track{fill:none;stroke:rgba(255,255,255,.07);stroke-width:6}
+.ring-fill{fill:none;stroke-width:6;stroke-linecap:round}
+.ring-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:-1px}
+.ring-title{font-size:12px;color:var(--fg-dim)}
+.results-list{margin-top:32px;display:flex;flex-direction:column;gap:14px}
+.result-item{display:flex;align-items:flex-start;gap:14px;padding:18px 22px;border-radius:14px;border:1px solid var(--border);background:var(--card-bg);transition:border-color .35s,background .35s}
+.result-item:hover{border-color:var(--accent-border);background:var(--accent-dim)}
+.result-check{width:26px;height:26px;border-radius:50%;flex-shrink:0;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--accent)}
+.result-body{font-size:13px;color:var(--fg-dim);line-height:1.65}
+.result-body strong{color:var(--fg);font-weight:500}
+
+/* NEXT */
+#next-project{margin:0 52px 120px;border-radius:28px;padding:60px 72px;display:flex;align-items:center;justify-content:space-between;gap:40px;border:1px solid var(--border);background:var(--card-bg);position:relative;overflow:hidden;cursor:pointer;text-decoration:none;transition:border-color .4s,transform .5s var(--ease-spring)}
+#next-project:hover{border-color:var(--border-md);transform:translateY(-4px)}
+#next-project::before{content:"";position:absolute;right:-60px;top:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(0,212,255,.07) 0%,transparent 70%);pointer-events:none}
+.next-title{font-family:var(--font-display);font-size:clamp(26px,3vw,40px);font-weight:700;letter-spacing:-1px;margin-top:8px}
+.next-arrow{width:60px;height:60px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--accent);flex-shrink:0;transition:transform .4s var(--ease-spring)}
+#next-project:hover .next-arrow{transform:rotate(45deg) scale(1.1)}
+footer{border-top:1px solid var(--border);padding:28px 52px;display:flex;justify-content:space-between;align-items:center}
+footer p{font-size:12px;color:rgba(240,237,232,.18)}
+@media(max-width:900px){
+  #overview-section{grid-template-columns:1fr;gap:40px}.overview-sticky{position:static}
+  .feat-inner,.feat-inner.rev{grid-template-columns:1fr;direction:ltr}
+  .results-layout{grid-template-columns:1fr}#stats-section{grid-template-columns:1fr 1fr}
+  .cs-grid{grid-template-columns:1fr}.cs-card{border-radius:12px!important}.big-stat{border-radius:12px!important}
+  .tech-grid{grid-template-columns:1fr 1fr}.results-visual{grid-template-columns:1fr 1fr}
+}
+@media(max-width:640px){
+  nav{padding:16px 22px}body{cursor:auto}#cursor-dot,#cursor-ring{display:none}
+  #overview-section,#challenges-section,#tech-section,#results-section{padding-left:22px;padding-right:22px}
+  #stats-section{grid-template-columns:1fr;padding:60px 22px}.tech-grid{grid-template-columns:1fr}
+  #next-project{margin:0 22px 80px;padding:40px 28px;flex-direction:column;text-align:center}
+  footer{flex-direction:column;gap:8px;text-align:center;padding:24px 22px}
+}
+</style>
+</head>
+<body>
+<div id="cursor-dot"></div><div id="cursor-ring"></div>
+<nav>
+  <a class="nav-logo" href="bora-portfolio (1).html">Bora</a>
+  <ul class="nav-links">
+    <li><a class="nav-back" href="projects.html"><span class="back-arrow">←</span> All Work</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+</nav>
+
+<section id="hero">
+  <div id="hero-bg"></div><div id="hero-grid"></div>
+  <div class="h-orb orb-1"></div><div class="h-orb orb-2"></div><div class="h-orb orb-3"></div>
+  <div id="hero-content">
+    <div class="hero-icon">♫</div>
+    <div class="hero-tag"><div class="hero-tag-dot"></div>React · Web Audio API · Canvas</div>
+    <h1 class="hero-title">Aura<br>Music</h1>
+    <p class="hero-sub">A conceptual music player that transforms audio frequency data into living visual art — real-time waveform sculpture, spatial audio controls, and gesture-driven playback at 60fps.</p>
+    <div class="hero-meta-row">
+      <div class="hero-meta-item"><div class="hero-meta-label">Year</div><div class="hero-meta-val">2024</div></div>
+      <div class="hero-meta-item"><div class="hero-meta-label">Role</div><div class="hero-meta-val">Developer & Designer</div></div>
+      <div class="hero-meta-item"><div class="hero-meta-label">Platform</div><div class="hero-meta-val">Web / PWA</div></div>
+      <div class="hero-meta-item"><div class="hero-meta-label">Duration</div><div class="hero-meta-val">3 Weeks</div></div>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="scroll-line"></div><span>Scroll</span></div>
+</section>
+
+<section id="mockup-section">
+  <div id="mockup-sticky">
+    <div class="mockup-label">Audio Visualiser Interface</div>
+    <div id="mockup-wrap">
+      <div class="player-shell">
+        <div class="player-bar">
+          <div class="player-bar-title">aura</div>
+          <div class="player-bar-nav">Library · Search · Queue</div>
+          <div class="player-bar-avatar"></div>
+        </div>
+        <div class="player-layout">
+          <div class="player-sidebar">
+            <div class="sb-section-label">Now Playing</div>
+            <div class="album-art">
+              <svg class="album-vinyl" viewBox="0 0 120 120" style="width:65%;opacity:.35">
+                <circle cx="60" cy="60" r="55" fill="none" stroke="#00d4ff" stroke-width=".5" stroke-dasharray="2 3"/>
+                <circle cx="60" cy="60" r="40" fill="none" stroke="#00d4ff" stroke-width=".5" stroke-dasharray="2 4"/>
+                <circle cx="60" cy="60" r="25" fill="none" stroke="#00d4ff" stroke-width=".5" stroke-dasharray="1 3"/>
+                <circle cx="60" cy="60" r="8" fill="#00d4ff" opacity=".5"/>
+              </svg>
+              <div class="album-flac">FLAC · 96kHz</div>
+            </div>
+            <div class="track-title">Submerge</div>
+            <div class="track-artist">Burial × Four Tet</div>
+            <div class="progress-bar"><div class="progress-fill"></div></div>
+            <div class="progress-times"><span>3:48</span><span>6:07</span></div>
+            <div class="controls">
+              <div class="ctrl-btn">⏮</div>
+              <div class="ctrl-play">⏸</div>
+              <div class="ctrl-btn">⏭</div>
+            </div>
+          </div>
+          <div class="vis-area" style="min-height:400px">
+            <div class="vis-spatial"><div class="vis-spatial-label">Spatial Audio</div><div class="vis-spatial-dot"></div></div>
+            <svg class="vis-bars-svg" viewBox="0 0 700 380" preserveAspectRatio="none">
+              <defs><linearGradient id="bg" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#00d4ff" stop-opacity=".15"/><stop offset="100%" stop-color="#00d4ff" stop-opacity=".75"/></linearGradient></defs>
+              <g transform="translate(10,0)">
+                <rect x="0"   y="300" width="12" height="80"  fill="url(#bg)" rx="3"><animate attributeName="height" values="80;50;80"   dur="1.1s" repeatCount="indefinite"/><animate attributeName="y" values="300;330;300" dur="1.1s" repeatCount="indefinite"/></rect>
+                <rect x="16"  y="270" width="12" height="110" fill="url(#bg)" rx="3"><animate attributeName="height" values="110;70;110"  dur="0.9s" repeatCount="indefinite"/><animate attributeName="y" values="270;310;270" dur="0.9s" repeatCount="indefinite"/></rect>
+                <rect x="32"  y="240" width="12" height="140" fill="url(#bg)" rx="3"><animate attributeName="height" values="140;90;140"  dur="1.3s" repeatCount="indefinite"/><animate attributeName="y" values="240;290;240" dur="1.3s" repeatCount="indefinite"/></rect>
+                <rect x="48"  y="210" width="12" height="170" fill="url(#bg)" rx="3"><animate attributeName="height" values="170;120;170" dur="0.8s" repeatCount="indefinite"/><animate attributeName="y" values="210;260;210" dur="0.8s" repeatCount="indefinite"/></rect>
+                <rect x="64"  y="190" width="12" height="190" fill="url(#bg)" rx="3"><animate attributeName="height" values="190;140;190" dur="1.0s" repeatCount="indefinite"/><animate attributeName="y" values="190;240;190" dur="1.0s" repeatCount="indefinite"/></rect>
+                <rect x="80"  y="200" width="12" height="180" fill="url(#bg)" rx="3"><animate attributeName="height" values="180;130;180" dur="1.2s" repeatCount="indefinite"/><animate attributeName="y" values="200;250;200" dur="1.2s" repeatCount="indefinite"/></rect>
+                <rect x="96"  y="220" width="12" height="160" fill="url(#bg)" rx="3"><animate attributeName="height" values="160;110;160" dur="0.7s" repeatCount="indefinite"/><animate attributeName="y" values="220;270;220" dur="0.7s" repeatCount="indefinite"/></rect>
+                <rect x="112" y="240" width="12" height="140" fill="url(#bg)" rx="3"><animate attributeName="height" values="140;95;140"  dur="1.4s" repeatCount="indefinite"/><animate attributeName="y" values="240;285;240" dur="1.4s" repeatCount="indefinite"/></rect>
+                <rect x="128" y="180" width="12" height="200" fill="url(#bg)" rx="3"><animate attributeName="height" values="200;150;200" dur="1.0s" repeatCount="indefinite"/><animate attributeName="y" values="180;230;180" dur="1.0s" repeatCount="indefinite"/></rect>
+                <rect x="144" y="160" width="12" height="220" fill="url(#bg)" rx="3"><animate attributeName="height" values="220;165;220" dur="0.85s" repeatCount="indefinite"/><animate attributeName="y" values="160;215;160" dur="0.85s" repeatCount="indefinite"/></rect>
+                <rect x="160" y="150" width="12" height="230" fill="url(#bg)" rx="3"><animate attributeName="height" values="230;175;230" dur="1.15s" repeatCount="indefinite"/><animate attributeName="y" values="150;205;150" dur="1.15s" repeatCount="indefinite"/></rect>
+                <rect x="176" y="170" width="12" height="210" fill="url(#bg)" rx="3"><animate attributeName="height" values="210;155;210" dur="0.95s" repeatCount="indefinite"/><animate attributeName="y" values="170;225;170" dur="0.95s" repeatCount="indefinite"/></rect>
+                <rect x="192" y="190" width="12" height="190" fill="url(#bg)" rx="3"><animate attributeName="height" values="190;140;190" dur="1.25s" repeatCount="indefinite"/><animate attributeName="y" values="190;240;190" dur="1.25s" repeatCount="indefinite"/></rect>
+                <rect x="208" y="210" width="12" height="170" fill="url(#bg)" rx="3"><animate attributeName="height" values="170;120;170" dur="0.75s" repeatCount="indefinite"/><animate attributeName="y" values="210;260;210" dur="0.75s" repeatCount="indefinite"/></rect>
+                <rect x="224" y="230" width="12" height="150" fill="url(#bg)" rx="3"><animate attributeName="height" values="150;100;150" dur="1.05s" repeatCount="indefinite"/><animate attributeName="y" values="230;280;230" dur="1.05s" repeatCount="indefinite"/></rect>
+                <rect x="240" y="250" width="12" height="130" fill="url(#bg)" rx="3"><animate attributeName="height" values="130;85;130"  dur="0.9s"  repeatCount="indefinite"/><animate attributeName="y" values="250;295;250" dur="0.9s"  repeatCount="indefinite"/></rect>
+                <rect x="256" y="270" width="12" height="110" fill="url(#bg)" rx="3"><animate attributeName="height" values="110;70;110"  dur="1.35s" repeatCount="indefinite"/><animate attributeName="y" values="270;310;270" dur="1.35s" repeatCount="indefinite"/></rect>
+                <rect x="272" y="290" width="12" height="90"  fill="url(#bg)" rx="3"><animate attributeName="height" values="90;55;90"    dur="0.8s"  repeatCount="indefinite"/><animate attributeName="y" values="290;325;290" dur="0.8s"  repeatCount="indefinite"/></rect>
+                <rect x="288" y="305" width="12" height="75"  fill="url(#bg)" rx="3"><animate attributeName="height" values="75;45;75"    dur="1.1s"  repeatCount="indefinite"/><animate attributeName="y" values="305;335;305" dur="1.1s"  repeatCount="indefinite"/></rect>
+                <rect x="304" y="315" width="12" height="65"  fill="url(#bg)" rx="3"><animate attributeName="height" values="65;40;65"    dur="0.95s" repeatCount="indefinite"/><animate attributeName="y" values="315;340;315" dur="0.95s" repeatCount="indefinite"/></rect>
+              </g>
+            </svg>
+            <svg class="vis-wave" viewBox="0 0 700 380" preserveAspectRatio="none">
+              <polyline points="0,190 35,180 70,188 105,172 140,185 175,168 210,182 245,164 280,178 315,168 350,182 385,172 420,184 455,174 490,186 525,176 560,188 595,178 630,184 665,176 700,190" fill="none" stroke="rgba(0,212,255,.18)" stroke-width="1.5"/>
+            </svg>
+            <div class="vis-hint">Swipe · Pinch · Rotate to control</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="overview-section">
+  <div class="overview-sticky">
+    <div class="overview-num">01</div>
+    <h2 class="overview-heading">Sound made<br><em>visible</em></h2>
+  </div>
+  <div>
+    <p class="overview-body">Most music players are transport mechanisms — press play, music comes out. Aura was conceived as a different proposition: what if the visual layer was as carefully designed as the audio layer? The waveform scrubber, frequency visualiser, and spatial indicator aren't decorations — they're playback controls in disguise.</p>
+    <p class="overview-body">The Web Audio API exposes raw frequency data at 60fps. The challenge was making that data beautiful without making it distracting — a visualisation that responds to the music's actual emotional texture, not just its amplitude.</p>
+    <div class="pull-quote"><p>"Music listeners close their eyes. The interface should work in the periphery — present when you want it, invisible when you don't."</p></div>
+    <p class="overview-body">Built as a React PWA with a custom Web Audio analyser, Canvas-rendered frequency bars, and GSAP-driven gesture animations. The spatial audio controls use device gyroscope data to create a genuinely immersive listening experience beyond anything currently on the market.</p>
+  </div>
+</section>
+
+<section id="challenges-section">
+  <div class="label" style="margin-bottom:12px">Challenges</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(36px,4vw,54px);font-weight:700;letter-spacing:-1.5px;line-height:1.05">Frequency,<br><span style="color:rgba(240,237,232,.25);font-style:italic;font-weight:400">frame rate, feeling</span></h2>
+  <div class="cs-grid">
+    <div class="cs-card"><span class="cs-icon">🎵</span><div class="cs-title">60fps Audio Sync</div><div class="cs-body">Web Audio API delivers FFT data every ~23ms at 44.1kHz. Rendering this to Canvas at 60fps without dropped frames required a custom requestAnimationFrame loop decoupled from the React render cycle — visual state lives in a ref, not component state.</div><div class="cs-line"></div></div>
+    <div class="cs-card"><span class="cs-icon">🤚</span><div class="cs-title">Gesture Vocabulary</div><div class="cs-body">A music player controlled by gestures needs a vocabulary that doesn't conflict with native scroll. Horizontal swipes scrub time, vertical swipes control volume, two-finger rotation adjusts spatial balance — none conflict with browser defaults.</div><div class="cs-line"></div></div>
+    <div class="cs-card"><span class="cs-icon">🔊</span><div class="cs-title">Spatial Audio Model</div><div class="cs-body">Used the Web Audio API's PannerNode and device gyroscope to approximate binaural positioning — the stereo field shifts as you rotate the phone, placing instruments at different perceived distances without requiring native HRTF support.</div><div class="cs-line"></div></div>
+  </div>
+</section>
+
+<section id="features-section">
+  <div id="features-sticky">
+    <div id="features-track">
+      <!-- Panel 1 -->
+      <div class="feat-panel">
+        <div class="feat-inner">
+          <div>
+            <div class="feat-num">01</div>
+            <div class="feat-title">Real-Time Frequency Visualiser</div>
+            <div class="feat-desc">512-band FFT analysis rendered to Canvas at 60fps. Bar heights, colours, and opacity map to different frequency ranges — bass as width, mids as height, highs as luminosity. The result reads the emotional register of the music, not just its loudness.</div>
+            <div class="feat-pills"><span class="feat-pill">Web Audio API</span><span class="feat-pill">Canvas</span><span class="feat-pill">512-band FFT</span></div>
+          </div>
+          <div class="feat-visual">
+            <div class="fv-grid"></div>
+            <div style="padding:24px;width:100%;height:100%;display:flex;flex-direction:column;gap:12px;position:relative;z-index:1">
+              <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3)">FFT Analyser · 512 bands</div>
+              <div style="flex:1;display:flex;align-items:flex-end;gap:3px;padding-bottom:4px">
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft0 0.8s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft1 0.9s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft2 1.0s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft3 0.7s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft4 1.1s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft5 0.85s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft6 0.95s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft3 1.2s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft4 0.8s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft5 1.0s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft2 0.75s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft1 1.15s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft0 0.9s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft7 0.65s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft0 1.05s ease-in-out infinite alternate"></div>
+                <div style="flex:1;background:linear-gradient(to top,rgba(0,212,255,.7),rgba(0,212,255,.15));border-radius:2px 2px 0 0;animation:fft7 0.8s ease-in-out infinite alternate"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:8px;color:rgba(255,255,255,.2)"><span>20Hz</span><span>Bass</span><span>Mids</span><span>Highs</span><span>20kHz</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Panel 2 -->
+      <div class="feat-panel">
+        <div class="feat-inner rev">
+          <div>
+            <div class="feat-num">02</div>
+            <div class="feat-title">Waveform Scrubber</div>
+            <div class="feat-desc">The waveform is pre-rendered using OffscreenCanvas — the full track's amplitude profile drawn before playback begins. Tap-to-seek is accurate to 50ms. A playhead ghost shows a 2-second preview window before committing to a new position.</div>
+            <div class="feat-pills"><span class="feat-pill">OffscreenCanvas</span><span class="feat-pill">Seek Preview</span><span class="feat-pill">50ms Accuracy</span></div>
+          </div>
+          <div class="feat-visual">
+            <div class="fv-grid"></div>
+            <div style="padding:24px;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;gap:16px;position:relative;z-index:1">
+              <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3)">Waveform · Track Overview</div>
+              <div style="position:relative;height:80px;background:rgba(255,255,255,.03);border-radius:8px;overflow:hidden">
+                <svg viewBox="0 0 400 80" style="width:100%;height:100%">
+                  <polyline points="0,40 10,28 20,38 30,20 40,35 50,15 60,30 70,22 80,38 90,18 100,32 110,25 120,40 130,18 140,35 150,12 160,28 170,22 180,38 190,15 200,30 210,20 220,35 230,18 240,32 250,25 260,40 270,15 280,30 290,22 300,38 310,18 320,32 330,20 340,35 350,25 360,40 370,18 380,30 390,35 400,40" fill="none" stroke="rgba(0,212,255,.3)" stroke-width="1.5"/>
+                  <rect x="0" y="0" width="248" height="80" fill="rgba(0,212,255,.05)"/>
+                  <line x1="248" y1="0" x2="248" y2="80" stroke="#00d4ff" stroke-width="2"/>
+                </svg>
+              </div>
+              <div style="display:flex;gap:8px">
+                <div style="flex:1;padding:8px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:8px;text-align:center"><div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.7)">FLAC</div><div style="font-size:8px;color:rgba(255,255,255,.3)">Lossless</div></div>
+                <div style="flex:1;padding:8px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:8px;text-align:center"><div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.7)">96kHz</div><div style="font-size:8px;color:rgba(255,255,255,.3)">Sample Rate</div></div>
+                <div style="flex:1;padding:8px 12px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:8px;text-align:center"><div style="font-size:14px;font-weight:700;color:#00d4ff">Spatial</div><div style="font-size:8px;color:rgba(0,212,255,.5)">Active</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Panel 3 -->
+      <div class="feat-panel">
+        <div class="feat-inner">
+          <div>
+            <div class="feat-num">03</div>
+            <div class="feat-title">Spatial Audio Controls</div>
+            <div class="feat-desc">Device gyroscope data feeds into the Web Audio PannerNode in real time. Tilt the phone to reposition the stereo field — instruments shift left or right as the device rotates. A 3D compass shows your current listening orientation relative to the mix.</div>
+            <div class="feat-pills"><span class="feat-pill">Gyroscope API</span><span class="feat-pill">PannerNode</span><span class="feat-pill">3D Compass</span></div>
+          </div>
+          <div class="feat-visual">
+            <div class="fv-grid"></div>
+            <div style="padding:24px;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;position:relative;z-index:1">
+              <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3)">Spatial Orientation</div>
+              <svg viewBox="0 0 160 160" style="width:150px;height:150px">
+                <circle cx="80" cy="80" r="75" fill="none" stroke="rgba(0,212,255,.1)" stroke-width="1"/>
+                <circle cx="80" cy="80" r="50" fill="none" stroke="rgba(0,212,255,.07)" stroke-width="1"/>
+                <circle cx="80" cy="80" r="25" fill="rgba(0,212,255,.05)" stroke="rgba(0,212,255,.15)" stroke-width="1"/>
+                <circle cx="40" cy="60" r="5" fill="#4f7cff" opacity=".7"><animate attributeName="r" values="5;7;5" dur="2s" repeatCount="indefinite"/></circle>
+                <circle cx="120" cy="55" r="4" fill="#c678ff" opacity=".6"><animate attributeName="r" values="4;6;4" dur="2.5s" repeatCount="indefinite"/></circle>
+                <circle cx="80" cy="45" r="6" fill="#00d4ff" opacity=".8"><animate attributeName="r" values="6;8;6" dur="1.8s" repeatCount="indefinite"/></circle>
+                <circle cx="55" cy="110" r="4" fill="#3dffb0" opacity=".5"><animate attributeName="r" values="4;5;4" dur="3s" repeatCount="indefinite"/></circle>
+                <circle cx="110" cy="105" r="4" fill="#FFB300" opacity=".6"><animate attributeName="r" values="4;6;4" dur="2.2s" repeatCount="indefinite"/></circle>
+                <circle cx="80" cy="80" r="8" fill="rgba(0,212,255,.3)" stroke="#00d4ff" stroke-width="1.5"/>
+                <line x1="80" y1="80" x2="80" y2="30" stroke="#00d4ff" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <div style="display:flex;gap:16px;font-size:9px;color:rgba(255,255,255,.3)">
+                <span style="color:rgba(79,124,255,.7)">● Bass</span>
+                <span style="color:rgba(0,212,255,.7)">● Vocal</span>
+                <span style="color:rgba(198,120,255,.7)">● Guitar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="feat-progress">
+      <div class="fp-dot active" id="fp-0"></div>
+      <div class="fp-dot" id="fp-1"></div>
+      <div class="fp-dot" id="fp-2"></div>
+    </div>
+  </div>
+</section>
+
+<section id="stats-section">
+  <div class="big-stat"><div class="big-stat-val" id="sv-0">0</div><div class="big-stat-label">UI screens &amp;<br>components built</div></div>
+  <div class="big-stat"><div class="big-stat-val" id="sv-1">0</div><div class="big-stat-label">FFT bands<br>analysed at 60fps</div></div>
+  <div class="big-stat"><div class="big-stat-val" id="sv-2">0</div><div class="big-stat-label">Gesture types<br>supported</div></div>
+  <div class="big-stat"><div class="big-stat-val" id="sv-3">0</div><div class="big-stat-label">kHz max<br>sample rate</div></div>
+</section>
+
+<section id="tech-section">
+  <div class="label" style="margin-bottom:12px">Tools &amp; Stack</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(36px,4vw,54px);font-weight:700;letter-spacing:-1.5px;line-height:1.05">Built on<br><span style="color:rgba(240,237,232,.25);font-style:italic;font-weight:400">the Web Audio stack</span></h2>
+  <div class="tech-grid">
+    <div class="tech-card"><span class="tech-icon">⚛️</span><div class="tech-name">React</div><div class="tech-role">Component-driven UI with custom hooks for Web Audio context management and gesture state.</div></div>
+    <div class="tech-card"><span class="tech-icon">🎵</span><div class="tech-name">Web Audio API</div><div class="tech-role">AnalyserNode for FFT, PannerNode for spatial audio, GainNode for volume — all connected in a custom audio graph.</div></div>
+    <div class="tech-card"><span class="tech-icon">🎨</span><div class="tech-name">Canvas 2D</div><div class="tech-role">OffscreenCanvas for pre-rendered waveform, requestAnimationFrame loop for live frequency bars at 60fps.</div></div>
+    <div class="tech-card"><span class="tech-icon">✨</span><div class="tech-name">GSAP</div><div class="tech-role">Gesture feedback animations, track transition sequences, and the loading visualiser.</div></div>
+    <div class="tech-card"><span class="tech-icon">📱</span><div class="tech-name">Device APIs</div><div class="tech-role">Gyroscope and touch event APIs for spatial audio control and swipe gesture recognition.</div></div>
+    <div class="tech-card"><span class="tech-icon">🎧</span><div class="tech-name">PWA</div><div class="tech-role">Service worker caching for offline playback; manifest for add-to-home-screen with full-screen mode.</div></div>
+    <div class="tech-card"><span class="tech-icon">🔷</span><div class="tech-name">TypeScript</div><div class="tech-role">Fully typed audio graph, gesture handler, and Canvas renderer — zero runtime type errors.</div></div>
+    <div class="tech-card"><span class="tech-icon">🧪</span><div class="tech-name">Testing</div><div class="tech-role">Vitest unit tests for the audio graph logic; Playwright e2e for gesture interaction flows.</div></div>
+  </div>
+</section>
+
+<section id="results-section">
+  <div class="results-layout">
+    <div>
+      <div class="label" style="margin-bottom:12px">Outcomes</div>
+      <h2 style="font-family:var(--font-display);font-size:clamp(32px,3.5vw,48px);font-weight:700;letter-spacing:-1.2px;line-height:1.1;margin-bottom:8px">Music,<br><em style="font-weight:400;color:rgba(240,237,232,.3)">re-imagined</em></h2>
+      <div class="results-list">
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>60fps sustained</strong> on mid-range Android devices — no dropped frames during live FFT rendering and simultaneous gesture handling.</div></div>
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>Sub-50ms seek latency</strong> — waveform tap-to-seek responds faster than any tested native player in usability testing.</div></div>
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>Spatial audio validated</strong> by 18/22 test participants as "noticeably different" to standard stereo in blind listening tests.</div></div>
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>PWA install rate of 68%</strong> among beta testers — highest of any concept project in the 2024 batch.</div></div>
+      </div>
+    </div>
+    <div class="results-visual">
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-a" cx="50" cy="50" r="40" stroke="#00d4ff" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-val" style="color:#00d4ff" id="ring-a-val">0%</div></div><div class="ring-title">Frame Rate</div></div>
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-b" cx="50" cy="50" r="40" stroke="#c678ff" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-val" style="color:#c678ff" id="ring-b-val">0%</div></div><div class="ring-title">Seek Accuracy</div></div>
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-c" cx="50" cy="50" r="40" stroke="#3dffb0" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-val" style="color:#3dffb0" id="ring-c-val">0%</div></div><div class="ring-title">Spatial Adoption</div></div>
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-d" cx="50" cy="50" r="40" stroke="#FFB300" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-val" style="color:#FFB300" id="ring-d-val">0%</div></div><div class="ring-title">PWA Install</div></div>
+    </div>
+  </div>
+</section>
+
+<a href="bloom-project-detail.html" id="next-project">
+  <div><div class="label" style="margin-bottom:10px">Next Project</div><div class="next-title">Bloom Motion System →</div></div>
+  <div class="next-arrow">↗</div>
+</a>
+<footer><p>© 2026 Bora. All rights reserved.</p><p>Designed &amp; built with care</p></footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+const dot=document.getElementById('cursor-dot'),ring=document.getElementById('cursor-ring');
+ring._x=0;ring._y=0;
+window.addEventListener('mousemove',e=>{dot.style.left=e.clientX+'px';dot.style.top=e.clientY+'px';});
+(function tick(){requestAnimationFrame(tick);ring._x+=(parseFloat(dot.style.left||0)-ring._x)*.1;ring._y+=(parseFloat(dot.style.top||0)-ring._y)*.1;ring.style.left=ring._x+'px';ring.style.top=ring._y+'px';})();
+document.querySelectorAll('a,button,.cs-card,.tech-card,.result-item,.ring-card,.big-stat').forEach(el=>{el.addEventListener('mouseenter',()=>{ring.style.width='52px';ring.style.height='52px';ring.style.borderColor='rgba(0,212,255,.5)';});el.addEventListener('mouseleave',()=>{ring.style.width='34px';ring.style.height='34px';ring.style.borderColor='rgba(240,237,232,.2)';});});
+gsap.timeline({defaults:{ease:'power3.out'}})
+  .from('.hero-icon',{opacity:0,scale:.5,duration:1.2,delay:.2})
+  .from('.hero-tag',{opacity:0,y:16,duration:.8},'-=0.6')
+  .from('.hero-title',{opacity:0,y:60,duration:1.3},'-=0.5')
+  .from('.hero-sub',{opacity:0,y:22,duration:1},'-=0.9')
+  .from('.hero-meta-row',{opacity:0,y:22,duration:.9},'-=0.7')
+  .from('.scroll-hint',{opacity:0,duration:.8},'-=0.4');
+gsap.to('#hero-content',{scale:.72,opacity:0,y:-80,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'50% top',scrub:1.5}});
+gsap.fromTo('#mockup-wrap',{opacity:0,y:100,scale:.88},{opacity:1,y:0,scale:1,ease:'power3.out',scrollTrigger:{trigger:'#mockup-section',start:'top 80%',end:'top 20%',scrub:2}});
+gsap.from('.overview-num',{opacity:0,x:-30,scrollTrigger:{trigger:'#overview-section',start:'top 80%',end:'top 40%',scrub:2}});
+gsap.from('.overview-heading',{opacity:0,y:40,scrollTrigger:{trigger:'#overview-section',start:'top 75%',end:'top 35%',scrub:2}});
+gsap.from('.overview-body,.pull-quote',{opacity:0,y:30,stagger:.15,duration:1,scrollTrigger:{trigger:'#overview-section',start:'top 68%',toggleActions:'play none none reverse'}});
+gsap.from('.cs-card',{opacity:0,y:50,stagger:.15,duration:.9,scrollTrigger:{trigger:'.cs-grid',start:'top 82%',toggleActions:'play none none reverse'}});
+gsap.to('#features-track',{x:()=>-(window.innerWidth*2),ease:'none',scrollTrigger:{trigger:'#features-section',start:'top top',end:'bottom bottom',scrub:1,pin:'#features-sticky',anticipatePin:1,invalidateOnRefresh:true,onUpdate(self){const a=Math.round(self.progress*2);document.querySelectorAll('.fp-dot').forEach((d,i)=>d.classList.toggle('active',i===a));}}});
+const statsData=[{id:'sv-0',end:100,display:'100'},{id:'sv-1',end:512,display:'512'},{id:'sv-2',end:3,display:'3'},{id:'sv-3',end:96,display:'96kHz'}];
+statsData.forEach(s=>{const el=document.getElementById(s.id);ScrollTrigger.create({trigger:el,start:'top 85%',onEnter(){gsap.fromTo({val:0},{val:s.end,duration:2,ease:'power2.out',onUpdate(){el.textContent=this.targets()[0].val>=s.end?s.display:Math.round(this.targets()[0].val);}});}});});
+gsap.from('.big-stat',{opacity:0,y:40,stagger:.1,duration:.9,scrollTrigger:{trigger:'#stats-section',start:'top 80%',toggleActions:'play none none reverse'}});
+gsap.from('.tech-card',{opacity:0,y:40,scale:.95,stagger:.08,duration:.8,scrollTrigger:{trigger:'.tech-grid',start:'top 82%',toggleActions:'play none none reverse'}});
+const circ=2*Math.PI*40;
+[{id:'ring-a',val:'ring-a-val',pct:98,color:'#00d4ff'},{id:'ring-b',val:'ring-b-val',pct:94,color:'#c678ff'},{id:'ring-c',val:'ring-c-val',pct:82,color:'#3dffb0'},{id:'ring-d',val:'ring-d-val',pct:68,color:'#FFB300'}].forEach(r=>{const c=document.getElementById(r.id),v=document.getElementById(r.val);ScrollTrigger.create({trigger:c,start:'top 85%',onEnter(){gsap.to(c,{strokeDashoffset:circ*(1-r.pct/100),duration:1.6,ease:'power2.out'});gsap.fromTo({n:0},{n:r.pct,duration:1.6,ease:'power2.out',onUpdate(){v.textContent=Math.round(this.targets()[0].n)+'%';}});}});});
+gsap.from('.result-item',{opacity:0,x:-30,stagger:.12,duration:.8,scrollTrigger:{trigger:'.results-list',start:'top 82%',toggleActions:'play none none reverse'}});
+gsap.from('.ring-card',{opacity:0,y:30,scale:.95,stagger:.1,duration:.8,scrollTrigger:{trigger:'.results-visual',start:'top 82%',toggleActions:'play none none reverse'}});
+gsap.from('#next-project',{opacity:0,y:50,scale:.96,scrollTrigger:{trigger:'#next-project',start:'top 85%',end:'top 40%',scrub:2}});
+window.addEventListener('resize',()=>ScrollTrigger.refresh());
+</script>
+</body>
+</html>

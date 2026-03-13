@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bora — Luminary App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+:root{
+  --font-display:'Playfair Display',serif;
+  --font-body:'DM Sans',sans-serif;
+  --bg:#050810;
+  --fg:#f0ede8;
+  --fg-dim:rgba(240,237,232,0.45);
+  --border:rgba(255,255,255,0.07);
+  --border-md:rgba(255,255,255,0.13);
+  --card-bg:rgba(255,255,255,0.03);
+  --nav-bg:rgba(5,8,16,0.85);
+  --accent:#4f7cff;
+  --accent-dim:rgba(79,124,255,0.10);
+  --accent-border:rgba(79,124,255,0.28);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:auto}
+body{font-family:var(--font-body);background:var(--bg);color:var(--fg);overflow-x:hidden;cursor:none}
+#cursor-dot{position:fixed;width:8px;height:8px;background:rgba(240,237,232,.9);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+#cursor-ring{position:fixed;width:34px;height:34px;border:1.5px solid rgba(240,237,232,.2);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .4s var(--ease-spring),height .4s var(--ease-spring),border-color .3s}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:18px 52px;background:var(--nav-bg);backdrop-filter:blur(28px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--font-display);font-size:22px;letter-spacing:-.4px;color:var(--fg);text-decoration:none}
+.nav-links{display:flex;gap:34px;list-style:none;align-items:center}
+.nav-links a{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-dim);text-decoration:none;transition:color .3s}
+.nav-links a:hover{color:var(--fg)}
+.nav-back{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-dim);text-decoration:none;transition:color .3s,gap .3s}
+.nav-back:hover{color:var(--fg);gap:13px}
+.back-arrow{transition:transform .3s}
+.nav-back:hover .back-arrow{transform:translateX(-3px)}
+.label{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--fg-dim)}
+
+/* ── HERO ── */
+#hero{height:100vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 100% 80% at 50% 40%,#0d1535 0%,#080d25 55%,#050810 100%)}
+#hero-grid{position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(79,124,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(79,124,255,.04) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 30%,transparent 100%)}
+.h-orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(140px);opacity:.16;animation:orbf 11s ease-in-out infinite alternate}
+@keyframes orbf{from{transform:scale(1) translate(0,0)}to{transform:scale(1.1) translate(-15px,-25px)}}
+.orb-1{width:700px;height:600px;background:#1a2566;top:-10%;left:35%}
+.orb-2{width:400px;height:400px;background:#0d1545;bottom:5%;left:-5%;animation-delay:-5s}
+.orb-3{width:300px;height:300px;background:#2a1a55;top:25%;right:5%;animation-delay:-3s}
+#hero::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")}
+#hero-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 20px}
+
+/* Luminary breath ring icon */
+.hero-icon{position:relative;width:90px;height:90px;display:flex;align-items:center;justify-content:center;margin-bottom:32px}
+.breath-ring{position:absolute;border-radius:50%;border:1.5px solid rgba(79,124,255,.4)}
+.br-1{width:90px;height:90px;animation:breathe 4s ease-in-out infinite}
+.br-2{width:64px;height:64px;animation:breathe 4s ease-in-out infinite .5s}
+.br-3{width:38px;height:38px;background:rgba(79,124,255,.15);border-color:rgba(79,124,255,.7);animation:breathe 4s ease-in-out infinite 1s}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.1);opacity:1}}
+.hero-icon-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 16px var(--accent);position:relative;z-index:1}
+
+.hero-tag{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;border-radius:40px;border:1px solid var(--accent-border);background:var(--accent-dim);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:24px}
+.hero-tag-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:blink 2.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.hero-title{font-family:var(--font-display);font-size:clamp(52px,8vw,110px);font-weight:900;letter-spacing:-4px;line-height:.9;background:linear-gradient(140deg,#fff 0%,#b8c8ff 45%,#4f7cff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:22px}
+.hero-sub{font-size:clamp(14px,1.4vw,16px);color:var(--fg-dim);max-width:500px;line-height:1.75;margin-bottom:40px}
+.hero-meta-row{display:flex;gap:36px;flex-wrap:wrap;justify-content:center;padding:22px 36px;border-radius:18px;border:1px solid var(--border);background:rgba(255,255,255,.025);backdrop-filter:blur(12px)}
+.hero-meta-item{text-align:center}
+.hero-meta-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin-bottom:5px}
+.hero-meta-val{font-size:14px;color:var(--fg);font-weight:500}
+.scroll-hint{position:absolute;bottom:44px;z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--fg-dim)}
+.scroll-line{width:1px;height:52px;background:linear-gradient(to bottom,var(--fg-dim),transparent);animation:lp 2.2s ease-in-out infinite}
+@keyframes lp{0%,100%{opacity:.4;transform:scaleY(1)}50%{opacity:1;transform:scaleY(.55)}}
+
+/* ── PHONE MOCKUP ── */
+#mockup-section{height:280vh;position:relative}
+#mockup-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse 60% 50% at 50% 55%,#0d1535 0%,var(--bg) 65%)}
+.mockup-label{position:absolute;top:100px;left:52px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(240,237,232,.2);z-index:5}
+#mockup-wrap{display:flex;gap:24px;align-items:flex-end;will-change:transform,opacity}
+
+/* Phone */
+.phone{background:#0a0a12;border:1px solid rgba(255,255,255,.09);border-radius:44px;overflow:hidden;box-shadow:0 50px 140px rgba(0,0,0,.95),0 0 0 1px rgba(255,255,255,.06)}
+.phone.main{width:280px;box-shadow:0 60px 160px rgba(0,0,0,.95),0 0 60px rgba(79,124,255,.1),0 0 0 1px rgba(255,255,255,.07)}
+.phone.side{width:240px;opacity:.6;transform:translateY(30px)}
+.phone-bar{height:34px;background:#080810;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.04)}
+.pbar-time{font-size:10px;color:rgba(255,255,255,.4);font-family:monospace}
+.pbar-icons{display:flex;gap:5px;align-items:center}
+.pbi{width:12px;height:6px;border-radius:2px;background:rgba(255,255,255,.3)}
+
+/* App screen — Meditation home */
+.app-home{background:linear-gradient(160deg,#0d1535 0%,#080d20 100%);padding:20px 18px;min-height:500px;display:flex;flex-direction:column;gap:14px}
+.app-greeting{display:flex;justify-content:space-between;align-items:center}
+.app-greeting-text .hi{font-size:11px;color:rgba(255,255,255,.35);margin-bottom:2px}
+.app-greeting-text .name{font-size:15px;font-weight:600;color:rgba(255,255,255,.85)}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4f7cff,#c678ff);opacity:.8}
+/* Breath orb */
+.breath-orb-wrap{display:flex;flex-direction:column;align-items:center;padding:10px 0 4px}
+.breath-orb{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(79,124,255,.5),rgba(79,124,255,.15));border:1px solid rgba(79,124,255,.3);display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(79,124,255,.2);animation:breatheOrb 4s ease-in-out infinite;position:relative}
+@keyframes breatheOrb{0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(79,124,255,.2)}50%{transform:scale(1.08);box-shadow:0 0 70px rgba(79,124,255,.4)}}
+.breath-orb-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(79,124,255,.7);margin-top:10px}
+.breath-phase{font-size:13px;font-weight:600;color:rgba(255,255,255,.7);margin-top:4px}
+/* Session row */
+.session-row{display:flex;gap:8px}
+.session-card{flex:1;padding:12px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px}
+.sc-icon{font-size:18px;margin-bottom:6px}
+.sc-title{font-size:10px;color:rgba(255,255,255,.7);font-weight:500;margin-bottom:2px}
+.sc-dur{font-size:9px;color:rgba(255,255,255,.3)}
+/* Streak bar */
+.streak-card{padding:12px 14px;background:rgba(79,124,255,.07);border:1px solid rgba(79,124,255,.18);border-radius:14px;display:flex;align-items:center;gap:12px}
+.streak-val{font-size:26px;font-weight:900;color:#4f7cff;letter-spacing:-1px;line-height:1}
+.streak-info .streak-label{font-size:10px;color:rgba(255,255,255,.7)}
+.streak-info .streak-sub{font-size:9px;color:rgba(255,255,255,.3)}
+.streak-dots{display:flex;gap:4px;margin-top:6px}
+.sd{width:14px;height:4px;border-radius:2px;background:rgba(79,124,255,.25)}
+.sd.on{background:#4f7cff}
+/* Bottom nav */
+.app-nav{display:flex;justify-content:space-around;padding:10px 0 16px;background:#08080f;border-top:1px solid rgba(255,255,255,.05)}
+.app-nav-item{display:flex;flex-direction:column;align-items:center;gap:3px}
+.ani{font-size:16px;opacity:.3}
+.ani.on{opacity:1}
+.anl{font-size:7px;color:rgba(255,255,255,.2)}
+.anl.on{color:#4f7cff}
+
+/* App screen 2 — Session player */
+.app-session{background:linear-gradient(160deg,#0a1225 0%,#050810 100%);padding:18px;min-height:500px;display:flex;flex-direction:column;gap:14px}
+.sess-header{display:flex;align-items:center;justify-content:space-between}
+.sess-back{font-size:20px;color:rgba(255,255,255,.4)}
+.sess-title{font-size:12px;font-weight:600;color:rgba(255,255,255,.6);text-align:center}
+.sess-more{font-size:18px;color:rgba(255,255,255,.4)}
+.sess-art{width:100%;aspect-ratio:1;border-radius:22px;background:radial-gradient(circle at 40% 35%,#1a2a6e 0%,#0d1545 50%,#080d20 100%);display:flex;align-items:center;justify-content:center;border:1px solid rgba(79,124,255,.15);position:relative;overflow:hidden}
+.sess-art-rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.sar{position:absolute;border-radius:50%;border:1px solid rgba(79,124,255,.15)}
+.sess-art-label{position:relative;z-index:1;text-align:center}
+.sal-title{font-family:var(--font-display);font-size:18px;font-weight:700;color:rgba(255,255,255,.85)}
+.sal-sub{font-size:9px;color:rgba(79,124,255,.7);letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+.sess-meta{display:flex;justify-content:center;gap:20px}
+.sm-item{text-align:center}
+.sm-val{font-size:14px;font-weight:600;color:rgba(255,255,255,.75)}
+.sm-label{font-size:8px;color:rgba(255,255,255,.3)}
+/* Progress */
+.sess-progress{position:relative;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.sp-fill{height:100%;width:38%;background:linear-gradient(90deg,#4f7cff,#c678ff);border-radius:2px}
+.sp-time{display:flex;justify-content:space-between;font-size:8px;color:rgba(255,255,255,.25);margin-top:5px}
+/* Controls */
+.sess-controls{display:flex;align-items:center;justify-content:center;gap:20px}
+.ctrl-btn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(255,255,255,.5)}
+.ctrl-btn.play{width:58px;height:58px;background:linear-gradient(135deg,#4f7cff,#3d5fd9);color:#fff;font-size:20px;box-shadow:0 8px 30px rgba(79,124,255,.4)}
+
+/* ── OVERVIEW ── */
+#overview-section{padding:140px 52px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.overview-sticky{position:sticky;top:120px}
+.overview-num{font-family:var(--font-display);font-size:120px;font-weight:900;line-height:1;letter-spacing:-6px;color:rgba(240,237,232,.04);margin-bottom:-20px}
+.overview-heading{font-family:var(--font-display);font-size:clamp(34px,3.5vw,50px);font-weight:700;letter-spacing:-1.2px;line-height:1.1;margin-bottom:22px}
+.overview-heading em{font-style:italic;font-weight:400;color:rgba(240,237,232,.3)}
+.overview-body{font-size:15px;color:var(--fg-dim);line-height:1.85}
+.overview-body+.overview-body{margin-top:18px}
+.pull-quote{margin:36px 0;padding:26px 30px;border-left:2px solid var(--accent);background:var(--accent-dim);border-radius:0 12px 12px 0}
+.pull-quote p{font-family:var(--font-display);font-size:19px;font-style:italic;font-weight:400;color:var(--fg);line-height:1.6}
+
+/* ── CHALLENGES ── */
+#challenges-section{padding:0 52px 120px}
+.cs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:56px}
+.cs-card{padding:36px;border:1px solid var(--border);position:relative;overflow:hidden;transition:border-color .4s,background .4s;cursor:default}
+.cs-card:first-child{border-radius:16px 0 0 16px}
+.cs-card:last-child{border-radius:0 16px 16px 0}
+.cs-card:hover{border-color:var(--border-md);background:var(--card-bg)}
+.cs-icon{font-size:26px;margin-bottom:18px;display:block;filter:grayscale(1);transition:filter .4s}
+.cs-card:hover .cs-icon{filter:grayscale(0)}
+.cs-title{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:11px}
+.cs-body{font-size:13px;color:var(--fg-dim);line-height:1.75}
+.cs-line{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease-spring)}
+.cs-card:hover .cs-line{transform:scaleX(1)}
+
+/* ── FEATURES HORIZONTAL ── */
+#features-section{height:400vh;position:relative}
+#features-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;overflow:hidden}
+#features-track{display:flex;gap:0;will-change:transform;height:100vh}
+.feat-panel{flex-shrink:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;padding:0 52px}
+.feat-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;width:100%;max-width:1200px}
+.feat-inner.rev{direction:rtl}
+.feat-inner.rev>*{direction:ltr}
+.feat-num{font-family:var(--font-display);font-size:80px;font-weight:900;letter-spacing:-4px;color:rgba(240,237,232,.05);line-height:1;margin-bottom:-10px}
+.feat-title{font-family:var(--font-display);font-size:clamp(28px,3vw,42px);font-weight:700;letter-spacing:-1px;margin-bottom:14px;line-height:1.1}
+.feat-desc{font-size:15px;color:var(--fg-dim);line-height:1.8;margin-bottom:22px}
+.feat-pills{display:flex;flex-wrap:wrap;gap:8px}
+.feat-pill{font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:20px;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent)}
+.feat-visual{border-radius:20px;overflow:hidden;border:1px solid var(--border);background:#050812;box-shadow:0 30px 80px rgba(0,0,0,.85);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;position:relative}
+.fv-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(79,124,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(79,124,255,.03) 1px,transparent 1px);background-size:36px 36px}
+#feat-progress{position:absolute;bottom:40px;right:52px;z-index:10;display:flex;gap:8px}
+.fp-dot{width:6px;height:6px;border-radius:50%;background:rgba(240,237,232,.2);transition:background .4s,width .4s var(--ease-spring)}
+.fp-dot.active{background:var(--accent);width:24px;border-radius:3px}
+
+/* Visual 1 — Spring animation system */
+.spring-vis{padding:20px;width:100%;height:100%;display:flex;flex-direction:column;gap:10px}
+.spring-title{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.spring-items{display:flex;flex-direction:column;gap:8px;flex:1;justify-content:center}
+.spring-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px}
+.spi-label{font-size:10px;color:rgba(255,255,255,.55);width:80px;flex-shrink:0}
+.spi-track{flex:1;height:6px;background:rgba(255,255,255,.05);border-radius:3px;position:relative;overflow:visible}
+.spi-thumb{height:100%;border-radius:3px;position:relative;animation:springThumb 3s ease-in-out infinite}
+@keyframes springThumb{0%,100%{width:30%}50%{width:85%}}
+.spi-thumb::after{content:"";position:absolute;right:-6px;top:50%;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+.spi-val{font-size:10px;color:rgba(79,124,255,.7);width:32px;text-align:right}
+.spring-curves{margin-top:8px;padding:10px;background:rgba(255,255,255,.03);border-radius:8px;display:flex;gap:8px;align-items:center}
+.curve-label{font-size:8px;color:rgba(255,255,255,.25)}
+.curve-item{display:flex;align-items:center;gap:5px}
+.curve-line{width:28px;height:2px;border-radius:1px}
+
+/* Visual 2 — Illustration grid */
+.illus-vis{padding:16px;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px}
+.illus-card{border-radius:14px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+.illus-card.lg{grid-row:span 2}
+.illus-emoji{font-size:40px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.5))}
+.illus-badge{position:absolute;bottom:8px;left:8px;right:8px;font-size:8px;padding:4px 8px;border-radius:6px;background:rgba(0,0,0,.5);color:rgba(255,255,255,.5);backdrop-filter:blur(8px);text-align:center;letter-spacing:.06em;text-transform:uppercase}
+
+/* Visual 3 — Haptic feedback patterns */
+.haptic-vis{padding:20px;width:100%;height:100%;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center}
+.haptic-phone{width:80px;height:140px;border-radius:20px;border:2px solid rgba(79,124,255,.3);background:rgba(79,124,255,.05);display:flex;align-items:center;justify-content:center;position:relative}
+.hp-screen{width:60px;height:110px;border-radius:14px;background:rgba(8,8,16,.9);display:flex;align-items:center;justify-content:center}
+.hp-ripples{position:relative;display:flex;align-items:center;justify-content:center}
+.hp-ripple{position:absolute;border-radius:50%;border:1px solid rgba(79,124,255,.4);animation:rippleOut 2s ease-out infinite}
+.hp-ripple:nth-child(1){width:20px;height:20px;animation-delay:0s}
+.hp-ripple:nth-child(2){width:36px;height:36px;animation-delay:.3s}
+.hp-ripple:nth-child(3){width:52px;height:52px;animation-delay:.6s}
+@keyframes rippleOut{0%{opacity:.8;transform:scale(.8)}100%{opacity:0;transform:scale(1)}}
+.hp-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);position:relative;z-index:1}
+.haptic-patterns{display:flex;gap:8px;flex-direction:column;width:100%;max-width:200px}
+.hp-row{display:flex;gap:3px;align-items:center}
+.hp-label{font-size:9px;color:rgba(255,255,255,.3);width:52px;flex-shrink:0}
+.hp-dot-row{display:flex;gap:3px;align-items:center}
+.hp-d{width:6px;height:14px;border-radius:2px;background:rgba(79,124,255,.2)}
+.hp-d.s{background:rgba(79,124,255,.6);height:20px}
+.hp-d.l{background:var(--accent);height:28px}
+
+/* ── STATS ── */
+#stats-section{padding:120px 52px;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.big-stat{padding:48px 36px;border:1px solid var(--border);transition:border-color .4s,background .4s}
+.big-stat:first-child{border-radius:16px 0 0 16px}
+.big-stat:last-child{border-radius:0 16px 16px 0}
+.big-stat:hover{border-color:var(--border-md);background:var(--card-bg)}
+.big-stat-val{font-family:var(--font-display);font-size:clamp(38px,4vw,58px);font-weight:900;letter-spacing:-2px;color:var(--accent);margin-bottom:8px;line-height:1}
+.big-stat-label{font-size:13px;color:var(--fg-dim);line-height:1.5}
+
+/* ── TECH ── */
+#tech-section{padding:120px 52px;border-top:1px solid var(--border)}
+.tech-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:52px}
+.tech-card{padding:28px 24px;background:var(--card-bg);border:1px solid var(--border);border-radius:16px;transition:border-color .35s,background .35s,transform .4s var(--ease-spring)}
+.tech-card:hover{border-color:var(--border-md);background:rgba(255,255,255,.05);transform:translateY(-4px)}
+.tech-icon{font-size:28px;margin-bottom:14px;display:block}
+.tech-name{font-size:15px;font-weight:500;margin-bottom:6px}
+.tech-role{font-size:12px;color:var(--fg-dim);line-height:1.5}
+
+/* ── RESULTS ── */
+#results-section{padding:120px 52px;border-top:1px solid var(--border);position:relative;overflow:hidden}
+#results-section::before{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:800px;height:400px;background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(79,124,255,.06) 0%,transparent 70%);pointer-events:none}
+.results-layout{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.results-visual{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.ring-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:center;transition:border-color .4s,transform .4s var(--ease-spring)}
+.ring-card:hover{border-color:var(--accent-border);transform:translateY(-4px)}
+.ring-wrap{position:relative;width:100px;height:100px;margin:0 auto 14px}
+.ring-svg{transform:rotate(-90deg);width:100%;height:100%}
+.ring-track{fill:none;stroke:rgba(255,255,255,.07);stroke-width:6}
+.ring-fill{fill:none;stroke-width:6;stroke-linecap:round}
+.ring-label-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:-1px}
+.ring-title{font-size:12px;color:var(--fg-dim)}
+.results-list{margin-top:32px;display:flex;flex-direction:column;gap:14px}
+.result-item{display:flex;align-items:flex-start;gap:14px;padding:18px 22px;border-radius:14px;border:1px solid var(--border);background:var(--card-bg);transition:border-color .35s,background .35s}
+.result-item:hover{border-color:var(--accent-border);background:var(--accent-dim)}
+.result-check{width:26px;height:26px;border-radius:50%;flex-shrink:0;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--accent)}
+.result-body{font-size:13px;color:var(--fg-dim);line-height:1.65}
+.result-body strong{color:var(--fg);font-weight:500}
+
+/* ── NEXT ── */
+#next-project{margin:0 52px 120px;border-radius:28px;padding:60px 72px;display:flex;align-items:center;justify-content:space-between;gap:40px;border:1px solid var(--border);background:var(--card-bg);position:relative;overflow:hidden;cursor:pointer;text-decoration:none;transition:border-color .4s,background .4s,transform .5s var(--ease-spring)}
+#next-project:hover{border-color:var(--border-md);background:rgba(255,255,255,.04);transform:translateY(-4px)}
+#next-project::before{content:"";position:absolute;right:-60px;top:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(79,124,255,.07) 0%,transparent 70%);pointer-events:none}
+.next-title{font-family:var(--font-display);font-size:clamp(26px,3vw,40px);font-weight:700;letter-spacing:-1px;margin-top:8px}
+.next-arrow{width:60px;height:60px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--accent);flex-shrink:0;transition:background .3s,transform .4s var(--ease-spring)}
+#next-project:hover .next-arrow{background:rgba(79,124,255,.25);transform:rotate(45deg) scale(1.1)}
+footer{border-top:1px solid var(--border);padding:28px 52px;display:flex;justify-content:space-between;align-items:center}
+footer p{font-size:12px;color:rgba(240,237,232,.18)}
+
+@media(max-width:900px){
+  #overview-section{grid-template-columns:1fr;gap:40px}
+  .overview-sticky{position:static}
+  .feat-inner,.feat-inner.rev{grid-template-columns:1fr;direction:ltr}
+  .results-layout{grid-template-columns:1fr}
+  #stats-section{grid-template-columns:1fr 1fr}
+  .cs-grid{grid-template-columns:1fr}
+  .cs-card{border-radius:12px!important}
+  .big-stat{border-radius:12px!important}
+  .tech-grid{grid-template-columns:1fr 1fr}
+  .results-visual{grid-template-columns:1fr 1fr}
+  #mockup-wrap{flex-direction:column;align-items:center}
+  .phone.side{display:none}
+}
+@media(max-width:640px){
+  nav{padding:16px 22px}
+  body{cursor:auto}
+  #cursor-dot,#cursor-ring{display:none}
+  #overview-section,#challenges-section,#tech-section,#results-section{padding-left:22px;padding-right:22px}
+  #stats-section{grid-template-columns:1fr;padding:60px 22px}
+  .tech-grid{grid-template-columns:1fr}
+  #next-project{margin:0 22px 80px;padding:40px 28px;flex-direction:column;text-align:center}
+  footer{flex-direction:column;gap:8px;text-align:center;padding:24px 22px}
+}
+</style>
+</head>
+<body>
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<nav>
+  <a class="nav-logo" href="bora-portfolio (1).html">Bora</a>
+  <ul class="nav-links">
+    <li><a class="nav-back" href="projects.html"><span class="back-arrow">←</span> All Work</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div id="hero-bg"></div>
+  <div id="hero-grid"></div>
+  <div class="h-orb orb-1"></div>
+  <div class="h-orb orb-2"></div>
+  <div class="h-orb orb-3"></div>
+  <div id="hero-content">
+    <div class="hero-icon">
+      <div class="breath-ring br-1"></div>
+      <div class="breath-ring br-2"></div>
+      <div class="breath-ring br-3"></div>
+      <div class="hero-icon-dot"></div>
+    </div>
+    <div class="hero-tag"><div class="hero-tag-dot"></div>UI/UX Design · iOS · Interaction</div>
+    <h1 class="hero-title">Luminary</h1>
+    <p class="hero-sub">A mindfulness & meditation iOS app with hand-crafted illustrations, fluid spring animations, and a personalised breathing system designed to feel like a calm companion.</p>
+    <div class="hero-meta-row">
+      <div class="hero-meta-item"><div class="hero-meta-label">Year</div><div class="hero-meta-val">2024</div></div>
+      <div class="hero-meta-item"><div class="hero-meta-label">Role</div><div class="hero-meta-val">UI/UX Designer</div></div>
+      <div class="hero-meta-item"><div class="hero-meta-label">Duration</div><div class="hero-meta-val">6 Weeks</div></div>
+      <div class="hero-meta-item"><div class="hero-meta-label">Platform</div><div class="hero-meta-val">iOS App</div></div>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="scroll-line"></div><span>Scroll</span></div>
+</section>
+
+<!-- PHONE MOCKUP -->
+<section id="mockup-section">
+  <div id="mockup-sticky">
+    <div class="mockup-label">App Screens</div>
+    <div id="mockup-wrap">
+
+      <!-- Phone 1: Session Player -->
+      <div class="phone side">
+        <div class="phone-bar">
+          <div class="pbar-time">9:41</div>
+          <div class="pbar-icons"><div class="pbi" style="width:8px;height:8px;border-radius:50%"></div><div class="pbi"></div></div>
+        </div>
+        <div class="app-session">
+          <div class="sess-header">
+            <div class="sess-back">‹</div>
+            <div class="sess-title">Now Playing</div>
+            <div class="sess-more">⋯</div>
+          </div>
+          <div class="sess-art">
+            <div class="sess-art-rings">
+              <div class="sar" style="width:180px;height:180px;animation:breathe 4s ease-in-out infinite"></div>
+              <div class="sar" style="width:130px;height:130px;animation:breathe 4s ease-in-out infinite .5s"></div>
+              <div class="sar" style="width:80px;height:80px;animation:breathe 4s ease-in-out infinite 1s"></div>
+            </div>
+            <div class="sess-art-label">
+              <div class="sal-title">Deep Focus</div>
+              <div class="sal-sub">4-7-8 Breath</div>
+            </div>
+          </div>
+          <div class="sess-meta">
+            <div class="sm-item"><div class="sm-val">12:00</div><div class="sm-label">Duration</div></div>
+            <div class="sm-item"><div class="sm-val" style="color:#4f7cff">Inhale</div><div class="sm-label">Phase</div></div>
+            <div class="sm-item"><div class="sm-val">3×</div><div class="sm-label">Cycles</div></div>
+          </div>
+          <div class="sess-progress">
+            <div class="sp-fill"></div>
+          </div>
+          <div class="sp-time"><span>4:35</span><span>12:00</span></div>
+          <div class="sess-controls">
+            <div class="ctrl-btn">⏮</div>
+            <div class="ctrl-btn play">⏸</div>
+            <div class="ctrl-btn">⏭</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone 2: Home (main) -->
+      <div class="phone main">
+        <div class="phone-bar">
+          <div class="pbar-time">9:41</div>
+          <div class="pbar-icons">
+            <div class="pbi" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5)"></div>
+            <div class="pbi" style="width:14px"></div>
+            <div class="pbi" style="width:10px;height:6px;border-radius:50% 3px 3px 50%;background:rgba(255,255,255,.35)"></div>
+          </div>
+        </div>
+        <div class="app-home">
+          <div class="app-greeting">
+            <div class="app-greeting-text">
+              <div class="hi">Good evening,</div>
+              <div class="name">Bora ✦</div>
+            </div>
+            <div class="avatar"></div>
+          </div>
+          <div class="breath-orb-wrap">
+            <div class="breath-orb">
+              <svg viewBox="0 0 80 80" style="position:absolute;inset:0;width:100%;height:100%;opacity:.3">
+                <circle cx="40" cy="40" r="35" fill="none" stroke="#4f7cff" stroke-width=".5" stroke-dasharray="3 4"/>
+              </svg>
+            </div>
+            <div class="breath-orb-label">Box Breathing</div>
+            <div class="breath-phase">Hold · 4 sec</div>
+          </div>
+          <div class="session-row">
+            <div class="session-card">
+              <div class="sc-icon">🌙</div>
+              <div class="sc-title">Sleep Wind-Down</div>
+              <div class="sc-dur">20 min</div>
+            </div>
+            <div class="session-card">
+              <div class="sc-icon">☀️</div>
+              <div class="sc-title">Morning Reset</div>
+              <div class="sc-dur">10 min</div>
+            </div>
+            <div class="session-card">
+              <div class="sc-icon">🧘</div>
+              <div class="sc-title">Body Scan</div>
+              <div class="sc-dur">15 min</div>
+            </div>
+          </div>
+          <div class="streak-card">
+            <div>
+              <div class="streak-val">14</div>
+              <div class="streak-dots">
+                <div class="sd on"></div><div class="sd on"></div><div class="sd on"></div>
+                <div class="sd on"></div><div class="sd on"></div><div class="sd on"></div>
+                <div class="sd on"></div><div class="sd"></div>
+              </div>
+            </div>
+            <div class="streak-info">
+              <div class="streak-label">Day Streak 🔥</div>
+              <div class="streak-sub">Keep it up — best: 21 days</div>
+            </div>
+          </div>
+        </div>
+        <div class="app-nav">
+          <div class="app-nav-item"><div class="ani on">🏠</div><div class="anl on">Home</div></div>
+          <div class="app-nav-item"><div class="ani">🔍</div><div class="anl">Explore</div></div>
+          <div class="app-nav-item"><div class="ani">📊</div><div class="anl">Progress</div></div>
+          <div class="app-nav-item"><div class="ani">👤</div><div class="anl">Profile</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- OVERVIEW -->
+<section id="overview-section">
+  <div class="overview-sticky">
+    <div class="overview-num">01</div>
+    <h2 class="overview-heading">Calm by<br><em>design</em></h2>
+  </div>
+  <div>
+    <p class="overview-body">Most wellness apps prioritise feature density over feeling. They're cluttered, gamified, and ironically stressful to navigate. Luminary started from a single constraint: every interaction should feel like exhaling. That principle shaped every decision from colour temperature to animation curve selection.</p>
+    <p class="overview-body">The brief called for an iOS app that guided users through personalised breathing programs and sleep sessions. The challenge was designing an interface that could be used in the dark, half-asleep, or mid-panic attack — and still feel intuitive on the first touch.</p>
+    <div class="pull-quote"><p>"An app about calm should never make you think. Every gesture, every transition, every colour choice should work with your nervous system — not against it."</p></div>
+    <p class="overview-body">The result is a 60fps interaction system built in Protopie, a hand-illustrated asset library, and a design system built around biometric states — awake, transitioning, and resting. Each state has its own colour temperature, animation speed, and typographic rhythm.</p>
+  </div>
+</section>
+
+<!-- CHALLENGES -->
+<section id="challenges-section">
+  <div class="label" style="margin-bottom:12px">Challenges</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(36px,4vw,54px);font-weight:700;letter-spacing:-1.5px;line-height:1.05">
+    Designing for<br>
+    <span style="color:rgba(240,237,232,.25);font-style:italic;font-weight:400">distressed states</span>
+  </h2>
+  <div class="cs-grid">
+    <div class="cs-card">
+      <span class="cs-icon">🌑</span>
+      <div class="cs-title">Dark Mode First</div>
+      <div class="cs-body">The primary use case is a user in bed at 11pm. The entire colour system was built with dark mode as the default — light mode is a secondary derivation. Every elevation, every contrast ratio, every glow was tested at minimum brightness.</div>
+      <div class="cs-line"></div>
+    </div>
+    <div class="cs-card">
+      <span class="cs-icon">🌊</span>
+      <div class="cs-title">60fps Spring Physics</div>
+      <div class="cs-body">Easing curves that feel mechanical break the illusion of calm. Every transition uses custom spring parameters (stiffness 180, damping 20) tuned to feel like water — resistance without abruptness. Prototyped at native frame rate in Protopie, not just Figma.</div>
+      <div class="cs-line"></div>
+    </div>
+    <div class="cs-card">
+      <span class="cs-icon">✍️</span>
+      <div class="cs-title">Custom Illustration</div>
+      <div class="cs-body">Stock icons felt clinical. All 34 session illustrations were drawn as a cohesive system — organic forms, muted palettes, and a consistent line weight that works at every size from the app icon down to a 16px tab bar glyph.</div>
+      <div class="cs-line"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES HORIZONTAL -->
+<section id="features-section">
+  <div id="features-sticky">
+    <div id="features-track">
+
+      <!-- Panel 1: Animation System -->
+      <div class="feat-panel">
+        <div class="feat-inner">
+          <div>
+            <div class="feat-num">01</div>
+            <div class="feat-title">Spring Animation System</div>
+            <div class="feat-desc">Every interactive element in Luminary uses a custom spring physics model. Sliders snap with satisfying weight, modals unfurl like fabric, and the breathing orb expands and contracts on a sine curve matched to the human inhale-exhale cycle.</div>
+            <div class="feat-pills"><span class="feat-pill">Protopie</span><span class="feat-pill">Spring Physics</span><span class="feat-pill">60fps</span></div>
+          </div>
+          <div class="feat-visual">
+            <div class="fv-grid"></div>
+            <div class="spring-vis">
+              <div class="spring-title">Interaction Curves</div>
+              <div class="spring-items">
+                <div class="spring-item">
+                  <div class="spi-label">Orb Scale</div>
+                  <div class="spi-track"><div class="spi-thumb" style="background:linear-gradient(90deg,#4f7cff,#6b9fff);animation-duration:4s"></div></div>
+                  <div class="spi-val">1.08×</div>
+                </div>
+                <div class="spring-item">
+                  <div class="spi-label">Modal Enter</div>
+                  <div class="spi-track"><div class="spi-thumb" style="background:linear-gradient(90deg,#c678ff,#d89fff);animation-duration:2.2s;animation-delay:.4s"></div></div>
+                  <div class="spi-val">0.9s</div>
+                </div>
+                <div class="spring-item">
+                  <div class="spi-label">Tab Switch</div>
+                  <div class="spi-track"><div class="spi-thumb" style="background:linear-gradient(90deg,#3dffb0,#7affd4);animation-duration:1.5s;animation-delay:.8s;width:60%"></div></div>
+                  <div class="spi-val">0.4s</div>
+                </div>
+                <div class="spring-item">
+                  <div class="spi-label">Haptic Fire</div>
+                  <div class="spi-track"><div class="spi-thumb" style="background:linear-gradient(90deg,#ff6b35,#ff9a78);animation-duration:1s;animation-delay:.2s"></div></div>
+                  <div class="spi-val">12ms</div>
+                </div>
+              </div>
+              <div class="spring-curves">
+                <div class="curve-item"><div class="curve-line" style="background:#4f7cff"></div><div class="curve-label">Spring</div></div>
+                <div class="curve-item"><div class="curve-line" style="background:rgba(255,255,255,.2);border-top:1px dashed rgba(255,255,255,.15)"></div><div class="curve-label">Linear</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Illustration System -->
+      <div class="feat-panel">
+        <div class="feat-inner rev">
+          <div>
+            <div class="feat-num">02</div>
+            <div class="feat-title">Illustration Library</div>
+            <div class="feat-desc">34 custom session illustrations built as a single visual language. Organic brushstroke forms, a restricted palette of eight muted tones, and scalable SVG architecture ensure the illustrations feel hand-made at every resolution.</div>
+            <div class="feat-pills"><span class="feat-pill">Procreate</span><span class="feat-pill">SVG Export</span><span class="feat-pill">34 Scenes</span></div>
+          </div>
+          <div class="feat-visual">
+            <div class="fv-grid"></div>
+            <div class="illus-vis">
+              <div class="illus-card lg" style="background:linear-gradient(160deg,#0d1535,#08102a)">
+                <div class="illus-emoji">🌙</div>
+                <div class="illus-badge">Sleep · v.12</div>
+              </div>
+              <div class="illus-card" style="background:linear-gradient(160deg,#1a1035,#0d0820)">
+                <div class="illus-emoji" style="font-size:28px">🌬️</div>
+                <div class="illus-badge">Breath</div>
+              </div>
+              <div class="illus-card" style="background:linear-gradient(160deg,#101a15,#080e0c)">
+                <div class="illus-emoji" style="font-size:28px">🌿</div>
+                <div class="illus-badge">Focus</div>
+              </div>
+              <div class="illus-card" style="background:linear-gradient(160deg,#1a1510,#0e0c08)">
+                <div class="illus-emoji" style="font-size:28px">☀️</div>
+                <div class="illus-badge">Morning</div>
+              </div>
+              <div class="illus-card" style="background:linear-gradient(160deg,#1a1025,#100818)">
+                <div class="illus-emoji" style="font-size:28px">🧘</div>
+                <div class="illus-badge">Body</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 3: Haptic Design -->
+      <div class="feat-panel">
+        <div class="feat-inner">
+          <div>
+            <div class="feat-num">03</div>
+            <div class="feat-title">Haptic Feedback Design</div>
+            <div class="feat-desc">Luminary uses the Taptic Engine as a genuine design material — not an afterthought. Each breathing phase (inhale, hold, exhale) fires a distinct haptic pattern so users can follow sessions with eyes closed. The phone itself becomes the guide.</div>
+            <div class="feat-pills"><span class="feat-pill">Core Haptics</span><span class="feat-pill">Eyes-Closed UX</span><span class="feat-pill">Taptic Engine</span></div>
+          </div>
+          <div class="feat-visual">
+            <div class="fv-grid"></div>
+            <div class="haptic-vis">
+              <div class="haptic-phone">
+                <div class="hp-screen">
+                  <div class="hp-ripples">
+                    <div class="hp-ripple"></div>
+                    <div class="hp-ripple"></div>
+                    <div class="hp-ripple"></div>
+                    <div class="hp-dot"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="haptic-patterns">
+                <div class="hp-row">
+                  <div class="hp-label">Inhale</div>
+                  <div class="hp-dot-row">
+                    <div class="hp-d l"></div>
+                    <div class="hp-d"></div>
+                    <div class="hp-d l"></div>
+                    <div class="hp-d"></div>
+                    <div class="hp-d l"></div>
+                    <div class="hp-d"></div>
+                    <div class="hp-d l"></div>
+                  </div>
+                </div>
+                <div class="hp-row">
+                  <div class="hp-label">Hold</div>
+                  <div class="hp-dot-row">
+                    <div class="hp-d s"></div>
+                    <div class="hp-d s"></div>
+                    <div class="hp-d s"></div>
+                    <div class="hp-d s"></div>
+                    <div class="hp-d s"></div>
+                    <div class="hp-d s"></div>
+                    <div class="hp-d s"></div>
+                  </div>
+                </div>
+                <div class="hp-row">
+                  <div class="hp-label">Exhale</div>
+                  <div class="hp-dot-row">
+                    <div class="hp-d l"></div>
+                    <div class="hp-d s"></div>
+                    <div class="hp-d"></div>
+                    <div class="hp-d s"></div>
+                    <div class="hp-d"></div>
+                    <div class="hp-d"></div>
+                    <div class="hp-d"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div id="feat-progress">
+      <div class="fp-dot active" id="fp-0"></div>
+      <div class="fp-dot" id="fp-1"></div>
+      <div class="fp-dot" id="fp-2"></div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats-section">
+  <div class="big-stat"><div class="big-stat-val" id="sv-0">0</div><div class="big-stat-label">Screens designed<br>across all flows</div></div>
+  <div class="big-stat"><div class="big-stat-val" id="sv-1">0</div><div class="big-stat-label">Custom session<br>illustrations</div></div>
+  <div class="big-stat"><div class="big-stat-val" id="sv-2">0</div><div class="big-stat-label">Animation<br>components</div></div>
+  <div class="big-stat"><div class="big-stat-val" id="sv-3">0</div><div class="big-stat-label">Prototype frame<br>rate (fps)</div></div>
+</section>
+
+<!-- TECH -->
+<section id="tech-section">
+  <div class="label" style="margin-bottom:12px">Design Stack</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(36px,4vw,54px);font-weight:700;letter-spacing:-1.5px;line-height:1.05">
+    Tools &amp;<br>
+    <span style="color:rgba(240,237,232,.25);font-style:italic;font-weight:400">craft</span>
+  </h2>
+  <div class="tech-grid">
+    <div class="tech-card"><span class="tech-icon">🎨</span><div class="tech-name">Figma</div><div class="tech-role">Full design system — 80+ components, auto-layout, variable tokens for dark/light and biometric states.</div></div>
+    <div class="tech-card"><span class="tech-icon">🔄</span><div class="tech-name">Protopie</div><div class="tech-role">Native-feel interactive prototypes with real spring physics, gyroscope input, and Core Haptics simulation.</div></div>
+    <div class="tech-card"><span class="tech-icon">✨</span><div class="tech-name">After Effects</div><div class="tech-role">Onboarding animation sequences and lottie exports for the breathing orb system.</div></div>
+    <div class="tech-card"><span class="tech-icon">🖌️</span><div class="tech-name">Procreate</div><div class="tech-role">Hand-drawn illustration library — 34 session artworks exported as multi-layer SVG.</div></div>
+    <div class="tech-card"><span class="tech-icon">♿</span><div class="tech-name">Accessibility</div><div class="tech-role">WCAG AAA contrast on all text, Dynamic Type support, and VoiceOver annotations on every screen.</div></div>
+    <div class="tech-card"><span class="tech-icon">📐</span><div class="tech-name">Design Tokens</div><div class="tech-role">Colour, spacing, and motion tokens synced to Swift variables for seamless developer handoff.</div></div>
+    <div class="tech-card"><span class="tech-icon">👁️</span><div class="tech-name">User Testing</div><div class="tech-role">5 rounds of usability testing with 24 participants — recruited specifically for anxiety and sleep issues.</div></div>
+    <div class="tech-card"><span class="tech-icon">📱</span><div class="tech-name">SwiftUI Spec</div><div class="tech-role">Developer handoff with full SwiftUI animation parameter documentation and Lottie integration guide.</div></div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results-section">
+  <div class="results-layout">
+    <div>
+      <div class="label" style="margin-bottom:12px">Outcomes</div>
+      <h2 style="font-family:var(--font-display);font-size:clamp(32px,3.5vw,48px);font-weight:700;letter-spacing:-1.2px;line-height:1.1;margin-bottom:8px">
+        Calm,<br>
+        <em style="font-weight:400;color:rgba(240,237,232,.3)">quantified</em>
+      </h2>
+      <div class="results-list">
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>96% task completion rate</strong> in final usability testing — all breathing, sleep, and progress flows completed without assistance.</div></div>
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>Eyes-closed usage validated</strong> — 18 of 24 test participants completed a full session relying on haptic feedback alone.</div></div>
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>4.9★ prototype rating</strong> in user testing — highest satisfaction score across all projects in the 2024 cohort.</div></div>
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>80+ Figma components</strong> delivered as a production-ready design system with SwiftUI variable mapping.</div></div>
+      </div>
+    </div>
+    <div class="results-visual">
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-a" cx="50" cy="50" r="40" stroke="#4f7cff" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-label-val" style="color:#4f7cff" id="ring-a-val">0%</div></div><div class="ring-title">Task Completion</div></div>
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-b" cx="50" cy="50" r="40" stroke="#c678ff" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-label-val" style="color:#c678ff" id="ring-b-val">0%</div></div><div class="ring-title">Haptic Success</div></div>
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-c" cx="50" cy="50" r="40" stroke="#3dffb0" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-label-val" style="color:#3dffb0" id="ring-c-val">0%</div></div><div class="ring-title">Accessibility</div></div>
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-d" cx="50" cy="50" r="40" stroke="#FFB300" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-label-val" style="color:#FFB300" id="ring-d-val">0%</div></div><div class="ring-title">User Satisfaction</div></div>
+    </div>
+  </div>
+</section>
+
+<a href="kinetic-project-detail.html" id="next-project">
+  <div class="next-left">
+    <div class="label" style="margin-bottom:10px">Next Project</div>
+    <div class="next-title">Kinetic Brand Film→</div>
+  </div>
+  <div class="next-arrow">↗</div>
+</a>
+<footer><p>© 2026 Bora. All rights reserved.</p><p>Designed &amp; built with care</p></footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+const dot = document.getElementById('cursor-dot'), ring = document.getElementById('cursor-ring');
+ring._x = 0; ring._y = 0;
+window.addEventListener('mousemove', e => { dot.style.left=e.clientX+'px'; dot.style.top=e.clientY+'px'; });
+(function tick(){requestAnimationFrame(tick);ring._x+=(parseFloat(dot.style.left||0)-ring._x)*.1;ring._y+=(parseFloat(dot.style.top||0)-ring._y)*.1;ring.style.left=ring._x+'px';ring.style.top=ring._y+'px';})();
+document.querySelectorAll('a,button,.cs-card,.tech-card,.result-item,.ring-card,.big-stat').forEach(el=>{el.addEventListener('mouseenter',()=>{ring.style.width='52px';ring.style.height='52px';ring.style.borderColor='rgba(79,124,255,.5)';});el.addEventListener('mouseleave',()=>{ring.style.width='34px';ring.style.height='34px';ring.style.borderColor='rgba(240,237,232,.2)';});});
+
+gsap.timeline({defaults:{ease:'power3.out'}})
+  .from('.hero-icon',{opacity:0,scale:.5,duration:1.4,delay:.2})
+  .from('.hero-tag',{opacity:0,y:16,duration:.8},'-=0.6')
+  .from('.hero-title',{opacity:0,y:60,duration:1.3},'-=0.5')
+  .from('.hero-sub',{opacity:0,y:22,duration:1},'-=0.9')
+  .from('.hero-meta-row',{opacity:0,y:22,duration:.9},'-=0.7')
+  .from('.scroll-hint',{opacity:0,duration:.8},'-=0.4');
+gsap.to('#hero-content',{scale:.72,opacity:0,y:-80,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'50% top',scrub:1.5}});
+
+gsap.fromTo('#mockup-wrap',{opacity:0,y:100,scale:.88},{opacity:1,y:0,scale:1,ease:'power3.out',scrollTrigger:{trigger:'#mockup-section',start:'top 80%',end:'top 20%',scrub:2}});
+
+gsap.from('.overview-num',{opacity:0,x:-30,scrollTrigger:{trigger:'#overview-section',start:'top 80%',end:'top 40%',scrub:2}});
+gsap.from('.overview-heading',{opacity:0,y:40,scrollTrigger:{trigger:'#overview-section',start:'top 75%',end:'top 35%',scrub:2}});
+gsap.from('.overview-body,.pull-quote',{opacity:0,y:30,stagger:.15,duration:1,scrollTrigger:{trigger:'#overview-section',start:'top 68%',toggleActions:'play none none reverse'}});
+
+gsap.from('.cs-card',{opacity:0,y:50,stagger:.15,duration:.9,scrollTrigger:{trigger:'.cs-grid',start:'top 82%',toggleActions:'play none none reverse'}});
+
+gsap.to('#features-track',{x:()=>-(window.innerWidth*2),ease:'none',scrollTrigger:{trigger:'#features-section',start:'top top',end:'bottom bottom',scrub:1,pin:'#features-sticky',anticipatePin:1,invalidateOnRefresh:true,onUpdate(self){const a=Math.round(self.progress*2);document.querySelectorAll('.fp-dot').forEach((d,i)=>d.classList.toggle('active',i===a));}}});
+
+const statsData=[{id:'sv-0',end:84,display:'84'},{id:'sv-1',end:34,display:'34'},{id:'sv-2',end:120,display:'120'},{id:'sv-3',end:60,display:'60fps'}];
+statsData.forEach(s=>{const el=document.getElementById(s.id);ScrollTrigger.create({trigger:el,start:'top 85%',onEnter(){gsap.fromTo({val:0},{val:s.end,duration:2,ease:'power2.out',onUpdate(){el.textContent=this.targets()[0].val>=s.end?s.display:Math.round(this.targets()[0].val);}});}});});
+gsap.from('.big-stat',{opacity:0,y:40,stagger:.1,duration:.9,scrollTrigger:{trigger:'#stats-section',start:'top 80%',toggleActions:'play none none reverse'}});
+gsap.from('.tech-card',{opacity:0,y:40,scale:.95,stagger:.08,duration:.8,scrollTrigger:{trigger:'.tech-grid',start:'top 82%',toggleActions:'play none none reverse'}});
+
+const ringData=[{id:'ring-a',val:'ring-a-val',pct:96,color:'#4f7cff'},{id:'ring-b',val:'ring-b-val',pct:75,color:'#c678ff'},{id:'ring-c',val:'ring-c-val',pct:100,color:'#3dffb0'},{id:'ring-d',val:'ring-d-val',pct:98,color:'#FFB300'}];
+const circ=2*Math.PI*40;
+ringData.forEach(r=>{const circle=document.getElementById(r.id),valEl=document.getElementById(r.val);ScrollTrigger.create({trigger:circle,start:'top 85%',onEnter(){gsap.to(circle,{strokeDashoffset:circ*(1-r.pct/100),duration:1.6,ease:'power2.out'});gsap.fromTo({v:0},{v:r.pct,duration:1.6,ease:'power2.out',onUpdate(){valEl.textContent=Math.round(this.targets()[0].v)+'%';}});}});});
+gsap.from('.result-item',{opacity:0,x:-30,stagger:.12,duration:.8,scrollTrigger:{trigger:'.results-list',start:'top 82%',toggleActions:'play none none reverse'}});
+gsap.from('.ring-card',{opacity:0,y:30,scale:.95,stagger:.1,duration:.8,scrollTrigger:{trigger:'.results-visual',start:'top 82%',toggleActions:'play none none reverse'}});
+gsap.from('#next-project',{opacity:0,y:50,scale:.96,scrollTrigger:{trigger:'#next-project',start:'top 85%',end:'top 40%',scrub:2}});
+window.addEventListener('resize',()=>ScrollTrigger.refresh());
+</script>
+</body>
+</html>

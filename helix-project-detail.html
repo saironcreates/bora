@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bora — Helix Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+:root{
+  --font-display:'Playfair Display',serif;--font-body:'DM Sans',sans-serif;
+  --bg:#0a0502;--fg:#f0ede8;--fg-dim:rgba(240,237,232,0.45);
+  --border:rgba(255,255,255,0.07);--border-md:rgba(255,255,255,0.13);
+  --card-bg:rgba(255,255,255,0.03);--nav-bg:rgba(10,5,2,0.88);
+  --accent:#ff6b35;--accent-dim:rgba(255,107,53,0.09);--accent-border:rgba(255,107,53,0.28);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--bg);color:var(--fg);overflow-x:hidden;cursor:none}
+#cursor-dot{position:fixed;width:8px;height:8px;background:rgba(240,237,232,.9);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+#cursor-ring{position:fixed;width:34px;height:34px;border:1.5px solid rgba(240,237,232,.2);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .4s var(--ease-spring),height .4s var(--ease-spring),border-color .3s}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:18px 52px;background:var(--nav-bg);backdrop-filter:blur(28px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--font-display);font-size:22px;letter-spacing:-.4px;color:var(--fg);text-decoration:none}
+.nav-links{display:flex;gap:34px;list-style:none;align-items:center}
+.nav-links a{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-dim);text-decoration:none;transition:color .3s}
+.nav-links a:hover{color:var(--fg)}
+.nav-back{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-dim);text-decoration:none;transition:color .3s,gap .3s}
+.nav-back:hover{color:var(--fg);gap:13px}
+.back-arrow{transition:transform .3s}
+.nav-back:hover .back-arrow{transform:translateX(-3px)}
+.label{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--fg-dim)}
+#hero{height:100vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 100% 80% at 50% 40%,#200e04 0%,#140902 55%,#0a0502 100%)}
+#hero-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,107,53,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,107,53,.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 30%,transparent 100%)}
+.h-orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(140px);opacity:.16;animation:orbf 11s ease-in-out infinite alternate}
+@keyframes orbf{from{transform:scale(1)}to{transform:scale(1.1) translate(-18px,-22px)}}
+.orb-1{width:700px;height:600px;background:#2d1205;top:-10%;left:30%}
+.orb-2{width:400px;height:400px;background:#180a03;bottom:0;left:-5%;animation-delay:-6s}
+.orb-3{width:320px;height:320px;background:#251003;top:25%;right:0;animation-delay:-4s}
+#hero::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")}
+#hero-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 20px}
+.hero-icon{width:84px;height:84px;border-radius:22px;border:1.5px solid var(--accent-border);background:var(--accent-dim);display:flex;align-items:center;justify-content:center;margin-bottom:30px;font-size:38px;box-shadow:0 0 40px rgba(255,107,53,.1)}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;border-radius:40px;border:1px solid var(--accent-border);background:var(--accent-dim);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:24px}
+.hero-tag-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:blink 2.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.hero-title{font-family:var(--font-display);font-size:clamp(48px,7.5vw,108px);font-weight:900;letter-spacing:-4px;line-height:.9;background:linear-gradient(140deg,#fff 0%,#ffd0b8 45%,#ff6b35 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:22px}
+.hero-sub{font-size:clamp(14px,1.4vw,16px);color:var(--fg-dim);max-width:520px;line-height:1.75;margin-bottom:40px}
+.hero-meta-row{display:flex;gap:36px;flex-wrap:wrap;justify-content:center;padding:22px 36px;border-radius:18px;border:1px solid var(--border);background:rgba(255,255,255,.025);backdrop-filter:blur(12px)}
+.hero-meta-item{text-align:center}
+.hero-meta-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-dim);margin-bottom:5px}
+.hero-meta-val{font-size:14px;color:var(--fg);font-weight:500}
+.scroll-hint{position:absolute;bottom:44px;z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--fg-dim)}
+.scroll-line{width:1px;height:52px;background:linear-gradient(to bottom,var(--fg-dim),transparent);animation:lp 2.2s ease-in-out infinite}
+@keyframes lp{0%,100%{opacity:.4;transform:scaleY(1)}50%{opacity:1;transform:scaleY(.55)}}
+#mockup-section{height:260vh;position:relative}
+#mockup-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse 65% 55% at 50% 55%,#150903 0%,var(--bg) 65%)}
+.mockup-label{position:absolute;top:100px;left:52px;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(240,237,232,.2)}
+#mockup-wrap{will-change:transform,opacity;width:88vw;max-width:1060px}
+#overview-section{padding:140px 52px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.overview-sticky{position:sticky;top:120px}
+.overview-num{font-family:var(--font-display);font-size:120px;font-weight:900;line-height:1;letter-spacing:-6px;color:rgba(240,237,232,.04);margin-bottom:-20px}
+.overview-heading{font-family:var(--font-display);font-size:clamp(34px,3.5vw,50px);font-weight:700;letter-spacing:-1.2px;line-height:1.1;margin-bottom:22px}
+.overview-heading em{font-style:italic;font-weight:400;color:rgba(240,237,232,.3)}
+.overview-body{font-size:15px;color:var(--fg-dim);line-height:1.85}
+.overview-body+.overview-body{margin-top:18px}
+.pull-quote{margin:36px 0;padding:26px 30px;border-left:2px solid var(--accent);background:var(--accent-dim);border-radius:0 12px 12px 0}
+.pull-quote p{font-family:var(--font-display);font-size:19px;font-style:italic;color:var(--fg);line-height:1.6}
+#challenges-section{padding:0 52px 120px}
+.cs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:56px}
+.cs-card{padding:36px;border:1px solid var(--border);position:relative;overflow:hidden;transition:border-color .4s,background .4s;cursor:default}
+.cs-card:first-child{border-radius:16px 0 0 16px}.cs-card:last-child{border-radius:0 16px 16px 0}
+.cs-card:hover{border-color:var(--border-md);background:var(--card-bg)}
+.cs-icon{font-size:26px;margin-bottom:18px;display:block;filter:grayscale(1);transition:filter .4s}
+.cs-card:hover .cs-icon{filter:grayscale(0)}
+.cs-title{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:11px}
+.cs-body{font-size:13px;color:var(--fg-dim);line-height:1.75}
+.cs-line{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease-spring)}
+.cs-card:hover .cs-line{transform:scaleX(1)}
+#features-section{height:400vh;position:relative}
+#features-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;overflow:hidden}
+#features-track{display:flex;will-change:transform;height:100vh}
+.feat-panel{flex-shrink:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;padding:0 52px}
+.feat-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;width:100%;max-width:1200px}
+.feat-inner.rev{direction:rtl}.feat-inner.rev>*{direction:ltr}
+.feat-num{font-family:var(--font-display);font-size:80px;font-weight:900;letter-spacing:-4px;color:rgba(240,237,232,.05);line-height:1;margin-bottom:-10px}
+.feat-title{font-family:var(--font-display);font-size:clamp(28px,3vw,42px);font-weight:700;letter-spacing:-1px;margin-bottom:14px;line-height:1.1}
+.feat-desc{font-size:15px;color:var(--fg-dim);line-height:1.8;margin-bottom:22px}
+.feat-pills{display:flex;flex-wrap:wrap;gap:8px}
+.feat-pill{font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:20px;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent)}
+.feat-visual{border-radius:20px;overflow:hidden;border:1px solid var(--border);background:#080502;box-shadow:0 30px 80px rgba(0,0,0,.85);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;position:relative}
+.fv-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,107,53,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,107,53,.03) 1px,transparent 1px);background-size:36px 36px}
+#feat-progress{position:absolute;bottom:40px;right:52px;z-index:10;display:flex;gap:8px}
+.fp-dot{width:6px;height:6px;border-radius:50%;background:rgba(240,237,232,.2);transition:background .4s,width .4s var(--ease-spring)}
+.fp-dot.active{background:var(--accent);width:24px;border-radius:3px}
+#stats-section{padding:120px 52px;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.big-stat{padding:48px 36px;border:1px solid var(--border);transition:border-color .4s,background .4s}
+.big-stat:first-child{border-radius:16px 0 0 16px}.big-stat:last-child{border-radius:0 16px 16px 0}
+.big-stat:hover{border-color:var(--border-md);background:var(--card-bg)}
+.big-stat-val{font-family:var(--font-display);font-size:clamp(38px,4vw,58px);font-weight:900;letter-spacing:-2px;color:var(--accent);margin-bottom:8px;line-height:1}
+.big-stat-label{font-size:13px;color:var(--fg-dim);line-height:1.5}
+#tech-section{padding:120px 52px;border-top:1px solid var(--border)}
+.tech-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:52px}
+.tech-card{padding:28px 24px;background:var(--card-bg);border:1px solid var(--border);border-radius:16px;transition:border-color .35s,background .35s,transform .4s var(--ease-spring)}
+.tech-card:hover{border-color:var(--border-md);background:rgba(255,255,255,.05);transform:translateY(-4px)}
+.tech-icon{font-size:28px;margin-bottom:14px;display:block}
+.tech-name{font-size:15px;font-weight:500;margin-bottom:6px}
+.tech-role{font-size:12px;color:var(--fg-dim);line-height:1.5}
+#results-section{padding:120px 52px;border-top:1px solid var(--border);position:relative;overflow:hidden}
+#results-section::before{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:800px;height:400px;background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(255,107,53,.05) 0%,transparent 70%);pointer-events:none}
+.results-layout{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.results-visual{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.ring-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:center;transition:border-color .4s,transform .4s var(--ease-spring)}
+.ring-card:hover{border-color:var(--accent-border);transform:translateY(-4px)}
+.ring-wrap{position:relative;width:100px;height:100px;margin:0 auto 14px}
+.ring-svg{transform:rotate(-90deg);width:100%;height:100%}
+.ring-track{fill:none;stroke:rgba(255,255,255,.07);stroke-width:6}
+.ring-fill{fill:none;stroke-width:6;stroke-linecap:round}
+.ring-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:-1px}
+.ring-title{font-size:12px;color:var(--fg-dim)}
+.results-list{margin-top:32px;display:flex;flex-direction:column;gap:14px}
+.result-item{display:flex;align-items:flex-start;gap:14px;padding:18px 22px;border-radius:14px;border:1px solid var(--border);background:var(--card-bg);transition:border-color .35s,background .35s}
+.result-item:hover{border-color:var(--accent-border);background:var(--accent-dim)}
+.result-check{width:26px;height:26px;border-radius:50%;flex-shrink:0;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--accent)}
+.result-body{font-size:13px;color:var(--fg-dim);line-height:1.65}
+.result-body strong{color:var(--fg);font-weight:500}
+#next-project{margin:0 52px 120px;border-radius:28px;padding:60px 72px;display:flex;align-items:center;justify-content:space-between;gap:40px;border:1px solid var(--border);background:var(--card-bg);position:relative;overflow:hidden;cursor:pointer;text-decoration:none;transition:border-color .4s,transform .5s var(--ease-spring)}
+#next-project:hover{border-color:var(--border-md);transform:translateY(-4px)}
+#next-project::before{content:"";position:absolute;right:-60px;top:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,53,.07) 0%,transparent 70%);pointer-events:none}
+.next-title{font-family:var(--font-display);font-size:clamp(26px,3vw,40px);font-weight:700;letter-spacing:-1px;margin-top:8px}
+.next-arrow{width:60px;height:60px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--accent);flex-shrink:0;transition:transform .4s var(--ease-spring)}
+#next-project:hover .next-arrow{transform:rotate(45deg) scale(1.1)}
+footer{border-top:1px solid var(--border);padding:28px 52px;display:flex;justify-content:space-between;align-items:center}
+footer p{font-size:12px;color:rgba(240,237,232,.18)}
+@media(max-width:900px){
+  #overview-section{grid-template-columns:1fr;gap:40px}.overview-sticky{position:static}
+  .feat-inner,.feat-inner.rev{grid-template-columns:1fr;direction:ltr}
+  .results-layout{grid-template-columns:1fr}#stats-section{grid-template-columns:1fr 1fr}
+  .cs-grid{grid-template-columns:1fr}.cs-card{border-radius:12px!important}.big-stat{border-radius:12px!important}
+  .tech-grid{grid-template-columns:1fr 1fr}.results-visual{grid-template-columns:1fr 1fr}
+}
+@media(max-width:640px){
+  nav{padding:16px 22px}body{cursor:auto}#cursor-dot,#cursor-ring{display:none}
+  #overview-section,#challenges-section,#tech-section,#results-section{padding-left:22px;padding-right:22px}
+  #stats-section{grid-template-columns:1fr;padding:60px 22px}.tech-grid{grid-template-columns:1fr}
+  #next-project{margin:0 22px 80px;padding:40px 28px;flex-direction:column;text-align:center}
+  footer{flex-direction:column;gap:8px;text-align:center;padding:24px 22px}
+}
+</style>
+</head>
+<body>
+<div id="cursor-dot"></div><div id="cursor-ring"></div>
+<nav>
+  <a class="nav-logo" href="bora-portfolio (1).html">Bora</a>
+  <ul class="nav-links">
+    <li><a class="nav-back" href="projects.html"><span class="back-arrow">←</span> All Work</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+</nav>
+
+<section id="hero">
+  <div id="hero-bg"></div><div id="hero-grid"></div>
+  <div class="h-orb orb-1"></div><div class="h-orb orb-2"></div><div class="h-orb orb-3"></div>
+  <div id="hero-content">
+    <div class="hero-icon">⬡</div>
+    <div class="hero-tag"><div class="hero-tag-dot"></div>Figma · React · Storybook · Design Systems</div>
+    <h1 class="hero-title">Helix<br>Design</h1>
+    <p class="hero-sub">An enterprise-scale design system with full dark and light modes, WCAG AA accessibility compliance, and a React + Storybook component library — 120+ components, documented and shipped.</p>
+    <div class="hero-meta-row">
+      <div class="hero-meta-item"><div class="hero-meta-label">Year</div><div class="hero-meta-val">2024</div></div>
+      <div class="hero-meta-item"><div class="hero-meta-label">Role</div><div class="hero-meta-val">Design Systems Lead</div></div>
+      <div class="hero-meta-item"><div class="hero-meta-label">Duration</div><div class="hero-meta-val">4 Months</div></div>
+      <div class="hero-meta-item"><div class="hero-meta-label">Scope</div><div class="hero-meta-val">120+ Components</div></div>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="scroll-line"></div><span>Scroll</span></div>
+</section>
+
+<section id="mockup-section">
+  <div id="mockup-sticky">
+    <div class="mockup-label">Storybook Component Library</div>
+    <div id="mockup-wrap">
+      <div style="background:#0e0805;border-radius:14px;border:1px solid rgba(255,107,53,.1);overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.95),0 0 60px rgba(255,107,53,.05)">
+        <!-- Storybook bar -->
+        <div style="height:44px;background:#100a06;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;gap:6px"><div style="width:10px;height:10px;border-radius:50%;background:#ff5f57"></div><div style="width:10px;height:10px;border-radius:50%;background:#febc2e"></div><div style="width:10px;height:10px;border-radius:50%;background:#28c840"></div></div>
+          <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.5);margin-left:4px">Helix · Storybook 7.6</div>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <div style="padding:4px 10px;border-radius:4px;background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.2);font-size:9px;color:rgba(255,107,53,.8)">Dark</div>
+            <div style="padding:4px 10px;border-radius:4px;background:rgba(255,255,255,.05);font-size:9px;color:rgba(255,255,255,.4)">Light</div>
+            <div style="padding:4px 10px;border-radius:4px;background:rgba(255,255,255,.05);font-size:9px;color:rgba(255,255,255,.4)">Docs</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:220px 1fr;min-height:380px">
+          <!-- Sidebar -->
+          <div style="background:#0c0704;border-right:1px solid rgba(255,255,255,.04);padding:16px 0">
+            <div style="padding:0 12px 8px;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2)">Components</div>
+            <div style="padding:7px 16px;font-size:11px;color:rgba(255,255,255,.35);border-left:2px solid transparent">Foundations</div>
+            <div style="padding:7px 28px;font-size:11px;color:rgba(255,255,255,.3);border-left:2px solid transparent">→ Colors</div>
+            <div style="padding:7px 28px;font-size:11px;color:rgba(255,255,255,.3);border-left:2px solid transparent">→ Typography</div>
+            <div style="padding:7px 28px;font-size:11px;color:rgba(255,255,255,.3);border-left:2px solid transparent">→ Spacing</div>
+            <div style="padding:7px 16px;font-size:11px;color:rgba(255,255,255,.35);border-left:2px solid transparent">Atoms</div>
+            <div style="padding:7px 28px;font-size:11px;color:rgba(255,255,255,.7);background:rgba(255,107,53,.08);border-left:2px solid #ff6b35">→ Button</div>
+            <div style="padding:7px 28px;font-size:11px;color:rgba(255,255,255,.3);border-left:2px solid transparent">→ Input</div>
+            <div style="padding:7px 28px;font-size:11px;color:rgba(255,255,255,.3);border-left:2px solid transparent">→ Badge</div>
+            <div style="padding:7px 16px;font-size:11px;color:rgba(255,255,255,.35);border-left:2px solid transparent">Molecules</div>
+            <div style="padding:7px 28px;font-size:11px;color:rgba(255,255,255,.3);border-left:2px solid transparent">→ Card</div>
+            <div style="padding:7px 28px;font-size:11px;color:rgba(255,255,255,.3);border-left:2px solid transparent">→ Modal</div>
+            <div style="padding:7px 28px;font-size:11px;color:rgba(255,255,255,.3);border-left:2px solid transparent">→ Toast</div>
+            <div style="padding:7px 16px;font-size:11px;color:rgba(255,255,255,.35);border-left:2px solid transparent">Organisms</div>
+            <div style="padding:7px 28px;font-size:11px;color:rgba(255,255,255,.3);border-left:2px solid transparent">→ DataTable</div>
+            <div style="padding:7px 28px;font-size:11px;color:rgba(255,255,255,.3);border-left:2px solid transparent">→ Navigation</div>
+          </div>
+          <!-- Preview -->
+          <div style="padding:24px;background:#080503;display:flex;flex-direction:column;gap:16px">
+            <div style="font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.06em">Button · All Variants</div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+              <button style="padding:10px 20px;border-radius:8px;background:linear-gradient(135deg,#ff6b35,#d94e1e);border:none;color:#fff;font-size:12px;font-weight:600;cursor:default;font-family:'DM Sans',sans-serif">Primary</button>
+              <button style="padding:10px 20px;border-radius:8px;background:transparent;border:1.5px solid rgba(255,107,53,.5);color:rgba(255,107,53,.9);font-size:12px;cursor:default;font-family:'DM Sans',sans-serif">Secondary</button>
+              <button style="padding:10px 20px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:12px;cursor:default;font-family:'DM Sans',sans-serif">Ghost</button>
+              <button style="padding:6px 14px;border-radius:6px;background:linear-gradient(135deg,#ff6b35,#d94e1e);border:none;color:#fff;font-size:10px;cursor:default;font-family:'DM Sans',sans-serif">SM</button>
+              <button style="padding:14px 28px;border-radius:10px;background:linear-gradient(135deg,#ff6b35,#d94e1e);border:none;color:#fff;font-size:14px;font-weight:600;cursor:default;font-family:'DM Sans',sans-serif">Large</button>
+              <button style="padding:10px 20px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.25);font-size:12px;cursor:default;font-family:'DM Sans',sans-serif" disabled>Disabled</button>
+            </div>
+            <!-- Props table -->
+            <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;overflow:hidden">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border-bottom:1px solid rgba(255,255,255,.06)">
+                <div style="padding:8px 12px;font-size:9px;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase">Prop</div>
+                <div style="padding:8px 12px;font-size:9px;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase">Type</div>
+                <div style="padding:8px 12px;font-size:9px;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase">Default</div>
+                <div style="padding:8px 12px;font-size:9px;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase">Required</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border-bottom:1px solid rgba(255,255,255,.04)"><div style="padding:7px 12px;font-size:10px;color:rgba(255,255,255,.6);font-family:monospace">variant</div><div style="padding:7px 12px;font-size:10px;color:rgba(198,120,255,.6);font-family:monospace">string</div><div style="padding:7px 12px;font-size:10px;color:rgba(61,255,176,.5);font-family:monospace">"primary"</div><div style="padding:7px 12px;font-size:10px;color:rgba(255,107,53,.3);font-family:monospace">No</div></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border-bottom:1px solid rgba(255,255,255,.04)"><div style="padding:7px 12px;font-size:10px;color:rgba(255,255,255,.6);font-family:monospace">size</div><div style="padding:7px 12px;font-size:10px;color:rgba(198,120,255,.6);font-family:monospace">sm|md|lg</div><div style="padding:7px 12px;font-size:10px;color:rgba(61,255,176,.5);font-family:monospace">"md"</div><div style="padding:7px 12px;font-size:10px;color:rgba(255,107,53,.3);font-family:monospace">No</div></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border-bottom:1px solid rgba(255,255,255,.04)"><div style="padding:7px 12px;font-size:10px;color:rgba(255,255,255,.6);font-family:monospace">disabled</div><div style="padding:7px 12px;font-size:10px;color:rgba(198,120,255,.6);font-family:monospace">boolean</div><div style="padding:7px 12px;font-size:10px;color:rgba(61,255,176,.5);font-family:monospace">false</div><div style="padding:7px 12px;font-size:10px;color:rgba(255,107,53,.3);font-family:monospace">No</div></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border-bottom:1px solid rgba(255,255,255,.04)"><div style="padding:7px 12px;font-size:10px;color:rgba(255,255,255,.6);font-family:monospace">onClick</div><div style="padding:7px 12px;font-size:10px;color:rgba(198,120,255,.6);font-family:monospace">() =&gt; void</div><div style="padding:7px 12px;font-size:10px;color:rgba(61,255,176,.5);font-family:monospace">–</div><div style="padding:7px 12px;font-size:10px;color:rgba(255,107,53,.8);font-family:monospace">Yes</div></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr"><div style="padding:7px 12px;font-size:10px;color:rgba(255,255,255,.6);font-family:monospace">children</div><div style="padding:7px 12px;font-size:10px;color:rgba(198,120,255,.6);font-family:monospace">ReactNode</div><div style="padding:7px 12px;font-size:10px;color:rgba(61,255,176,.5);font-family:monospace">–</div><div style="padding:7px 12px;font-size:10px;color:rgba(255,107,53,.8);font-family:monospace">Yes</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="overview-section">
+  <div class="overview-sticky">
+    <div class="overview-num">01</div>
+    <h2 class="overview-heading">Design at<br><em>enterprise scale</em></h2>
+  </div>
+  <div>
+    <p class="overview-body">Most design systems start as a UI kit and grow into bureaucracy. Helix started from the opposite direction: what does an engineering team actually need to move fast without breaking consistency? The answer isn't more components — it's better foundations, precise documentation, and a system that punishes inconsistency at the token level, not in design review.</p>
+    <p class="overview-body">The brief was an enterprise SaaS product with a design debt crisis: six product teams building in parallel, three different button implementations, no shared colour system, and a dark mode hand-coded per component. The task was to unify everything without disrupting in-flight shipping teams.</p>
+    <div class="pull-quote"><p>"A design system is infrastructure. It should be invisible when it works and obvious when it doesn't — like a grid."</p></div>
+    <p class="overview-body">Helix was built token-first: colour, spacing, typography, and motion defined as JSON tokens synced to both Figma variables and CSS custom properties. The 120+ React components in Storybook consume only tokens — never raw values. Dark and light mode is a single token swap.</p>
+  </div>
+</section>
+
+<section id="challenges-section">
+  <div class="label" style="margin-bottom:12px">Challenges</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(36px,4vw,54px);font-weight:700;letter-spacing:-1.5px;line-height:1.05">120 components,<br><span style="color:rgba(240,237,232,.25);font-style:italic;font-weight:400">zero raw values</span></h2>
+  <div class="cs-grid">
+    <div class="cs-card"><span class="cs-icon">🌓</span><div class="cs-title">Dark / Light Without Duplication</div><div class="cs-body">Both themes needed to feel intentionally designed, not just inverted. Used a semantic token layer (color.surface.primary, color.text.secondary) above the primitive palette — components reference semantic tokens only, so theme switching is a JSON swap with zero component-level changes.</div><div class="cs-line"></div></div>
+    <div class="cs-card"><span class="cs-icon">♿</span><div class="cs-title">WCAG AA Everywhere</div><div class="cs-body">Every colour combination in the system was validated against WCAG AA (4.5:1 minimum contrast). Built a custom Figma plugin that runs contrast checks on all component variants automatically during the CI step — a failing contrast ratio blocks merge to main.</div><div class="cs-line"></div></div>
+    <div class="cs-card"><span class="cs-icon">🔄</span><div class="cs-title">Migration Without Disruption</div><div class="cs-body">Six product teams couldn't stop shipping to migrate. Built a compatibility shim layer that maps old class names and props to the new token system — teams could adopt Helix incrementally, component by component, without a big-bang migration sprint.</div><div class="cs-line"></div></div>
+  </div>
+</section>
+
+<section id="features-section">
+  <div id="features-sticky">
+    <div id="features-track">
+      <!-- Panel 1: Token Architecture -->
+      <div class="feat-panel">
+        <div class="feat-inner">
+          <div>
+            <div class="feat-num">01</div>
+            <div class="feat-title">Token Architecture</div>
+            <div class="feat-desc">Three-tier token hierarchy: primitives (raw values), semantics (role-based names), and components (component-specific references). Nothing references primitives directly — all values flow through the semantic layer, making global theme changes a single file edit.</div>
+            <div class="feat-pills"><span class="feat-pill">JSON Tokens</span><span class="feat-pill">3-Tier Hierarchy</span><span class="feat-pill">Figma Variables</span></div>
+          </div>
+          <div class="feat-visual"><div class="fv-grid"></div>
+            <div style="padding:24px;width:100%;height:100%;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1">
+              <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3)">Token Hierarchy</div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:8px"><div style="width:12px;height:12px;border-radius:3px;background:#ff6b35;flex-shrink:0"></div><div style="flex:1;font-size:9px;color:rgba(255,255,255,.55);font-family:monospace">color.orange.500</div><div style="font-size:9px;color:rgba(255,255,255,.25)">#ff6b35</div></div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:8px;margin-left:24px"><div style="width:12px;height:12px;border-radius:3px;background:rgba(255,107,53,.7);flex-shrink:0"></div><div style="flex:1;font-size:9px;color:rgba(255,255,255,.55);font-family:monospace">color.interactive.primary</div><div style="font-size:9px;color:rgba(255,255,255,.25)">→ orange.500</div></div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:8px;margin-left:48px"><div style="width:12px;height:12px;border-radius:3px;background:rgba(255,107,53,.5);flex-shrink:0"></div><div style="flex:1;font-size:9px;color:rgba(255,255,255,.55);font-family:monospace">button.background.default</div><div style="font-size:9px;color:rgba(255,255,255,.25)">→ interactive.primary</div></div>
+              <div style="height:1px;background:rgba(255,255,255,.06);margin:4px 0"></div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:8px"><div style="width:12px;height:12px;border-radius:3px;background:#0a0502;border:1px solid rgba(255,255,255,.1);flex-shrink:0"></div><div style="flex:1;font-size:9px;color:rgba(255,255,255,.55);font-family:monospace">color.neutral.900</div><div style="font-size:9px;color:rgba(255,255,255,.25)">#0a0502</div></div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:8px;margin-left:24px"><div style="width:12px;height:12px;border-radius:3px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);flex-shrink:0"></div><div style="flex:1;font-size:9px;color:rgba(255,255,255,.55);font-family:monospace">color.surface.elevated</div><div style="font-size:9px;color:rgba(255,255,255,.25)">→ neutral.900</div></div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:8px;margin-left:48px"><div style="width:12px;height:12px;border-radius:3px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);flex-shrink:0"></div><div style="flex:1;font-size:9px;color:rgba(255,255,255,.55);font-family:monospace">card.background</div><div style="font-size:9px;color:rgba(255,255,255,.25)">→ surface.elevated</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Panel 2: A11y CI -->
+      <div class="feat-panel">
+        <div class="feat-inner rev">
+          <div>
+            <div class="feat-num">02</div>
+            <div class="feat-title">Accessibility Automation</div>
+            <div class="feat-desc">WCAG AA compliance is built into the CI pipeline. A custom Figma plugin and a Jest + axe-core test suite run on every component and token combination. A failing contrast ratio or missing aria attribute blocks the PR from merging.</div>
+            <div class="feat-pills"><span class="feat-pill">axe-core</span><span class="feat-pill">Figma Plugin</span><span class="feat-pill">CI Gate</span></div>
+          </div>
+          <div class="feat-visual"><div class="fv-grid"></div>
+            <div style="padding:20px;width:100%;height:100%;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1">
+              <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3)">A11y CI Report</div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(76,175,80,.15);border-radius:8px"><div style="width:20px;height:20px;border-radius:50%;background:rgba(76,175,80,.15);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">✓</div><div style="flex:1;font-size:10px;color:rgba(255,255,255,.55)">Color contrast ratio ≥ 4.5:1</div><div style="font-size:9px;color:rgba(76,175,80,.7)">Pass · 7.2:1</div></div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(76,175,80,.15);border-radius:8px"><div style="width:20px;height:20px;border-radius:50%;background:rgba(76,175,80,.15);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">✓</div><div style="flex:1;font-size:10px;color:rgba(255,255,255,.55)">Focus ring visible</div><div style="font-size:9px;color:rgba(76,175,80,.7)">Pass · 3px solid</div></div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(76,175,80,.15);border-radius:8px"><div style="width:20px;height:20px;border-radius:50%;background:rgba(76,175,80,.15);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">✓</div><div style="flex:1;font-size:10px;color:rgba(255,255,255,.55)">aria-label on icon buttons</div><div style="font-size:9px;color:rgba(76,175,80,.7)">Pass · 120/120</div></div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(76,175,80,.15);border-radius:8px"><div style="width:20px;height:20px;border-radius:50%;background:rgba(76,175,80,.15);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">✓</div><div style="flex:1;font-size:10px;color:rgba(255,255,255,.55)">Keyboard navigation order</div><div style="font-size:9px;color:rgba(76,175,80,.7)">Pass · Logical</div></div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(76,175,80,.15);border-radius:8px"><div style="width:20px;height:20px;border-radius:50%;background:rgba(76,175,80,.15);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">✓</div><div style="flex:1;font-size:10px;color:rgba(255,255,255,.55)">Touch target ≥ 44×44px</div><div style="font-size:9px;color:rgba(76,175,80,.7)">Pass · 48×48</div></div>
+              <div style="padding:8px 12px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.2);border-radius:8px;display:flex;align-items:center;justify-content:space-between"><div style="font-size:10px;color:rgba(76,175,80,.8);font-weight:600">All checks passed</div><div style="font-size:9px;color:rgba(76,175,80,.5)">120/120 components</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Panel 3: Dark/Light -->
+      <div class="feat-panel">
+        <div class="feat-inner">
+          <div>
+            <div class="feat-num">03</div>
+            <div class="feat-title">Dark / Light Mode System</div>
+            <div class="feat-desc">Theme switching is a single CSS custom property swap on the root element. All 120+ components reference semantic tokens, never primitives — so neither the React code nor Figma components require any changes when switching theme. Both modes are equally designed, not inverses.</div>
+            <div class="feat-pills"><span class="feat-pill">CSS Variables</span><span class="feat-pill">Semantic Tokens</span><span class="feat-pill">Zero Duplication</span></div>
+          </div>
+          <div class="feat-visual"><div class="fv-grid"></div>
+            <div style="padding:20px;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;position:relative;z-index:1">
+              <div style="display:flex;gap:20px;align-items:flex-start">
+                <div style="width:160px;background:#0e0805;border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.7)">
+                  <div style="height:24px;background:#0a0603;display:flex;align-items:center;padding:0 10px;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:#ff5f57"></div><div style="width:6px;height:6px;border-radius:50%;background:#febc2e"></div><div style="width:6px;height:6px;border-radius:50%;background:#28c840"></div></div>
+                  <div style="padding:14px;display:flex;flex-direction:column;gap:8px">
+                    <div style="font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase">Dark Mode</div>
+                    <div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px;width:80%"></div>
+                    <div style="height:8px;background:rgba(255,255,255,.04);border-radius:4px;width:60%"></div>
+                    <button style="padding:7px 14px;border-radius:6px;background:linear-gradient(135deg,#ff6b35,#d94e1e);border:none;color:#fff;font-size:9px;cursor:default;font-family:'DM Sans',sans-serif">Action</button>
+                  </div>
+                </div>
+                <div style="width:160px;background:#faf9f7;border:1px solid rgba(0,0,0,.08);border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.2)">
+                  <div style="height:24px;background:#f0ede8;display:flex;align-items:center;padding:0 10px;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:#ff5f57"></div><div style="width:6px;height:6px;border-radius:50%;background:#febc2e"></div><div style="width:6px;height:6px;border-radius:50%;background:#28c840"></div></div>
+                  <div style="padding:14px;display:flex;flex-direction:column;gap:8px">
+                    <div style="font-size:9px;color:rgba(0,0,0,.35);letter-spacing:.1em;text-transform:uppercase">Light Mode</div>
+                    <div style="height:8px;background:rgba(0,0,0,.07);border-radius:4px;width:80%"></div>
+                    <div style="height:8px;background:rgba(0,0,0,.04);border-radius:4px;width:60%"></div>
+                    <button style="padding:7px 14px;border-radius:6px;background:linear-gradient(135deg,#ff6b35,#d94e1e);border:none;color:#fff;font-size:9px;cursor:default;font-family:'DM Sans',sans-serif">Action</button>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size:9px;color:rgba(255,255,255,.3);text-align:center;font-family:monospace">:root[data-theme] — single token swap</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="feat-progress">
+      <div class="fp-dot active" id="fp-0"></div>
+      <div class="fp-dot" id="fp-1"></div>
+      <div class="fp-dot" id="fp-2"></div>
+    </div>
+  </div>
+</section>
+
+<section id="stats-section">
+  <div class="big-stat"><div class="big-stat-val" id="sv-0">0</div><div class="big-stat-label">React<br>components</div></div>
+  <div class="big-stat"><div class="big-stat-val" id="sv-1">0</div><div class="big-stat-label">Months<br>end-to-end</div></div>
+  <div class="big-stat"><div class="big-stat-val" id="sv-2">0</div><div class="big-stat-label">Themes<br>dark &amp; light</div></div>
+  <div class="big-stat"><div class="big-stat-val" id="sv-3">0</div><div class="big-stat-label">% WCAG AA<br>compliance</div></div>
+</section>
+
+<section id="tech-section">
+  <div class="label" style="margin-bottom:12px">Tools &amp; Stack</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(36px,4vw,54px);font-weight:700;letter-spacing:-1.5px;line-height:1.05">Token-first,<br><span style="color:rgba(240,237,232,.25);font-style:italic;font-weight:400">production-ready</span></h2>
+  <div class="tech-grid">
+    <div class="tech-card"><span class="tech-icon">🎨</span><div class="tech-name">Figma</div><div class="tech-role">Full component library with variables synced to the JSON token system — 120+ auto-layout components.</div></div>
+    <div class="tech-card"><span class="tech-icon">⚛️</span><div class="tech-name">React</div><div class="tech-role">TypeScript component library consuming design tokens via CSS custom properties and styled-components.</div></div>
+    <div class="tech-card"><span class="tech-icon">📖</span><div class="tech-name">Storybook</div><div class="tech-role">Component documentation with interactive props, usage guidelines, and do/don't examples per component.</div></div>
+    <div class="tech-card"><span class="tech-icon">🔑</span><div class="tech-name">Design Tokens</div><div class="tech-role">Three-tier JSON token hierarchy (primitives → semantics → components) synced to Figma and CSS.</div></div>
+    <div class="tech-card"><span class="tech-icon">♿</span><div class="tech-name">axe-core</div><div class="tech-role">Automated accessibility testing in the Jest suite — contrast, aria labels, keyboard nav, all CI-gated.</div></div>
+    <div class="tech-card"><span class="tech-icon">🌓</span><div class="tech-name">Theme System</div><div class="tech-role">Single CSS custom property swap for dark/light — zero component-level changes required per theme.</div></div>
+    <div class="tech-card"><span class="tech-icon">🔄</span><div class="tech-name">Migration Shim</div><div class="tech-role">Compatibility layer mapping old class names to Helix tokens — enables incremental team-by-team adoption.</div></div>
+    <div class="tech-card"><span class="tech-icon">📐</span><div class="tech-name">Spacing Scale</div><div class="tech-role">8-point grid with a named scale (xs, sm, md, lg, xl, 2xl) enforced at the token level.</div></div>
+  </div>
+</section>
+
+<section id="results-section">
+  <div class="results-layout">
+    <div>
+      <div class="label" style="margin-bottom:12px">Outcomes</div>
+      <h2 style="font-family:var(--font-display);font-size:clamp(32px,3.5vw,48px);font-weight:700;letter-spacing:-1.2px;line-height:1.1;margin-bottom:8px">System,<br><em style="font-weight:400;color:rgba(240,237,232,.3)">not style guide</em></h2>
+      <div class="results-list">
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>120+ components shipped</strong> across 4 months — atoms, molecules, organisms, and full-page templates.</div></div>
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>100% WCAG AA compliance</strong> on every component and token combination — validated by automated CI checks.</div></div>
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>6 product teams migrated</strong> incrementally over 8 weeks using the compatibility shim, with zero shipping disruption.</div></div>
+        <div class="result-item"><div class="result-check">✓</div><div class="result-body"><strong>40% reduction</strong> in design-to-development handoff time, measured over the quarter following system launch.</div></div>
+      </div>
+    </div>
+    <div class="results-visual">
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-a" cx="50" cy="50" r="40" stroke="#ff6b35" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-val" style="color:#ff6b35" id="ring-a-val">0%</div></div><div class="ring-title">Components</div></div>
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-b" cx="50" cy="50" r="40" stroke="#4CAF50" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-val" style="color:#4CAF50" id="ring-b-val">0%</div></div><div class="ring-title">WCAG AA</div></div>
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-c" cx="50" cy="50" r="40" stroke="#4f7cff" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-val" style="color:#4f7cff" id="ring-c-val">0%</div></div><div class="ring-title">Teams Migrated</div></div>
+      <div class="ring-card"><div class="ring-wrap"><svg class="ring-svg" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" id="ring-d" cx="50" cy="50" r="40" stroke="#FFB300" stroke-dasharray="251" stroke-dashoffset="251"/></svg><div class="ring-val" style="color:#FFB300" id="ring-d-val">0%</div></div><div class="ring-title">Handoff Speed ↑</div></div>
+    </div>
+  </div>
+</section>
+
+<a href="einvoice-project-detail.html" id="next-project">
+  <div><div class="label" style="margin-bottom:10px">View All Work</div><div class="next-title">E-Invoice Automation→</div></div>
+  <div class="next-arrow">↗</div>
+</a>
+<footer><p>© 2026 Bora. All rights reserved.</p><p>Designed &amp; built with care</p></footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+const dot=document.getElementById('cursor-dot'),ring=document.getElementById('cursor-ring');
+ring._x=0;ring._y=0;
+window.addEventListener('mousemove',e=>{dot.style.left=e.clientX+'px';dot.style.top=e.clientY+'px';});
+(function tick(){requestAnimationFrame(tick);ring._x+=(parseFloat(dot.style.left||0)-ring._x)*.1;ring._y+=(parseFloat(dot.style.top||0)-ring._y)*.1;ring.style.left=ring._x+'px';ring.style.top=ring._y+'px';})();
+document.querySelectorAll('a,button,.cs-card,.tech-card,.result-item,.ring-card,.big-stat').forEach(el=>{el.addEventListener('mouseenter',()=>{ring.style.width='52px';ring.style.height='52px';ring.style.borderColor='rgba(255,107,53,.5)';});el.addEventListener('mouseleave',()=>{ring.style.width='34px';ring.style.height='34px';ring.style.borderColor='rgba(240,237,232,.2)';});});
+gsap.timeline({defaults:{ease:'power3.out'}})
+  .from('.hero-icon',{opacity:0,scale:.5,duration:1.2,delay:.2})
+  .from('.hero-tag',{opacity:0,y:16,duration:.8},'-=0.6')
+  .from('.hero-title',{opacity:0,y:60,duration:1.3},'-=0.5')
+  .from('.hero-sub',{opacity:0,y:22,duration:1},'-=0.9')
+  .from('.hero-meta-row',{opacity:0,y:22,duration:.9},'-=0.7')
+  .from('.scroll-hint',{opacity:0,duration:.8},'-=0.4');
+gsap.to('#hero-content',{scale:.72,opacity:0,y:-80,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'50% top',scrub:1.5}});
+gsap.fromTo('#mockup-wrap',{opacity:0,y:100,scale:.88},{opacity:1,y:0,scale:1,ease:'power3.out',scrollTrigger:{trigger:'#mockup-section',start:'top 80%',end:'top 20%',scrub:2}});
+gsap.from('.overview-num',{opacity:0,x:-30,scrollTrigger:{trigger:'#overview-section',start:'top 80%',end:'top 40%',scrub:2}});
+gsap.from('.overview-heading',{opacity:0,y:40,scrollTrigger:{trigger:'#overview-section',start:'top 75%',end:'top 35%',scrub:2}});
+gsap.from('.overview-body,.pull-quote',{opacity:0,y:30,stagger:.15,duration:1,scrollTrigger:{trigger:'#overview-section',start:'top 68%',toggleActions:'play none none reverse'}});
+gsap.from('.cs-card',{opacity:0,y:50,stagger:.15,duration:.9,scrollTrigger:{trigger:'.cs-grid',start:'top 82%',toggleActions:'play none none reverse'}});
+gsap.to('#features-track',{x:()=>-(window.innerWidth*2),ease:'none',scrollTrigger:{trigger:'#features-section',start:'top top',end:'bottom bottom',scrub:1,pin:'#features-sticky',anticipatePin:1,invalidateOnRefresh:true,onUpdate(self){const a=Math.round(self.progress*2);document.querySelectorAll('.fp-dot').forEach((d,i)=>d.classList.toggle('active',i===a));}}});
+const statsData=[{id:'sv-0',end:120,display:'120+'},{id:'sv-1',end:4,display:'4'},{id:'sv-2',end:2,display:'2'},{id:'sv-3',end:100,display:'100%'}];
+statsData.forEach(s=>{const el=document.getElementById(s.id);ScrollTrigger.create({trigger:el,start:'top 85%',onEnter(){gsap.fromTo({val:0},{val:s.end,duration:2,ease:'power2.out',onUpdate(){el.textContent=this.targets()[0].val>=s.end?s.display:Math.round(this.targets()[0].val);}});}});});
+gsap.from('.big-stat',{opacity:0,y:40,stagger:.1,duration:.9,scrollTrigger:{trigger:'#stats-section',start:'top 80%',toggleActions:'play none none reverse'}});
+gsap.from('.tech-card',{opacity:0,y:40,scale:.95,stagger:.08,duration:.8,scrollTrigger:{trigger:'.tech-grid',start:'top 82%',toggleActions:'play none none reverse'}});
+const circ=2*Math.PI*40;
+[{id:'ring-a',val:'ring-a-val',pct:100,color:'#ff6b35'},{id:'ring-b',val:'ring-b-val',pct:100,color:'#4CAF50'},{id:'ring-c',val:'ring-c-val',pct:100,color:'#4f7cff'},{id:'ring-d',val:'ring-d-val',pct:40,color:'#FFB300'}].forEach(r=>{const c=document.getElementById(r.id),v=document.getElementById(r.val);ScrollTrigger.create({trigger:c,start:'top 85%',onEnter(){gsap.to(c,{strokeDashoffset:circ*(1-r.pct/100),duration:1.6,ease:'power2.out'});gsap.fromTo({n:0},{n:r.pct,duration:1.6,ease:'power2.out',onUpdate(){v.textContent=Math.round(this.targets()[0].n)+'%';}});}});});
+gsap.from('.result-item',{opacity:0,x:-30,stagger:.12,duration:.8,scrollTrigger:{trigger:'.results-list',start:'top 82%',toggleActions:'play none none reverse'}});
+gsap.from('.ring-card',{opacity:0,y:30,scale:.95,stagger:.1,duration:.8,scrollTrigger:{trigger:'.results-visual',start:'top 82%',toggleActions:'play none none reverse'}});
+gsap.from('#next-project',{opacity:0,y:50,scale:.96,scrollTrigger:{trigger:'#next-project',start:'top 85%',end:'top 40%',scrub:2}});
+window.addEventListener('resize',()=>ScrollTrigger.refresh());
+</script>
+</body>
+</html>

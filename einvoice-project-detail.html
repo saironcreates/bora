@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bora — E-Invoice Automation System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+/* ══════════════════════════════════════════════════
+   DESIGN SYSTEM
+══════════════════════════════════════════════════ */
+:root {
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --bg: #080808;
+  --fg: #f0ede8;
+  --fg-dim: rgba(240,237,232,0.45);
+  --fg-ghost: rgba(240,237,232,0.07);
+  --border: rgba(255,255,255,0.07);
+  --border-md: rgba(255,255,255,0.13);
+  --card-bg: rgba(255,255,255,0.03);
+  --nav-bg: rgba(8,8,8,0.82);
+  --accent: #4CAF50;
+  --accent-dim: rgba(76,175,80,0.12);
+  --accent-border: rgba(76,175,80,0.25);
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: auto; }
+body { font-family: var(--font-body); background: var(--bg); color: var(--fg); overflow-x: hidden; cursor: none; }
+
+/* ── Cursor ── */
+#cursor-dot {
+  position: fixed; width: 8px; height: 8px;
+  background: rgba(240,237,232,.9); border-radius: 50%;
+  pointer-events: none; z-index: 9999; transform: translate(-50%,-50%);
+  transition: width .3s, height .3s, background .3s;
+}
+#cursor-ring {
+  position: fixed; width: 34px; height: 34px;
+  border: 1.5px solid rgba(240,237,232,.2); border-radius: 50%;
+  pointer-events: none; z-index: 9998; transform: translate(-50%,-50%);
+  transition: width .4s var(--ease-spring), height .4s var(--ease-spring), border-color .3s;
+}
+
+/* ── Nav ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 52px;
+  background: var(--nav-bg);
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-family: var(--font-display); font-size: 22px; letter-spacing: -.4px; color: var(--fg); text-decoration: none; }
+.nav-links { display: flex; gap: 34px; list-style: none; align-items: center; }
+.nav-links a { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--fg-dim); text-decoration: none; transition: color .3s; }
+.nav-links a:hover { color: var(--fg); }
+.nav-back { display: flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--fg-dim); text-decoration: none; transition: color .3s, gap .3s; }
+.nav-back:hover { color: var(--fg); gap: 13px; }
+.back-arrow { font-size: 15px; transition: transform .3s; }
+.nav-back:hover .back-arrow { transform: translateX(-3px); }
+.label { font-size: 11px; letter-spacing: .25em; text-transform: uppercase; color: var(--fg-dim); }
+
+/* ══════════════════════════════════════════════════
+   HERO
+══════════════════════════════════════════════════ */
+#hero { height: 100vh; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+#hero-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #061a08 0%, #071a0e 50%, #030a06 100%); }
+#hero-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(76,175,80,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(76,175,80,.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%);
+}
+.h-orb { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(110px); opacity: .2; animation: orbf 10s ease-in-out infinite alternate; }
+@keyframes orbf { from{transform:scale(1) translateY(0)} to{transform:scale(1.1) translateY(-30px)} }
+.orb-1 { width:600px; height:600px; background:#0a3d12; top:-10%; left:45%; animation-delay:0s; }
+.orb-2 { width:400px; height:400px; background:#062014; top:50%; left:2%; animation-delay:-5s; }
+#hero::after { content:''; position:absolute; inset:0; pointer-events:none; z-index:1; opacity:.025; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E"); }
+#hero-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.hero-tag { display: inline-flex; align-items: center; gap: 8px; padding: 7px 18px; border-radius: 40px; border: 1px solid var(--accent-border); background: var(--accent-dim); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 28px; }
+.hero-tag-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:.3} }
+.hero-title { font-family: var(--font-display); font-size: clamp(48px, 8vw, 110px); font-weight: 900; letter-spacing: -4px; line-height: .9; background: linear-gradient(140deg, #fff 0%, #c8f5ca 40%, #7ecf81 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 24px; }
+.hero-sub { font-size: clamp(14px,1.5vw,17px); color: var(--fg-dim); max-width: 520px; line-height: 1.75; margin-bottom: 44px; }
+.hero-meta-row { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; padding: 24px 40px; border-radius: 20px; border: 1px solid var(--border); background: rgba(255,255,255,.03); backdrop-filter: blur(12px); }
+.hero-meta-item { text-align: center; }
+.hero-meta-label { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--fg-dim); margin-bottom: 5px; }
+.hero-meta-val { font-size: 15px; color: var(--fg); font-weight: 500; }
+.scroll-hint { position: absolute; bottom: 44px; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--fg-dim); }
+.scroll-line { width:1px; height:52px; background:linear-gradient(to bottom,var(--fg-dim),transparent); animation:lp 2.2s ease-in-out infinite; }
+@keyframes lp{0%,100%{opacity:.4;transform:scaleY(1)}50%{opacity:1;transform:scaleY(.55)}}
+
+/* ══════════════════════════════════════════════════
+   MOCKUP SECTION
+══════════════════════════════════════════════════ */
+#mockup-section { height: 300vh; position: relative; }
+#mockup-sticky { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; background: radial-gradient(ellipse 70% 50% at 50% 60%, #071a08 0%, var(--bg) 70%); }
+#mockup-wrap { width: clamp(300px, 72vw, 960px); will-change: transform, opacity; }
+.dash-frame { background: #0d0d0d; border: 1px solid rgba(255,255,255,.09); border-radius: 16px; overflow: hidden; box-shadow: 0 40px 120px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.05); }
+.dash-bar { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: #111; border-bottom: 1px solid rgba(255,255,255,.06); }
+.dash-dots { display: flex; gap: 6px; }
+.dd { width: 10px; height: 10px; border-radius: 50%; }
+.dash-url { flex: 1; margin: 0 12px; height: 24px; background: rgba(255,255,255,.05); border-radius: 6px; display: flex; align-items: center; padding: 0 10px; font-size: 9px; color: rgba(255,255,255,.25); letter-spacing: .04em; font-family: 'SF Mono', monospace; }
+.dash-body { display: grid; grid-template-columns: 200px 1fr; height: 520px; }
+.dash-sidebar { background: #0a0a0a; border-right: 1px solid rgba(255,255,255,.06); padding: 20px 0; }
+.dash-sidebar-logo { padding: 0 20px 20px; font-family: var(--font-display); font-size: 14px; color: var(--accent); border-bottom: 1px solid rgba(255,255,255,.05); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.dash-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 11px; color: rgba(255,255,255,.3); border-left: 2px solid transparent; cursor: default; }
+.dash-nav-item.on { color: var(--accent); border-left-color: var(--accent); background: linear-gradient(90deg, var(--accent-dim), transparent); }
+.dash-nav-icon { width: 14px; height: 14px; border-radius: 3px; background: currentColor; opacity: .6; flex-shrink: 0; }
+.dash-main { padding: 24px; overflow: hidden; display: flex; flex-direction: column; gap: 18px; }
+.stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.stat-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; padding: 14px; }
+.stat-label { font-size: 9px; color: rgba(255,255,255,.3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+.stat-val { font-size: 22px; font-weight: 700; letter-spacing: -1px; color: var(--fg); margin-bottom: 4px; }
+.stat-delta { font-size: 9px; }
+.stat-delta.up { color: var(--accent); }
+.stat-delta.down { color: #ff6b35; }
+.chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; flex: 1; }
+.chart-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; padding: 16px; position: relative; overflow: hidden; }
+.chart-title { font-size: 10px; color: rgba(255,255,255,.3); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 14px; }
+.chart-svg { width: 100%; height: 100px; }
+.donut-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 16px; }
+.donut-svg { width: 100px; height: 100px; }
+.donut-legend { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.dl-row { display: flex; align-items: center; gap: 8px; font-size: 9px; color: rgba(255,255,255,.4); }
+.dl-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.table-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; overflow: hidden; }
+.table-head { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.05); }
+.th { font-size: 9px; color: rgba(255,255,255,.25); letter-spacing: .1em; text-transform: uppercase; }
+.table-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.04); align-items: center; }
+.table-row:last-child { border-bottom: none; }
+.td { font-size: 10px; color: rgba(255,255,255,.55); }
+.td.name { color: rgba(255,255,255,.8); display: flex; align-items: center; gap: 8px; }
+.td-avatar { width: 20px; height: 20px; border-radius: 4px; flex-shrink: 0; }
+.td-badge { font-size: 8px; padding: 2px 8px; border-radius: 20px; }
+.td-badge.live { background: rgba(76,175,80,.15); color: var(--accent); }
+.td-badge.idle { background: rgba(255,255,255,.07); color: rgba(255,255,255,.35); }
+.td-badge.warn { background: rgba(255,107,53,.15); color: #ff6b35; }
+.mockup-label { position: absolute; top: 40px; left: 52px; font-size: 11px; letter-spacing: .25em; text-transform: uppercase; color: rgba(240,237,232,.2); z-index: 5; }
+
+/* ══════════════════════════════════════════════════
+   OVERVIEW
+══════════════════════════════════════════════════ */
+#overview-section { padding: 140px 52px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+.overview-sticky { position: sticky; top: 120px; }
+.overview-num { font-family: var(--font-display); font-size: 120px; font-weight: 900; line-height: 1; letter-spacing: -6px; color: rgba(240,237,232,.04); margin-bottom: -20px; }
+.overview-heading { font-family: var(--font-display); font-size: clamp(34px, 3.5vw, 50px); font-weight: 700; letter-spacing: -1.2px; line-height: 1.1; margin-bottom: 24px; }
+.overview-heading em { font-style: italic; font-weight: 400; color: rgba(240,237,232,.35); }
+.overview-body { font-size: 15px; color: var(--fg-dim); line-height: 1.85; }
+.overview-body + .overview-body { margin-top: 20px; }
+.pull-quote { margin: 40px 0; padding: 28px 32px; border-left: 2px solid var(--accent); background: var(--accent-dim); border-radius: 0 12px 12px 0; }
+.pull-quote p { font-family: var(--font-display); font-size: 20px; font-style: italic; font-weight: 400; color: var(--fg); line-height: 1.6; }
+
+/* ══════════════════════════════════════════════════
+   CHALLENGES
+══════════════════════════════════════════════════ */
+#challenges-section { padding: 0 52px 120px; }
+.cs-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2px; margin-top: 56px; }
+.cs-card { padding: 40px 36px; border: 1px solid var(--border); position: relative; overflow: hidden; transition: border-color .4s, background .4s; cursor: default; }
+.cs-card:first-child { border-radius: 16px 0 0 16px; }
+.cs-card:last-child  { border-radius: 0 16px 16px 0; }
+.cs-card:hover { border-color: var(--border-md); background: var(--card-bg); }
+.cs-icon { font-size: 28px; margin-bottom: 20px; display: block; filter: grayscale(1); transition: filter .4s; }
+.cs-card:hover .cs-icon { filter: grayscale(0); }
+.cs-title { font-family: var(--font-display); font-size: 21px; font-weight: 700; letter-spacing: -.4px; margin-bottom: 12px; }
+.cs-body { font-size: 13px; color: var(--fg-dim); line-height: 1.75; }
+.cs-line { position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .5s var(--ease-spring); }
+.cs-card:hover .cs-line { transform: scaleX(1); }
+
+/* ══════════════════════════════════════════════════
+   FEATURES HORIZONTAL
+══════════════════════════════════════════════════ */
+#features-section { height: 400vh; position: relative; }
+#features-sticky { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; overflow: hidden; }
+#features-track { display: flex; gap: 0; will-change: transform; height: 100vh; }
+.feat-panel { flex-shrink: 0; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; padding: 0 52px; }
+.feat-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; width: 100%; max-width: 1200px; }
+.feat-inner.reverse { direction: rtl; }
+.feat-inner.reverse > * { direction: ltr; }
+.feat-num { font-family: var(--font-display); font-size: 80px; font-weight: 900; letter-spacing: -4px; color: rgba(240,237,232,.05); line-height: 1; margin-bottom: -10px; }
+.feat-title { font-family: var(--font-display); font-size: clamp(28px, 3vw, 42px); font-weight: 700; letter-spacing: -1px; margin-bottom: 16px; line-height: 1.1; }
+.feat-desc { font-size: 15px; color: var(--fg-dim); line-height: 1.8; margin-bottom: 24px; }
+.feat-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.feat-pill { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; padding: 5px 12px; border-radius: 20px; background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent); }
+.feat-visual { border-radius: 20px; overflow: hidden; border: 1px solid var(--border); background: #0a0a0a; box-shadow: 0 30px 80px rgba(0,0,0,.7); aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; position: relative; }
+.feat-visual-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(76,175,80,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(76,175,80,.04) 1px, transparent 1px); background-size: 40px 40px; }
+#feat-progress { position: absolute; bottom: 40px; right: 52px; z-index: 10; display: flex; gap: 8px; }
+.fp-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(240,237,232,.2); transition: background .4s, width .4s var(--ease-spring); }
+.fp-dot.active { background: var(--accent); width: 24px; border-radius: 3px; }
+
+/* Feature visual components */
+.inv-preview { padding: 20px; width: 100%; height: 100%; display: flex; flex-direction: column; gap: 0; }
+.inv-doc { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); border-radius: 10px; padding: 16px; flex: 1; }
+.inv-doc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.inv-logo-block { display: flex; flex-direction: column; gap: 4px; }
+.inv-logo-name { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.8); }
+.inv-logo-sub  { font-size: 9px; color: rgba(255,255,255,.3); }
+.inv-num-block { text-align: right; }
+.inv-num-label { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); }
+.inv-num-val { font-size: 14px; font-weight: 700; color: var(--accent); }
+.inv-line { height: 1px; background: rgba(255,255,255,.06); margin-bottom: 12px; }
+.inv-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 9px; color: rgba(255,255,255,.4); }
+.inv-total-row { display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.07); font-size: 11px; color: rgba(255,255,255,.7); font-weight: 600; margin-top: 4px; }
+.inv-total-row span:last-child { color: var(--accent); }
+.inv-status { display: flex; justify-content: flex-end; margin-top: 10px; }
+.inv-badge { font-size: 8px; padding: 3px 10px; border-radius: 20px; background: rgba(76,175,80,.15); border: 1px solid rgba(76,175,80,.3); color: var(--accent); }
+
+.rule-vis { padding: 20px; width: 100%; height: 100%; display: flex; flex-direction: column; gap: 10px; }
+.rule-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,.06); background: rgba(255,255,255,.03); }
+.rule-icon-wrap { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.rule-body { flex: 1; }
+.rule-name { font-size: 10px; color: rgba(255,255,255,.7); margin-bottom: 3px; }
+.rule-cond { font-size: 9px; color: rgba(255,255,255,.3); font-family: 'SF Mono', monospace; }
+.rule-toggle { width: 28px; height: 16px; border-radius: 8px; background: var(--accent); position: relative; flex-shrink: 0; }
+.rule-toggle::after { content:''; position:absolute; right:3px; top:3px; width:10px; height:10px; border-radius:50%; background:#fff; }
+.rule-toggle.off { background: rgba(255,255,255,.12); }
+.rule-toggle.off::after { right:auto; left:3px; }
+
+.notif-vis { padding: 20px; width: 100%; height: 100%; display: flex; flex-direction: column; gap: 8px; }
+.notif-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,.06); background: rgba(255,255,255,.03); animation: nIn .4s ease-out; }
+@keyframes nIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+.n-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+.n-text { font-size: 11px; color: rgba(255,255,255,.5); line-height: 1.5; }
+.n-text strong { color: rgba(255,255,255,.8); font-weight: 500; }
+.n-time { font-size: 9px; color: rgba(255,255,255,.2); white-space: nowrap; margin-left: auto; }
+
+/* ══════════════════════════════════════════════════
+   STATS
+══════════════════════════════════════════════════ */
+#stats-section { padding: 120px 52px; border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(4,1fr); gap: 2px; }
+.big-stat { padding: 48px 40px; border: 1px solid var(--border); transition: border-color .4s, background .4s; }
+.big-stat:first-child { border-radius: 16px 0 0 16px; }
+.big-stat:last-child  { border-radius: 0 16px 16px 0; }
+.big-stat:hover { border-color: var(--border-md); background: var(--card-bg); }
+.big-stat-val { font-family: var(--font-display); font-size: clamp(40px, 4.5vw, 60px); font-weight: 900; letter-spacing: -2px; color: var(--accent); margin-bottom: 8px; line-height: 1; }
+.big-stat-label { font-size: 13px; color: var(--fg-dim); line-height: 1.5; }
+
+/* ══════════════════════════════════════════════════
+   TECH STACK
+══════════════════════════════════════════════════ */
+#tech-section { padding: 120px 52px; border-top: 1px solid var(--border); }
+.tech-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-top: 56px; }
+.tech-card { padding: 28px 24px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; transition: border-color .35s, background .35s, transform .4s var(--ease-spring); }
+.tech-card:hover { border-color: var(--border-md); background: rgba(255,255,255,.05); transform: translateY(-4px); }
+.tech-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+.tech-name { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+.tech-role { font-size: 12px; color: var(--fg-dim); line-height: 1.5; }
+
+/* ══════════════════════════════════════════════════
+   TIMELINE
+══════════════════════════════════════════════════ */
+#timeline-section { padding: 120px 52px; border-top: 1px solid var(--border); }
+.timeline { max-width: 700px; margin: 56px auto 0; position: relative; }
+.timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--border); }
+.tl-item { padding: 0 0 56px 40px; position: relative; }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-dot { position: absolute; left: -5px; top: 4px; width: 11px; height: 11px; border-radius: 50%; background: var(--bg); border: 2px solid var(--border); transition: border-color .4s, background .4s; }
+.tl-item.done .tl-dot { border-color: var(--accent); background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+.tl-week { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.tl-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: -.4px; margin-bottom: 10px; }
+.tl-body { font-size: 13px; color: var(--fg-dim); line-height: 1.75; }
+
+/* ══════════════════════════════════════════════════
+   RESULTS
+══════════════════════════════════════════════════ */
+#results-section { padding: 120px 52px; border-top: 1px solid var(--border); position: relative; overflow: hidden; }
+#results-section::before { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:800px; height:400px; background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(76,175,80,.07) 0%, transparent 70%); pointer-events:none; }
+.results-layout { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+.results-list { margin-top: 36px; display:flex; flex-direction:column; gap:16px; }
+.result-item { display:flex; align-items:flex-start; gap:16px; padding: 20px 24px; border-radius:16px; border: 1px solid var(--border); background: var(--card-bg); transition: border-color .35s, background .35s; }
+.result-item:hover { border-color: var(--accent-border); background: var(--accent-dim); }
+.result-check { width:28px; height:28px; border-radius:50%; flex-shrink:0; background: var(--accent-dim); border:1px solid var(--accent-border); display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--accent); }
+.result-body { font-size:14px; color:var(--fg-dim); line-height:1.6; }
+.result-body strong { color:var(--fg); font-weight:500; }
+.results-visual { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.ring-card { background: var(--card-bg); border:1px solid var(--border); border-radius:20px; padding:28px; text-align:center; transition: border-color .4s, transform .4s var(--ease-spring); }
+.ring-card:hover { border-color:var(--accent-border); transform:translateY(-4px); }
+.ring-wrap { position:relative; width:100px; height:100px; margin:0 auto 14px; }
+.ring-svg { transform: rotate(-90deg); width:100%; height:100%; }
+.ring-track { fill:none; stroke:rgba(255,255,255,.07); stroke-width:6; }
+.ring-fill  { fill:none; stroke-width:6; stroke-linecap:round; }
+.ring-label-val { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:22px; font-weight:700; letter-spacing:-1px; }
+.ring-title { font-size:12px; color:var(--fg-dim); }
+
+/* ══════════════════════════════════════════════════
+   NEXT PROJECT + FOOTER
+══════════════════════════════════════════════════ */
+#next-project { margin: 0 52px 120px; border-radius: 28px; padding: 64px 72px; display: flex; align-items: center; justify-content: space-between; gap: 40px; border: 1px solid var(--border); background: var(--card-bg); position: relative; overflow: hidden; cursor: pointer; text-decoration: none; transition: border-color .4s, background .4s, transform .5s var(--ease-spring); }
+#next-project:hover { border-color: var(--border-md); background: rgba(255,255,255,.04); transform: translateY(-4px); }
+#next-project::before { content:''; position:absolute; right:-60px; top:-60px; width:300px; height:300px; border-radius:50%; background: radial-gradient(circle, rgba(76,175,80,.08) 0%, transparent 70%); pointer-events:none; }
+.next-left .label { margin-bottom: 10px; }
+.next-title { font-family:var(--font-display); font-size:clamp(26px,3vw,40px); font-weight:700; letter-spacing:-1px; }
+.next-arrow { width:64px; height:64px; border-radius:50%; background: var(--accent-dim); border:1px solid var(--accent-border); display:flex; align-items:center; justify-content:center; font-size:24px; color:var(--accent); flex-shrink:0; transition: background .3s, transform .4s var(--ease-spring); }
+#next-project:hover .next-arrow { background:rgba(76,175,80,.2); transform:rotate(45deg) scale(1.1); }
+footer { border-top:1px solid var(--border); padding:28px 52px; display:flex; justify-content:space-between; align-items:center; }
+footer p { font-size:12px; color:rgba(240,237,232,.18); }
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════ */
+@media (max-width:900px) {
+  #overview-section { grid-template-columns:1fr; gap:40px; }
+  .overview-sticky { position:static; }
+  .feat-inner, .feat-inner.reverse { grid-template-columns:1fr; direction:ltr; }
+  .feat-inner.reverse > * { direction:ltr; }
+  .results-layout { grid-template-columns:1fr; }
+  .big-stat { border-radius:12px !important; }
+  #stats-section { grid-template-columns:1fr 1fr; }
+  .tech-grid { grid-template-columns:1fr 1fr; }
+  .cs-grid { grid-template-columns:1fr; }
+  .cs-card { border-radius:12px !important; }
+  .results-visual { grid-template-columns:repeat(2,auto); justify-content:center; }
+}
+@media (max-width:640px) {
+  nav { padding:16px 22px; }
+  .nav-links li:not(:last-child):not(:first-child) { display:none; }
+  #cursor-dot, #cursor-ring { display:none; }
+  body { cursor:auto; }
+  #hero-content { padding:0 20px; }
+  .hero-meta-row { padding:18px 20px; gap:24px; }
+  #overview-section,#challenges-section,#tech-section,#timeline-section,#results-section { padding-left:22px; padding-right:22px; }
+  #stats-section { grid-template-columns:1fr; padding:60px 22px; }
+  .tech-grid { grid-template-columns:1fr; }
+  #next-project { margin:0 22px 80px; padding:40px 28px; flex-direction:column; text-align:center; }
+  footer { flex-direction:column; gap:8px; text-align:center; padding:24px 22px; }
+  .dash-body { grid-template-columns:1fr; }
+  .dash-sidebar { display:none; }
+}
+</style>
+</head>
+<body>
+
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- ════════════ NAV ════════════ -->
+<nav>
+  <a class="nav-logo" href="bora-portfolio (1).html"a>Bora</a>
+  <ul class="nav-links">
+    <li><a class="nav-back" href="projects.html"><span class="back-arrow">←</span> All Work</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ════════════ HERO ════════════ -->
+<section id="hero">
+  <div id="hero-bg"></div>
+  <div id="hero-grid"></div>
+  <div class="h-orb orb-1"></div>
+  <div class="h-orb orb-2"></div>
+
+  <div id="hero-content">
+    <div class="hero-tag">
+      <div class="hero-tag-dot"></div>
+      UI Design · Dashboard UX
+    </div>
+    <h1 class="hero-title">E-Invoice<br>Automation</h1>
+    <p class="hero-sub">Smart invoicing platform that automatically generates and manages invoices for marketplace sellers — zero manual work, zero errors.</p>
+    <div class="hero-meta-row">
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Year</div>
+        <div class="hero-meta-val">2026</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Role</div>
+        <div class="hero-meta-val">UI / UX Designer</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Type</div>
+        <div class="hero-meta-val">SaaS Platform</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Scope</div>
+        <div class="hero-meta-val">End-to-End Design</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- ════════════ DASHBOARD MOCKUP ════════════ -->
+<section id="mockup-section">
+  <div id="mockup-sticky">
+    <div class="mockup-label">Live Product</div>
+    <div id="mockup-wrap">
+      <div class="dash-frame">
+        <div class="dash-bar">
+          <div class="dash-dots">
+            <div class="dd" style="background:#ff5f56"></div>
+            <div class="dd" style="background:#ffbd2e"></div>
+            <div class="dd" style="background:#27c93f"></div>
+          </div>
+          <div class="dash-url">app.einvoice.io/dashboard</div>
+        </div>
+        <div class="dash-body">
+          <div class="dash-sidebar">
+            <div class="dash-sidebar-logo">
+              <div class="logo-dot"></div>
+              eInvoice
+            </div>
+            <div class="dash-nav-item on"><div class="dash-nav-icon" style="background:var(--accent)"></div>Dashboard</div>
+            <div class="dash-nav-item"><div class="dash-nav-icon"></div>Invoices</div>
+            <div class="dash-nav-item"><div class="dash-nav-icon"></div>Sellers</div>
+            <div class="dash-nav-item"><div class="dash-nav-icon"></div>Automation</div>
+            <div class="dash-nav-item"><div class="dash-nav-icon"></div>Reports</div>
+            <div class="dash-nav-item"><div class="dash-nav-icon"></div>Settings</div>
+          </div>
+          <div class="dash-main">
+            <div class="stat-row">
+              <div class="stat-card">
+                <div class="stat-label">Invoices Today</div>
+                <div class="stat-val" id="stat-inv">1,284</div>
+                <div class="stat-delta up">↑ 18.3% vs yesterday</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-val">₺482k</div>
+                <div class="stat-delta up">↑ 11.2% this month</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Auto-Generated</div>
+                <div class="stat-val">99.1%</div>
+                <div class="stat-delta up">↑ vs 71% manual</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Pending Review</div>
+                <div class="stat-val" id="stat-pend">12</div>
+                <div class="stat-delta down">↓ needs attention</div>
+              </div>
+            </div>
+            <div class="chart-row">
+              <div class="chart-card">
+                <div class="chart-title">Invoice Volume — Last 30 Days</div>
+                <svg class="chart-svg" viewBox="0 0 400 80" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#4CAF50" stop-opacity=".28"/>
+                      <stop offset="100%" stop-color="#4CAF50" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M0,65 C20,62 40,55 70,50 C100,45 120,52 150,44 C180,36 200,28 230,25 C260,22 280,30 310,22 C340,14 365,18 400,12 L400,80 L0,80 Z" fill="url(#cg)"/>
+                  <path d="M0,65 C20,62 40,55 70,50 C100,45 120,52 150,44 C180,36 200,28 230,25 C260,22 280,30 310,22 C340,14 365,18 400,12" fill="none" stroke="#4CAF50" stroke-width="1.5"/>
+                  <circle r="3" fill="#4CAF50">
+                    <animateMotion dur="7s" repeatCount="indefinite" path="M0,65 C20,62 40,55 70,50 C100,45 120,52 150,44 C180,36 200,28 230,25 C260,22 280,30 310,22 C340,14 365,18 400,12"/>
+                  </circle>
+                  <line x1="0" y1="20" x2="400" y2="20" stroke="rgba(255,255,255,.04)" stroke-dasharray="4,4"/>
+                  <line x1="0" y1="40" x2="400" y2="40" stroke="rgba(255,255,255,.04)" stroke-dasharray="4,4"/>
+                  <line x1="0" y1="60" x2="400" y2="60" stroke="rgba(255,255,255,.04)" stroke-dasharray="4,4"/>
+                </svg>
+              </div>
+              <div class="chart-card">
+                <div class="chart-title">Invoice Status</div>
+                <div class="donut-wrap">
+                  <svg class="donut-svg" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="10"/>
+                    <circle cx="50" cy="50" r="36" fill="none" stroke="#4CAF50" stroke-width="10" stroke-dasharray="90 144" stroke-dashoffset="-4" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+                    <circle cx="50" cy="50" r="36" fill="none" stroke="#4f7cff" stroke-width="10" stroke-dasharray="30 144" stroke-dashoffset="-98" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+                    <circle cx="50" cy="50" r="36" fill="none" stroke="#ff6b35" stroke-width="10" stroke-dasharray="24 144" stroke-dashoffset="-132" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+                    <text x="50" y="54" text-anchor="middle" font-size="12" fill="rgba(255,255,255,.7)" font-family="DM Sans">63%</text>
+                  </svg>
+                  <div class="donut-legend">
+                    <div class="dl-row"><div class="dl-dot" style="background:#4CAF50"></div>Paid — 63%</div>
+                    <div class="dl-row"><div class="dl-dot" style="background:#4f7cff"></div>Sent — 21%</div>
+                    <div class="dl-row"><div class="dl-dot" style="background:#ff6b35"></div>Overdue — 16%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="table-card">
+              <div class="table-head">
+                <div class="th">Seller</div>
+                <div class="th">Invoice #</div>
+                <div class="th">Amount</div>
+                <div class="th">Status</div>
+              </div>
+              <div class="table-row">
+                <div class="td name"><div class="td-avatar" style="background:rgba(76,175,80,.25)">🛍</div>TechStore Pro</div>
+                <div class="td">INV-2026-0041</div>
+                <div class="td">₺12,840</div>
+                <div class="td"><span class="td-badge live">Paid</span></div>
+              </div>
+              <div class="table-row">
+                <div class="td name"><div class="td-avatar" style="background:rgba(79,124,255,.25)">👗</div>FashionHub</div>
+                <div class="td">INV-2026-0042</div>
+                <div class="td">₺8,320</div>
+                <div class="td"><span class="td-badge idle">Sent</span></div>
+              </div>
+              <div class="table-row">
+                <div class="td name"><div class="td-avatar" style="background:rgba(255,107,53,.25)">📦</div>QuickShip Co.</div>
+                <div class="td">INV-2026-0039</div>
+                <div class="td">₺5,190</div>
+                <div class="td"><span class="td-badge warn">Overdue</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ OVERVIEW ════════════ -->
+<section id="overview-section">
+  <div class="overview-sticky">
+    <div class="overview-num">01</div>
+    <h2 class="overview-heading">
+      The Problem<br>
+      <em>worth solving</em>
+    </h2>
+  </div>
+  <div>
+    <p class="overview-body">Marketplace sellers were drowning in paperwork. Each sale on Trendyol, Hepsiburada, or Amazon Turkey required a manually generated e-invoice — filed within 7 days by law. With hundreds of daily orders, sellers were spending 3–4 hours a day just on invoicing, or hiring dedicated staff for a task that should be invisible.</p>
+    <p class="overview-body">The existing tools were either too complex (full ERP systems) or too basic (simple PDF generators). Nobody had designed invoicing specifically for marketplace sellers — people who care about their products, not tax compliance software.</p>
+    <div class="pull-quote">
+      <p>"I sell 200 items a day. I don't have time to think about invoices — they should just happen."</p>
+    </div>
+    <p class="overview-body">eInvoice was designed from the ground up for this persona. Connect your marketplace API, set your rules once, and never think about invoicing again. The entire UX was built around one principle: if the user has to do it manually, we failed.</p>
+  </div>
+</section>
+
+<!-- ════════════ CHALLENGES ════════════ -->
+<section id="challenges-section">
+  <div class="label" style="margin-bottom:12px;">Challenges</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(36px,4vw,54px);font-weight:700;letter-spacing:-1.5px;line-height:1.05;">
+    Complex rules,<br>
+    <span style="color:rgba(240,237,232,.25);font-style:italic;font-weight:400;">simple interface</span>
+  </h2>
+  <div class="cs-grid">
+    <div class="cs-card">
+      <span class="cs-icon">⚖️</span>
+      <div class="cs-title">Legal Complexity</div>
+      <div class="cs-body">Turkish e-invoice law (e-Fatura / e-Arşiv) has dozens of edge cases — different rules for B2B vs B2C, VAT thresholds, cancellation windows. All this had to become invisible to the end user while staying 100% compliant.</div>
+      <div class="cs-line"></div>
+    </div>
+    <div class="cs-card">
+      <span class="cs-icon">🔗</span>
+      <div class="cs-title">Multi-Marketplace Sync</div>
+      <div class="cs-body">Each marketplace (Trendyol, Hepsiburada, Amazon TR, n11) has a different API structure, order schema, and timing. Designing a unified data model that abstracts these differences — without losing seller-specific details — was the core UX challenge.</div>
+      <div class="cs-line"></div>
+    </div>
+    <div class="cs-card">
+      <span class="cs-icon">🎯</span>
+      <div class="cs-title">Trust & Confidence</div>
+      <div class="cs-body">Sellers were handing over their tax compliance to an algorithm. The UI had to communicate reliability and accuracy at every step — real-time status, clear audit trails, and one-tap manual override — so users felt in control, not anxious.</div>
+      <div class="cs-line"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ FEATURE PANELS ════════════ -->
+<section id="features-section">
+  <div id="features-sticky">
+    <div id="features-track">
+
+      <!-- Panel 1: Auto Generation -->
+      <div class="feat-panel">
+        <div class="feat-inner">
+          <div class="feat-text-col">
+            <div class="feat-num">01</div>
+            <div class="feat-title">Auto Invoice Generation</div>
+            <div class="feat-desc">The moment a sale is confirmed on any connected marketplace, an e-invoice is generated, validated, and submitted to the GİB portal automatically — typically within 90 seconds. No clicks, no forms, no delays.</div>
+            <div class="feat-pills">
+              <span class="feat-pill">GİB API</span>
+              <span class="feat-pill">Auto-Trigger</span>
+              <span class="feat-pill">90s SLA</span>
+            </div>
+          </div>
+          <div class="feat-visual">
+            <div class="feat-visual-grid"></div>
+            <div class="inv-preview">
+              <div class="inv-doc">
+                <div class="inv-doc-header">
+                  <div class="inv-logo-block">
+                    <div class="inv-logo-name">TechStore Pro</div>
+                    <div class="inv-logo-sub">Vergi No: 1234567890</div>
+                  </div>
+                  <div class="inv-num-block">
+                    <div class="inv-num-label">E-Fatura</div>
+                    <div class="inv-num-val">INV-2026-0041</div>
+                  </div>
+                </div>
+                <div class="inv-line"></div>
+                <div class="inv-row"><span>Samsung Galaxy S24 × 1</span><span>₺10,000</span></div>
+                <div class="inv-row"><span>Kılıf × 2</span><span>₺800</span></div>
+                <div class="inv-row"><span>Kargo</span><span>₺40</span></div>
+                <div class="inv-line"></div>
+                <div class="inv-row"><span>KDV (%20)</span><span>₺2,168</span></div>
+                <div class="inv-total-row"><span>Toplam</span><span>₺13,008</span></div>
+                <div class="inv-status">
+                  <div class="inv-badge">✓ GİB Onaylı</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Rule Engine -->
+      <div class="feat-panel">
+        <div class="feat-inner reverse">
+          <div class="feat-text-col">
+            <div class="feat-num">02</div>
+            <div class="feat-title">Smart Rule Engine</div>
+            <div class="feat-desc">Set your invoicing logic once in plain language — no code, no accountant needed. Rules handle VAT rates by category, B2B vs B2C routing, cancellation policies, and marketplace-specific requirements automatically.</div>
+            <div class="feat-pills">
+              <span class="feat-pill">No-Code Rules</span>
+              <span class="feat-pill">VAT Logic</span>
+              <span class="feat-pill">B2B / B2C</span>
+            </div>
+          </div>
+          <div class="feat-visual">
+            <div class="feat-visual-grid"></div>
+            <div class="rule-vis">
+              <div class="rule-item">
+                <div class="rule-icon-wrap" style="background:rgba(76,175,80,.15)">🧾</div>
+                <div class="rule-body">
+                  <div class="rule-name">Auto B2B Detection</div>
+                  <div class="rule-cond">IF buyer.taxId EXISTS → e-Fatura</div>
+                </div>
+                <div class="rule-toggle"></div>
+              </div>
+              <div class="rule-item">
+                <div class="rule-icon-wrap" style="background:rgba(79,124,255,.15)">📦</div>
+                <div class="rule-body">
+                  <div class="rule-name">Marketplace VAT Override</div>
+                  <div class="rule-cond">IF platform == 'trendyol' → KDV 10%</div>
+                </div>
+                <div class="rule-toggle"></div>
+              </div>
+              <div class="rule-item">
+                <div class="rule-icon-wrap" style="background:rgba(255,107,53,.15)">⏰</div>
+                <div class="rule-body">
+                  <div class="rule-name">Late Invoice Alert</div>
+                  <div class="rule-cond">IF days_since_order > 5 → notify</div>
+                </div>
+                <div class="rule-toggle off"></div>
+              </div>
+              <div class="rule-item">
+                <div class="rule-icon-wrap" style="background:rgba(198,120,255,.15)">🔄</div>
+                <div class="rule-body">
+                  <div class="rule-name">Auto Cancel on Return</div>
+                  <div class="rule-cond">IF order.status == 'returned' → cancel</div>
+                </div>
+                <div class="rule-toggle"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 3: Notifications -->
+      <div class="feat-panel">
+        <div class="feat-inner">
+          <div class="feat-text-col">
+            <div class="feat-num">03</div>
+            <div class="feat-title">Real-Time Status Feed</div>
+            <div class="feat-desc">Every invoice event is surfaced instantly — GİB acceptance, payment confirmations, overdue alerts, and cancellation notices. Sellers always know exactly where every invoice stands without logging into government portals.</div>
+            <div class="feat-pills">
+              <span class="feat-pill">Push Alerts</span>
+              <span class="feat-pill">GİB Sync</span>
+              <span class="feat-pill">Audit Trail</span>
+            </div>
+          </div>
+          <div class="feat-visual">
+            <div class="feat-visual-grid"></div>
+            <div class="notif-vis">
+              <div class="notif-item" style="border-color:rgba(76,175,80,.25);background:rgba(76,175,80,.06);animation-delay:.0s">
+                <div class="n-dot" style="background:#4CAF50"></div>
+                <div class="n-text"><strong>INV-2026-0041 onaylandı</strong> — GİB tarafından kabul edildi, ödeme bekleniyor</div>
+                <div class="n-time">şimdi</div>
+              </div>
+              <div class="notif-item" style="border-color:rgba(79,124,255,.2);background:rgba(79,124,255,.05);animation-delay:.3s">
+                <div class="n-dot" style="background:#4f7cff"></div>
+                <div class="n-text"><strong>₺8,320 ödeme alındı</strong> — FashionHub, INV-2026-0038 kapatıldı</div>
+                <div class="n-time">4dk önce</div>
+              </div>
+              <div class="notif-item" style="border-color:rgba(255,107,53,.2);background:rgba(255,107,53,.05);animation-delay:.6s">
+                <div class="n-dot" style="background:#ff6b35"></div>
+                <div class="n-text"><strong>INV-2026-0039 gecikti</strong> — QuickShip Co., 3 gündür ödeme yok</div>
+                <div class="n-time">1sa önce</div>
+              </div>
+              <div class="notif-item" style="animation-delay:.9s">
+                <div class="n-dot" style="background:#4CAF50"></div>
+                <div class="n-text"><strong>Günlük özet hazır</strong> — 1,284 fatura kesildi, ₺482k işlem hacmi</div>
+                <div class="n-time">3sa önce</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div id="feat-progress">
+      <div class="fp-dot active" id="fp-0"></div>
+      <div class="fp-dot" id="fp-1"></div>
+      <div class="fp-dot" id="fp-2"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ STATS ════════════ -->
+<section id="stats-section">
+  <div class="big-stat">
+    <div class="big-stat-val" id="sv-0">0</div>
+    <div class="big-stat-label">Invoices generated<br>per day at peak</div>
+  </div>
+  <div class="big-stat">
+    <div class="big-stat-val" id="sv-1">0</div>
+    <div class="big-stat-label">Hours saved weekly<br>per seller on average</div>
+  </div>
+  <div class="big-stat">
+    <div class="big-stat-val" id="sv-2">0</div>
+    <div class="big-stat-label">GİB acceptance rate<br>first submission</div>
+  </div>
+  <div class="big-stat">
+    <div class="big-stat-val" id="sv-3">0</div>
+    <div class="big-stat-label">Marketplaces<br>integrated</div>
+  </div>
+</section>
+
+<!-- ════════════ TECH STACK ════════════ -->
+<section id="tech-section">
+  <div class="label" style="margin-bottom:12px;">Design & Technology</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(36px,4vw,54px);font-weight:700;letter-spacing:-1.5px;line-height:1.05;">
+    Built with<br>
+    <span style="color:rgba(240,237,232,.25);font-style:italic;font-weight:400;">intention</span>
+  </h2>
+  <div class="tech-grid">
+    <div class="tech-card">
+      <span class="tech-icon">🎨</span>
+      <div class="tech-name">Figma</div>
+      <div class="tech-role">Full design system, component library, auto-layout, and interactive prototypes.</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-icon">🔄</span>
+      <div class="tech-name">Protopie</div>
+      <div class="tech-role">Advanced interaction prototypes for user testing the rule engine and onboarding flows.</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-icon">📐</span>
+      <div class="tech-name">Design Tokens</div>
+      <div class="tech-role">Color, spacing, typography, and radius tokens synced between Figma and the dev handoff.</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-icon">♿</span>
+      <div class="tech-name">Accessibility</div>
+      <div class="tech-role">WCAG AA contrast ratios, keyboard navigation, and screen reader annotation on all components.</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-icon">⚛️</span>
+      <div class="tech-name">React + Next.js</div>
+      <div class="tech-role">Design implemented in React with Next.js — pixel-perfect component handoff to engineering.</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-icon">🌿</span>
+      <div class="tech-name">Tailwind CSS</div>
+      <div class="tech-role">Utility-first CSS aligned with the design token system for consistent implementation.</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-icon">🧪</span>
+      <div class="tech-name">Usability Testing</div>
+      <div class="tech-role">5 rounds of moderated testing with marketplace sellers across 3 user segments.</div>
+    </div>
+    <div class="tech-card">
+      <span class="tech-icon">📊</span>
+      <div class="tech-name">Mixpanel</div>
+      <div class="tech-role">Analytics instrumentation plan for tracking funnel drop-off and feature adoption post-launch.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ TIMELINE ════════════ -->
+<section id="timeline-section">
+  <div class="label" style="margin-bottom:12px;">Project Timeline</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(36px,4vw,54px);font-weight:700;letter-spacing:-1.5px;line-height:1.05;">
+    16 weeks,<br>
+    <span style="color:rgba(240,237,232,.25);font-style:italic;font-weight:400;">research to launch</span>
+  </h2>
+  <div class="timeline">
+    <div class="tl-item done">
+      <div class="tl-dot"></div>
+      <div class="tl-week">Week 1–3</div>
+      <div class="tl-title">Research & Discovery</div>
+      <div class="tl-body">Interviewed 18 marketplace sellers across Trendyol, Hepsiburada, and Amazon TR. Mapped the current invoicing workflow end-to-end. Identified 7 key pain points — the biggest: sellers had no idea when an invoice failed GİB validation.</div>
+    </div>
+    <div class="tl-item done">
+      <div class="tl-dot"></div>
+      <div class="tl-week">Week 4–5</div>
+      <div class="tl-title">IA & User Flows</div>
+      <div class="tl-body">Defined information architecture for a 3-role system (Seller, Accountant, Admin). Mapped 12 core user flows — from first connection to daily invoice review. Validated flows in low-fidelity with 6 participants.</div>
+    </div>
+    <div class="tl-item done">
+      <div class="tl-dot"></div>
+      <div class="tl-week">Week 6–8</div>
+      <div class="tl-title">Design System Foundation</div>
+      <div class="tl-body">Built a full component library in Figma: 80+ components, 3 state variants each (default, hover, disabled), dark theme optimised for data-dense screens. Token system spans 6 categories: color, spacing, type, radius, shadow, motion.</div>
+    </div>
+    <div class="tl-item done">
+      <div class="tl-dot"></div>
+      <div class="tl-week">Week 9–13</div>
+      <div class="tl-title">High-Fidelity Design</div>
+      <div class="tl-body">Full hi-fi screens for all core flows: dashboard, invoice list, rule builder, seller onboarding, and reporting. Interactive prototype in Protopie for the rule engine — the most complex interaction surface in the product.</div>
+    </div>
+    <div class="tl-item done">
+      <div class="tl-dot"></div>
+      <div class="tl-week">Week 14–16</div>
+      <div class="tl-title">Testing & Dev Handoff</div>
+      <div class="tl-body">3 rounds of usability testing — iterated on the rule builder after round 1 revealed sellers didn't understand "condition" vs "action" terminology. Final handoff includes annotated specs, motion guidelines, and a Storybook-ready component doc.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ RESULTS ════════════ -->
+<section id="results-section">
+  <div class="results-layout">
+    <div class="results-text">
+      <div class="label" style="margin-bottom:12px;">Outcomes</div>
+      <h2 style="font-family:var(--font-display);font-size:clamp(34px,3.5vw,50px);font-weight:700;letter-spacing:-1.2px;line-height:1.1;margin-bottom:8px;">
+        Results that<br>
+        <em style="font-weight:400;color:rgba(240,237,232,.35);">speak for themselves</em>
+      </h2>
+      <div class="results-list">
+        <div class="result-item">
+          <div class="result-check">✓</div>
+          <div class="result-body"><strong>Task completion rate jumped to 94%</strong> in usability testing — up from 61% with the previous tool tested in the research phase.</div>
+        </div>
+        <div class="result-item">
+          <div class="result-check">✓</div>
+          <div class="result-body"><strong>Onboarding time cut to under 8 minutes</strong> — sellers connect a marketplace and generate their first invoice without any support.</div>
+        </div>
+        <div class="result-item">
+          <div class="result-check">✓</div>
+          <div class="result-body"><strong>99.1% GİB first-submission acceptance</strong> — the rule engine eliminates the most common validation errors before submission.</div>
+        </div>
+        <div class="result-item">
+          <div class="result-check">✓</div>
+          <div class="result-body"><strong>Design-to-dev handoff time halved</strong> — the token-based design system eliminated ambiguity, reducing back-and-forth by over 60%.</div>
+        </div>
+      </div>
+    </div>
+    <div class="results-visual">
+      <div class="ring-card">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-track" cx="50" cy="50" r="40"/>
+            <circle class="ring-fill" id="ring-a" cx="50" cy="50" r="40" stroke="#4CAF50" stroke-dasharray="251" stroke-dashoffset="251"/>
+          </svg>
+          <div class="ring-label-val" style="color:#4CAF50" id="ring-a-val">0%</div>
+        </div>
+        <div class="ring-title">Task Completion</div>
+      </div>
+      <div class="ring-card">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-track" cx="50" cy="50" r="40"/>
+            <circle class="ring-fill" id="ring-b" cx="50" cy="50" r="40" stroke="#4f7cff" stroke-dasharray="251" stroke-dashoffset="251"/>
+          </svg>
+          <div class="ring-label-val" style="color:#4f7cff" id="ring-b-val">0%</div>
+        </div>
+        <div class="ring-title">GİB Acceptance</div>
+      </div>
+      <div class="ring-card">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-track" cx="50" cy="50" r="40"/>
+            <circle class="ring-fill" id="ring-c" cx="50" cy="50" r="40" stroke="#c678ff" stroke-dasharray="251" stroke-dashoffset="251"/>
+          </svg>
+          <div class="ring-label-val" style="color:#c678ff" id="ring-c-val">0%</div>
+        </div>
+        <div class="ring-title">Auto-Generated</div>
+      </div>
+      <div class="ring-card">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-track" cx="50" cy="50" r="40"/>
+            <circle class="ring-fill" id="ring-d" cx="50" cy="50" r="40" stroke="#ff6b35" stroke-dasharray="251" stroke-dashoffset="251"/>
+          </svg>
+          <div class="ring-label-val" style="color:#ff6b35" id="ring-d-val">0%</div>
+        </div>
+        <div class="ring-title">User Satisfaction</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ NEXT PROJECT ════════════ -->
+<a href="projects.html" id="next-project">
+  <div class="next-left">
+    <div class="label" style="margin-bottom:10px;">Next Project</div>
+    <div class="next-title">Back to projects →</div>
+  </div>
+  <div class="next-arrow">↗</div>
+</a>
+
+<!-- ════════════ FOOTER ════════════ -->
+<footer>
+  <p>© 2026 Bora. All rights reserved.</p>
+  <p>Designed &amp; built with care</p>
+</footer>
+
+
+<!-- ════════════════════════════════════════════
+     GSAP ANIMATIONS
+════════════════════════════════════════════ -->
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── Cursor ── */
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+ring._x = 0; ring._y = 0;
+window.addEventListener('mousemove', e => {
+  dot.style.left = e.clientX + 'px';
+  dot.style.top  = e.clientY + 'px';
+});
+(function tick() {
+  requestAnimationFrame(tick);
+  ring._x += (parseFloat(dot.style.left||0) - ring._x) * 0.1;
+  ring._y += (parseFloat(dot.style.top ||0) - ring._y) * 0.1;
+  ring.style.left = ring._x + 'px'; ring.style.top = ring._y + 'px';
+})();
+document.querySelectorAll('a,button,.cs-card,.tech-card,.result-item,.ring-card,.big-stat,.rule-item').forEach(el => {
+  el.addEventListener('mouseenter', () => { ring.style.width='52px'; ring.style.height='52px'; ring.style.borderColor='rgba(76,175,80,.5)'; });
+  el.addEventListener('mouseleave', () => { ring.style.width='34px'; ring.style.height='34px'; ring.style.borderColor='rgba(240,237,232,.2)'; });
+});
+
+/* ── Hero entrance ── */
+gsap.timeline({ defaults: { ease: 'power3.out' } })
+  .from('.hero-tag',      { opacity:0, y:16, duration:.8, delay:.3 })
+  .from('.hero-title',    { opacity:0, y:60, duration:1.3 }, '-=0.5')
+  .from('.hero-sub',      { opacity:0, y:22, duration:1   }, '-=0.9')
+  .from('.hero-meta-row', { opacity:0, y:22, duration:.9  }, '-=0.7')
+  .from('.scroll-hint',   { opacity:0, duration:.8        }, '-=0.4');
+
+gsap.to('#hero-content', {
+  scale: 0.7, opacity: 0, y: -80, ease: 'none',
+  scrollTrigger: { trigger:'#hero', start:'top top', end:'50% top', scrub:1.5 }
+});
+gsap.to('#hero-grid', {
+  y: 80, ease: 'none',
+  scrollTrigger: { trigger:'#hero', start:'top top', end:'bottom top', scrub:true }
+});
+
+/* ── Mockup ── */
+gsap.fromTo('#mockup-wrap',
+  { opacity:0, y:100, scale:.88 },
+  { opacity:1, y:0, scale:1, ease:'power3.out',
+    scrollTrigger: { trigger:'#mockup-section', start:'top 80%', end:'top 20%', scrub:2 }
+  }
+);
+
+/* Live stat flicker */
+setInterval(() => {
+  const inv  = document.getElementById('stat-inv');
+  const pend = document.getElementById('stat-pend');
+  if (inv)  inv.textContent  = (1270 + Math.floor(Math.random()*30)).toLocaleString();
+  if (pend) pend.textContent = (10 + Math.floor(Math.random()*6)).toString();
+}, 2400);
+
+/* ── Overview ── */
+gsap.from('.overview-num', { opacity:0, x:-30, scrollTrigger:{ trigger:'#overview-section', start:'top 80%', end:'top 40%', scrub:2 } });
+gsap.from('.overview-heading', { opacity:0, y:40, scrollTrigger:{ trigger:'#overview-section', start:'top 75%', end:'top 35%', scrub:2 } });
+gsap.from('.overview-body, .pull-quote', { opacity:0, y:30, stagger:.15, duration:1, ease:'power2.out',
+  scrollTrigger:{ trigger:'#overview-section', start:'top 68%', toggleActions:'play none none reverse' }
+});
+
+/* ── Challenges ── */
+gsap.from('#challenges-section .label, #challenges-section h2', { opacity:0, y:40, stagger:.12, duration:.9, ease:'power2.out', scrollTrigger:{ trigger:'#challenges-section', start:'top 78%', toggleActions:'play none none reverse' } });
+gsap.from('.cs-card', { opacity:0, y:50, stagger:.15, duration:.9, ease:'power2.out', scrollTrigger:{ trigger:'.cs-grid', start:'top 82%', toggleActions:'play none none reverse' } });
+
+/* ── Features horizontal scrub ── */
+const track = document.getElementById('features-track');
+gsap.to(track, {
+  x: () => -(window.innerWidth * 2),
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#features-section', start: 'top top', end: 'bottom bottom',
+    scrub: 1, pin: '#features-sticky', anticipatePin: 1, invalidateOnRefresh: true,
+    onUpdate(self) {
+      const active = Math.round(self.progress * 2);
+      document.querySelectorAll('.fp-dot').forEach((d,i) => d.classList.toggle('active', i===active));
+    }
+  }
+});
+
+/* ── Stats count-up ── */
+const statsData = [
+  { id:'sv-0', end:1284, display:'1,284+' },
+  { id:'sv-1', end:18,   display:'18h'    },
+  { id:'sv-2', end:99,   display:'99.1%'  },
+  { id:'sv-3', end:4,    display:'4'      },
+];
+statsData.forEach(s => {
+  const el = document.getElementById(s.id);
+  ScrollTrigger.create({
+    trigger: el, start: 'top 85%',
+    onEnter() {
+      gsap.fromTo({ val:0 }, { val:s.end, duration:2, ease:'power2.out',
+        onUpdate() { el.textContent = this.targets()[0].val >= s.end ? s.display : Math.round(this.targets()[0].val).toLocaleString(); }
+      });
+    }
+  });
+});
+gsap.from('.big-stat', { opacity:0, y:40, stagger:.1, duration:.9, ease:'power2.out', scrollTrigger:{ trigger:'#stats-section', start:'top 80%', toggleActions:'play none none reverse' } });
+
+/* ── Tech cards ── */
+gsap.from('.tech-card', { opacity:0, y:40, scale:.95, stagger:.08, duration:.8, ease:'power2.out', scrollTrigger:{ trigger:'.tech-grid', start:'top 82%', toggleActions:'play none none reverse' } });
+
+/* ── Timeline ── */
+gsap.from('#timeline-section .label, #timeline-section h2', { opacity:0, y:30, stagger:.12, scrollTrigger:{ trigger:'#timeline-section', start:'top 80%', toggleActions:'play none none reverse' } });
+gsap.from('.tl-item', { opacity:0, x:-30, stagger:.15, duration:.9, ease:'power2.out', scrollTrigger:{ trigger:'.timeline', start:'top 80%', toggleActions:'play none none reverse' } });
+
+/* ── Results rings ── */
+const ringData = [
+  { id:'ring-a', val:'ring-a-val', pct:94, color:'#4CAF50' },
+  { id:'ring-b', val:'ring-b-val', pct:99, color:'#4f7cff' },
+  { id:'ring-c', val:'ring-c-val', pct:99, color:'#c678ff' },
+  { id:'ring-d', val:'ring-d-val', pct:91, color:'#ff6b35' },
+];
+const circ = 2 * Math.PI * 40;
+ringData.forEach(r => {
+  const circle = document.getElementById(r.id);
+  const valEl  = document.getElementById(r.val);
+  ScrollTrigger.create({
+    trigger: circle, start: 'top 85%',
+    onEnter() {
+      gsap.to(circle, { strokeDashoffset: circ * (1 - r.pct/100), duration:1.6, ease:'power2.out' });
+      gsap.fromTo({ v:0 }, { v:r.pct, duration:1.6, ease:'power2.out',
+        onUpdate() { valEl.textContent = Math.round(this.targets()[0].v) + '%'; }
+      });
+    }
+  });
+});
+gsap.from('.result-item', { opacity:0, x:-30, stagger:.12, duration:.8, ease:'power2.out', scrollTrigger:{ trigger:'.results-list', start:'top 82%', toggleActions:'play none none reverse' } });
+gsap.from('.ring-card', { opacity:0, y:30, scale:.95, stagger:.1, duration:.8, ease:'power2.out', scrollTrigger:{ trigger:'.results-visual', start:'top 82%', toggleActions:'play none none reverse' } });
+
+/* ── Next project ── */
+gsap.from('#next-project', { opacity:0, y:50, scale:.96, scrollTrigger:{ trigger:'#next-project', start:'top 85%', end:'top 40%', scrub:2 } });
+
+window.addEventListener('resize', () => ScrollTrigger.refresh());
+</script>
+</body>
+</html>
